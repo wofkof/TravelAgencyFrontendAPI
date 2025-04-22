@@ -44,6 +44,8 @@ namespace TravelAgencyFrontendAPI.Data
         public DbSet<Attraction> Attractions { get; set; }
         public DbSet<Restaurant> Restaurants { get; set; }
         public DbSet<Transport> Transports { get; set; }
+        public DbSet<Collect> Collects { get; set; }
+        public DbSet<Comment> Comments { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -85,7 +87,8 @@ namespace TravelAgencyFrontendAPI.Data
             modelBuilder.ApplyConfiguration(new AttractionConfig());
             modelBuilder.ApplyConfiguration(new RestaurantConfig());
             modelBuilder.ApplyConfiguration(new TransportConfig());
-
+            modelBuilder.ApplyConfiguration(new CollectConfig());
+            modelBuilder.ApplyConfiguration(new CommentConfig());
         }
     }
 }
