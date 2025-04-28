@@ -33,6 +33,44 @@ namespace TravelAgencyFrontendAPI.Data.Configurations
                    .IsRequired();
             builder.HasIndex(m => m.Phone).IsUnique();
 
+            builder.Property(m => m.Gender)
+                   .HasConversion<string>()
+                   .HasMaxLength(10)
+                   .IsRequired();
+
+            builder.Property(m => m.IdNumber)
+                   .HasMaxLength(20)
+                   .IsRequired(false);
+
+            builder.Property(m => m.PassportSurname)
+                   .HasMaxLength(50)
+                   .IsRequired(false);
+
+            builder.Property(m => m.PassportGivenName)
+                   .HasMaxLength(50)
+                   .IsRequired(false);
+
+            builder.Property(m => m.PassportExpireDate)
+                   .HasColumnType("date")
+                   .IsRequired(false);
+
+            builder.Property(m => m.Nationality)
+                   .HasMaxLength(50)
+                   .IsRequired(false);
+
+            builder.Property(m => m.DocumentType)
+                   .HasConversion<string>()
+                   .HasMaxLength(20)
+                   .IsRequired();
+
+            builder.Property(m => m.DocumentNumber)
+                   .HasMaxLength(50)
+                   .IsRequired(false);
+
+            builder.Property(m => m.Address)
+                   .HasMaxLength(255)
+                   .IsRequired(false);
+
             builder.Property(m => m.PasswordHash)
                    .HasMaxLength(255)
                    .IsRequired();

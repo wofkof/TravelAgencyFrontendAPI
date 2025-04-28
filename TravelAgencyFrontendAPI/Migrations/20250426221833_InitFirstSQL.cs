@@ -74,6 +74,15 @@ namespace TravelAgencyFrontendAPI.Migrations
                     Birthday = table.Column<DateTime>(type: "date", nullable: true),
                     Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Gender = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    IdNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    PassportSurname = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    PassportGivenName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    PassportExpireDate = table.Column<DateTime>(type: "date", nullable: true),
+                    Nationality = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    DocumentType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    DocumentNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     PasswordHash = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     PasswordSalt = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     GoogleId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
@@ -210,26 +219,111 @@ namespace TravelAgencyFrontendAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "T_Participant",
+                name: "T_Collect",
                 columns: table => new
                 {
-                    ParticipantId = table.Column<int>(type: "int", nullable: false)
+                    CollectId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    MemberId = table.Column<int>(type: "int", nullable: false),
+                    TravelId = table.Column<int>(type: "int", nullable: false),
+                    TravelType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETDATE()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_Collect", x => x.CollectId);
+                    table.ForeignKey(
+                        name: "FK_T_Collect_T_Member_MemberId",
+                        column: x => x.MemberId,
+                        principalTable: "T_Member",
+                        principalColumn: "MemberId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_Comment",
+                columns: table => new
+                {
+                    CommentId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MemberId = table.Column<int>(type: "int", nullable: false),
+                    TravelId = table.Column<int>(type: "int", nullable: false),
+                    TravelType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Rating = table.Column<int>(type: "int", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Visible"),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETDATE()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_Comment", x => x.CommentId);
+                    table.CheckConstraint("CK_Comment_Rating", "[Rating] BETWEEN 1 AND 5");
+                    table.ForeignKey(
+                        name: "FK_T_Comment_T_Member_MemberId",
+                        column: x => x.MemberId,
+                        principalTable: "T_Member",
+                        principalColumn: "MemberId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_MemberFavoriteTraveler",
+                columns: table => new
+                {
+                    FavoriteTravelerId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "20000, 1"),
                     MemberId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     IdNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     BirthDate = table.Column<DateTime>(type: "date", nullable: true),
-                    EnglishName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    PassportNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    IssuedPlace = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    PassportIssueDate = table.Column<DateTime>(type: "date", nullable: false)
+                    Gender = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    DocumentType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    DocumentNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    PassportSurname = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    PassportGivenName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    PassportExpireDate = table.Column<DateTime>(type: "date", nullable: true),
+                    Nationality = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "GETDATE()"),
+                    Note = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Active")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_T_Participant", x => x.ParticipantId);
+                    table.PrimaryKey("PK_T_MemberFavoriteTraveler", x => x.FavoriteTravelerId);
                     table.ForeignKey(
-                        name: "FK_T_Participant_T_Member_MemberId",
+                        name: "FK_T_MemberFavoriteTraveler_T_Member_MemberId",
+                        column: x => x.MemberId,
+                        principalTable: "T_Member",
+                        principalColumn: "MemberId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_Order",
+                columns: table => new
+                {
+                    OrderId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MemberId = table.Column<int>(type: "int", nullable: false),
+                    ItemId = table.Column<int>(type: "int", nullable: false),
+                    OrderParticipantId = table.Column<int>(type: "int", nullable: false),
+                    Category = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETDATE()"),
+                    ParticipantsCount = table.Column<int>(type: "int", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    PaymentMethod = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    PaymentDate = table.Column<DateTime>(type: "datetime", nullable: true),
+                    Note = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_Order", x => x.OrderId);
+                    table.ForeignKey(
+                        name: "FK_T_Order_T_Member_MemberId",
                         column: x => x.MemberId,
                         principalTable: "T_Member",
                         principalColumn: "MemberId",
@@ -482,38 +576,57 @@ namespace TravelAgencyFrontendAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "T_Order",
+                name: "T_OrderParticipant",
                 columns: table => new
                 {
-                    OrderId = table.Column<int>(type: "int", nullable: false)
+                    OrderParticipantId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    MemberId = table.Column<int>(type: "int", nullable: false),
-                    ItemId = table.Column<int>(type: "int", nullable: false),
-                    ParticipantId = table.Column<int>(type: "int", nullable: false),
-                    Category = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETDATE()"),
-                    ParticipantsCount = table.Column<int>(type: "int", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    PaymentMethod = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    PaymentDate = table.Column<DateTime>(type: "datetime", nullable: true),
+                    OrderId = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    BirthDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IdNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Gender = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    DocumentType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    DocumentNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    PassportSurname = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    PassportGivenName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    PassportExpireDate = table.Column<DateTime>(type: "date", nullable: true),
+                    Nationality = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     Note = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_T_Order", x => x.OrderId);
+                    table.PrimaryKey("PK_T_OrderParticipant", x => x.OrderParticipantId);
                     table.ForeignKey(
-                        name: "FK_T_Order_T_Member_MemberId",
-                        column: x => x.MemberId,
-                        principalTable: "T_Member",
-                        principalColumn: "MemberId",
+                        name: "FK_T_OrderParticipant_T_Order_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "T_Order",
+                        principalColumn: "OrderId",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_TravelRecord",
+                columns: table => new
+                {
+                    TravelRecordId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    OrderId = table.Column<int>(type: "int", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalParticipants = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETDATE()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_TravelRecord", x => x.TravelRecordId);
                     table.ForeignKey(
-                        name: "FK_T_Order_T_Participant_ParticipantId",
-                        column: x => x.ParticipantId,
-                        principalTable: "T_Participant",
-                        principalColumn: "ParticipantId",
-                        onDelete: ReferentialAction.Restrict);
+                        name: "FK_T_TravelRecord_T_Order_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "T_Order",
+                        principalColumn: "OrderId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -639,28 +752,6 @@ namespace TravelAgencyFrontendAPI.Migrations
                         column: x => x.RegionId,
                         principalTable: "T_Region",
                         principalColumn: "RegionId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "T_TravelRecord",
-                columns: table => new
-                {
-                    TravelRecordId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    OrderId = table.Column<int>(type: "int", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TotalParticipants = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETDATE()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_T_TravelRecord", x => x.TravelRecordId);
-                    table.ForeignKey(
-                        name: "FK_T_TravelRecord_T_Order_OrderId",
-                        column: x => x.OrderId,
-                        principalTable: "T_Order",
-                        principalColumn: "OrderId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -891,6 +982,17 @@ namespace TravelAgencyFrontendAPI.Migrations
                 column: "MemberId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_T_Collect_MemberId_TravelType_TravelId",
+                table: "T_Collect",
+                columns: new[] { "MemberId", "TravelType", "TravelId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_Comment_MemberId",
+                table: "T_Comment",
+                column: "MemberId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_T_CustomTravel_MemberId",
                 table: "T_CustomTravel",
                 column: "MemberId");
@@ -936,6 +1038,29 @@ namespace TravelAgencyFrontendAPI.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_T_Member_Phone",
                 table: "T_Member",
+                column: "Phone",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_MemberFavoriteTraveler_Email",
+                table: "T_MemberFavoriteTraveler",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_MemberFavoriteTraveler_IdNumber",
+                table: "T_MemberFavoriteTraveler",
+                column: "IdNumber",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_MemberFavoriteTraveler_MemberId",
+                table: "T_MemberFavoriteTraveler",
+                column: "MemberId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_MemberFavoriteTraveler_Phone",
+                table: "T_MemberFavoriteTraveler",
                 column: "Phone",
                 unique: true);
 
@@ -1005,30 +1130,25 @@ namespace TravelAgencyFrontendAPI.Migrations
                 column: "MemberId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_T_Order_ParticipantId",
-                table: "T_Order",
-                column: "ParticipantId");
+                name: "IX_T_OrderParticipant_Email",
+                table: "T_OrderParticipant",
+                column: "Email",
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_T_Participant_IdNumber",
-                table: "T_Participant",
+                name: "IX_T_OrderParticipant_IdNumber",
+                table: "T_OrderParticipant",
                 column: "IdNumber",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_T_Participant_MemberId",
-                table: "T_Participant",
-                column: "MemberId");
+                name: "IX_T_OrderParticipant_OrderId",
+                table: "T_OrderParticipant",
+                column: "OrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_T_Participant_PassportNumber",
-                table: "T_Participant",
-                column: "PassportNumber",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_T_Participant_Phone",
-                table: "T_Participant",
+                name: "IX_T_OrderParticipant_Phone",
+                table: "T_OrderParticipant",
                 column: "Phone",
                 unique: true);
 
@@ -1080,6 +1200,12 @@ namespace TravelAgencyFrontendAPI.Migrations
                 name: "T_CallLog");
 
             migrationBuilder.DropTable(
+                name: "T_Collect");
+
+            migrationBuilder.DropTable(
+                name: "T_Comment");
+
+            migrationBuilder.DropTable(
                 name: "T_CustomTravelContent");
 
             migrationBuilder.DropTable(
@@ -1087,6 +1213,9 @@ namespace TravelAgencyFrontendAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "T_GroupTravel");
+
+            migrationBuilder.DropTable(
+                name: "T_MemberFavoriteTraveler");
 
             migrationBuilder.DropTable(
                 name: "T_MessageMedia");
@@ -1102,6 +1231,9 @@ namespace TravelAgencyFrontendAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "T_OfficialTravelSchedule");
+
+            migrationBuilder.DropTable(
+                name: "T_OrderParticipant");
 
             migrationBuilder.DropTable(
                 name: "T_Requirements");
@@ -1158,16 +1290,13 @@ namespace TravelAgencyFrontendAPI.Migrations
                 name: "S_City");
 
             migrationBuilder.DropTable(
-                name: "T_Participant");
+                name: "T_Member");
 
             migrationBuilder.DropTable(
                 name: "T_Employee");
 
             migrationBuilder.DropTable(
                 name: "T_Region");
-
-            migrationBuilder.DropTable(
-                name: "T_Member");
 
             migrationBuilder.DropTable(
                 name: "T_Role");

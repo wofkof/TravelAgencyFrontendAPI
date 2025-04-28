@@ -11,7 +11,7 @@ namespace TravelAgencyFrontendAPI.Data
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<ResetPassword> ResetPasswords { get; set; }
-        public DbSet<Participant> Participants { get; set; }
+        public DbSet<MemberFavoriteTraveler> MemberFavoriteTravelers { get; set; }
         public DbSet<ChatRoom> ChatRooms { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<MessageMedia> MessageMedias { get; set; }
@@ -46,6 +46,7 @@ namespace TravelAgencyFrontendAPI.Data
         public DbSet<Transport> Transports { get; set; }
         public DbSet<Collect> Collects { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<OrderParticipant> OrderParticipants { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -54,7 +55,7 @@ namespace TravelAgencyFrontendAPI.Data
             modelBuilder.ApplyConfiguration(new EmployeeConfig());
             modelBuilder.ApplyConfiguration(new RoleConfig());
             modelBuilder.ApplyConfiguration(new ResetPasswordConfig());
-            modelBuilder.ApplyConfiguration(new ParticipantConfig());
+            modelBuilder.ApplyConfiguration(new MemberFavoriteTravelerConfig());
             modelBuilder.ApplyConfiguration(new ChatRoomConfig());
             modelBuilder.ApplyConfiguration(new MessageConfig());
             modelBuilder.ApplyConfiguration(new MessageMediaConfig());
@@ -89,6 +90,7 @@ namespace TravelAgencyFrontendAPI.Data
             modelBuilder.ApplyConfiguration(new TransportConfig());
             modelBuilder.ApplyConfiguration(new CollectConfig());
             modelBuilder.ApplyConfiguration(new CommentConfig());
+            modelBuilder.ApplyConfiguration(new OrderParticipantConfig());
         }
     }
 }

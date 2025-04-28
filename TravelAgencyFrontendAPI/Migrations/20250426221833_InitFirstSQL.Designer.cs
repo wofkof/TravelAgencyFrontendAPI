@@ -12,8 +12,8 @@ using TravelAgencyFrontendAPI.Data;
 namespace TravelAgencyFrontendAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250422151515_ADD_Collect_Comment")]
-    partial class ADD_Collect_Comment
+    [Migration("20250426221833_InitFirstSQL")]
+    partial class InitFirstSQL
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -578,20 +578,42 @@ namespace TravelAgencyFrontendAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MemberId"), 11110L);
 
+                    b.Property<string>("Address")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.Property<DateTime?>("Birthday")
                         .HasColumnType("date");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime");
 
+                    b.Property<string>("DocumentNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
                     b.Property<string>("GoogleId")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("IdNumber")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<bool>("IsBlacklisted")
                         .ValueGeneratedOnAdd()
@@ -603,9 +625,24 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<string>("Nationality")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("Note")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime?>("PassportExpireDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("PassportGivenName")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("PassportSurname")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -653,6 +690,106 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .IsUnique();
 
                     b.ToTable("T_Member", (string)null);
+                });
+
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.MemberFavoriteTraveler", b =>
+                {
+                    b.Property<int>("FavoriteTravelerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FavoriteTravelerId"), 20000L);
+
+                    b.Property<DateTime?>("BirthDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("DocumentNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("IdNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("MemberId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Nationality")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime?>("PassportExpireDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("PassportGivenName")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("PassportSurname")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Active");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.HasKey("FavoriteTravelerId");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("IdNumber")
+                        .IsUnique();
+
+                    b.HasIndex("MemberId");
+
+                    b.HasIndex("Phone")
+                        .IsUnique();
+
+                    b.ToTable("T_MemberFavoriteTraveler", (string)null);
                 });
 
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Message", b =>
@@ -1050,7 +1187,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<int>("ParticipantId")
+                    b.Property<int>("OrderParticipantId")
                         .HasColumnType("int");
 
                     b.Property<int>("ParticipantsCount")
@@ -1076,72 +1213,90 @@ namespace TravelAgencyFrontendAPI.Migrations
 
                     b.HasIndex("MemberId");
 
-                    b.HasIndex("ParticipantId");
-
                     b.ToTable("T_Order", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Participant", b =>
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OrderParticipant", b =>
                 {
-                    b.Property<int>("ParticipantId")
+                    b.Property<int>("OrderParticipantId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ParticipantId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderParticipantId"));
 
-                    b.Property<DateTime?>("BirthDate")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("BirthDate")
+                        .HasColumnType("datetime2");
 
-                    b.Property<string>("EnglishName")
+                    b.Property<string>("DocumentNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("IdNumber")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<string>("IssuedPlace")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("MemberId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime>("PassportIssueDate")
+                    b.Property<string>("Nationality")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("PassportExpireDate")
                         .HasColumnType("date");
 
-                    b.Property<string>("PassportNumber")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                    b.Property<string>("PassportGivenName")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("PassportSurname")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Phone")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.HasKey("ParticipantId");
+                    b.HasKey("OrderParticipantId");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
 
                     b.HasIndex("IdNumber")
                         .IsUnique();
 
-                    b.HasIndex("MemberId");
-
-                    b.HasIndex("PassportNumber")
-                        .IsUnique();
+                    b.HasIndex("OrderId");
 
                     b.HasIndex("Phone")
                         .IsUnique();
 
-                    b.ToTable("T_Participant", (string)null);
+                    b.ToTable("T_OrderParticipant", (string)null);
                 });
 
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Permission", b =>
@@ -1598,6 +1753,17 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("OfficialTravelDetail");
                 });
 
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.MemberFavoriteTraveler", b =>
+                {
+                    b.HasOne("TravelAgencyFrontendAPI.Models.Member", "Member")
+                        .WithMany("MemberFavoriteTravelers")
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Member");
+                });
+
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Message", b =>
                 {
                     b.HasOne("TravelAgencyFrontendAPI.Models.ChatRoom", "ChatRoom")
@@ -1714,26 +1880,18 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Participant", "Participant")
-                        .WithMany("Orders")
-                        .HasForeignKey("ParticipantId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Member");
-
-                    b.Navigation("Participant");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Participant", b =>
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OrderParticipant", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Member", "Member")
-                        .WithMany("Participants")
-                        .HasForeignKey("MemberId")
+                    b.HasOne("TravelAgencyFrontendAPI.Models.Order", "Order")
+                        .WithMany("OrderParticipants")
+                        .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Member");
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.ResetPassword", b =>
@@ -1809,14 +1967,14 @@ namespace TravelAgencyFrontendAPI.Migrations
 
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Member", b =>
                 {
-                    b.Navigation("Orders");
+                    b.Navigation("MemberFavoriteTravelers");
 
-                    b.Navigation("Participants");
+                    b.Navigation("Orders");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Participant", b =>
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Order", b =>
                 {
-                    b.Navigation("Orders");
+                    b.Navigation("OrderParticipants");
                 });
 
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Role", b =>

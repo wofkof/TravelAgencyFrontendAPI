@@ -32,12 +32,6 @@ namespace TravelAgencyFrontendAPI.Data.Configurations
             entity.HasOne(e => e.Member)
                   .WithMany(m => m.Orders)
                   .HasForeignKey(e => e.MemberId);
-
-            entity.HasOne(e => e.Participant)
-                  .WithMany(p => p.Orders)
-                  .HasForeignKey(e => e.ParticipantId)
-                  .OnDelete(DeleteBehavior.Restrict); ;
-                    
         }
     }
 

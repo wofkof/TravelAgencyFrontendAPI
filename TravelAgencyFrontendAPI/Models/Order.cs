@@ -24,7 +24,7 @@
         public int OrderId { get; set; }
         public int MemberId { get; set; }
         public int ItemId { get; set; } 
-        public int ParticipantId { get; set; }
+        public int OrderParticipantId { get; set; }
 
         public OrderCategory Category { get; set; }
 
@@ -39,7 +39,7 @@
         public string? Note { get; set; }
 
         public Member Member { get; set; }
-        public Participant Participant { get; set; }
+        public ICollection<OrderParticipant> OrderParticipants { get; set; } = new List<OrderParticipant>();
     }
 
 }
