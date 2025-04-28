@@ -32,8 +32,8 @@ namespace TravelAgencyFrontendAPI.Data.Configurations
 
             entity.Property(p => p.Nationality).HasMaxLength(50).IsRequired(false);
 
-            entity.Property(p => p.CreatedAt).HasDefaultValueSql("GETDATE()").IsRequired();
-            entity.Property(p => p.UpdatedAt).HasDefaultValueSql("GETDATE()").IsRequired(false);
+            entity.Property(p => p.CreatedAt).HasColumnType("datetime").HasDefaultValueSql("GETDATE()").IsRequired();
+            entity.Property(p => p.UpdatedAt).HasColumnType("datetime").HasDefaultValueSql("GETDATE()").IsRequired(false);
 
             entity.Property(p => p.Note).HasMaxLength(255).IsRequired(false);
             entity.Property(p => p.Status).HasMaxLength(20).HasDefaultValue(FavoriteStatus.Active).HasConversion<string>().IsRequired();
@@ -41,7 +41,7 @@ namespace TravelAgencyFrontendAPI.Data.Configurations
             entity.Property(p => p.IdNumber).HasMaxLength(20).IsRequired();
             entity.HasIndex(p => p.IdNumber).IsUnique();
 
-            entity.Property(p => p.BirthDate).HasColumnType("date").IsRequired(false);
+            entity.Property(p => p.BirthDate).HasColumnType("date").IsRequired();
 
             entity.HasOne(p => p.Member)
                   .WithMany(m => m.MemberFavoriteTravelers)

@@ -110,10 +110,12 @@ namespace TravelAgencyFrontendAPI.Data.Configurations
 
             builder.Property(m => m.UpdatedAt)
                    .HasColumnType("datetime")
+                   .HasDefaultValueSql("GETDATE()")
                    .IsRequired(false);
 
             builder.Property(m => m.DeletedAt)
                    .HasColumnType("datetime")
+                   .HasDefaultValueSql("GETDATE()")
                    .IsRequired(false);
         }
     }
