@@ -45,6 +45,48 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Accommodation", (string)null);
                 });
 
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Agency", b =>
+                {
+                    b.Property<int>("AgencyCode")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AgencyCode"));
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("AgencyName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ContactEmail")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ContactPerson")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ContactPhone")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("ServiceDescription")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("AgencyCode");
+
+                    b.ToTable("T_Agency", (string)null);
+                });
+
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Announcement", b =>
                 {
                     b.Property<int>("AnnouncementId")
@@ -434,22 +476,136 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("S_District", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Document", b =>
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.DocumentApplicationForm", b =>
                 {
-                    b.Property<int>("DocumentId")
+                    b.Property<int>("ApplicationId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DocumentId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ApplicationId"));
 
-                    b.Property<string>("DocumentName")
+                    b.Property<string>("ApplicationType")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("CaseType")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("Fee")
+                        .HasColumnType("decimal(6,2)");
+
+                    b.Property<int>("MemberId")
+                        .HasColumnType("int");
+
+                    b.Property<byte>("ProcessingDays")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("ProcessingItem")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("RegionId")
+                        .HasMaxLength(10)
+                        .HasColumnType("int");
+
+                    b.Property<string>("StayDuration")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("ApplicationId");
+
+                    b.HasIndex("MemberId");
+
+                    b.HasIndex("RegionId");
+
+                    b.ToTable("T_DocumentApplicationForm", (string)null);
+                });
+
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.DocumentOrderDetails", b =>
+                {
+                    b.Property<int>("DocumentOrderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DocumentOrderId"));
+
+                    b.Property<int>("AgencyCode")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ApplicationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ApplicationType")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<DateTime>("BirthDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("ChineseFirstName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.HasKey("DocumentId");
+                    b.Property<string>("ChineseLastName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.ToTable("T_Documents", (string)null);
+                    b.Property<DateTime>("DepartureDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("EnglishFirstName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("EnglishLastName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("PickupInfoId")
+                        .HasColumnType("int");
+
+                    b.Property<byte>("PickupMethodId")
+                        .HasColumnType("tinyint");
+
+                    b.Property<byte>("ProcessingCount")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("RequiredData")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubmissionMethod")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("DocumentOrderId");
+
+                    b.HasIndex("AgencyCode");
+
+                    b.HasIndex("ApplicationId");
+
+                    b.HasIndex("PickupInfoId");
+
+                    b.HasIndex("PickupMethodId");
+
+                    b.ToTable("T_DocumentOrderDetails", (string)null);
                 });
 
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Employee", b =>
@@ -1301,6 +1457,32 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_OrderParticipant", (string)null);
                 });
 
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Payment", b =>
+                {
+                    b.Property<int>("PaymentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"));
+
+                    b.Property<int>("DocumentOrderId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("PaymentDeadline")
+                        .HasColumnType("date");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("PaymentId");
+
+                    b.HasIndex("DocumentOrderId");
+
+                    b.ToTable("T_Payment", (string)null);
+                });
+
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Permission", b =>
                 {
                     b.Property<int>("PermissionId")
@@ -1317,6 +1499,54 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.HasKey("PermissionId");
 
                     b.ToTable("T_Permission", (string)null);
+                });
+
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.PickupInformation", b =>
+                {
+                    b.Property<int>("PickupInfoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PickupInfoId"));
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("DetailedAddress")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("District")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("PostalCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.HasKey("PickupInfoId");
+
+                    b.ToTable("T_PickupInformation", (string)null);
+                });
+
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.PickupMethod", b =>
+                {
+                    b.Property<byte>("PickupMethodId")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("PickupMethodName")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("PickupMethodId");
+
+                    b.ToTable("T_PickupMethod", (string)null);
                 });
 
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Region", b =>
@@ -1340,24 +1570,6 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.HasKey("RegionId");
 
                     b.ToTable("T_Region", (string)null);
-                });
-
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Requirement", b =>
-                {
-                    b.Property<int>("RequirementId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RequirementId"));
-
-                    b.Property<string>("RequirementName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("RequirementId");
-
-                    b.ToTable("T_Requirements", (string)null);
                 });
 
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.ResetPassword", b =>
@@ -1566,47 +1778,6 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_TravelSupplier", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.VisaInformation", b =>
-                {
-                    b.Property<int>("VisaInfoId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VisaInfoId"));
-
-                    b.Property<int>("CountryId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("VisaTypeId")
-                        .HasColumnType("int");
-
-                    b.HasKey("VisaInfoId");
-
-                    b.HasIndex("CountryId");
-
-                    b.HasIndex("VisaTypeId");
-
-                    b.ToTable("T_VisaInformation", (string)null);
-                });
-
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.VisaType", b =>
-                {
-                    b.Property<int>("VisaTypeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VisaTypeId"));
-
-                    b.Property<string>("VisaTypeName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("VisaTypeId");
-
-                    b.ToTable("T_VisaTypes", (string)null);
-                });
-
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Accommodation", b =>
                 {
                     b.HasOne("TravelAgencyFrontendAPI.Models.District", "District")
@@ -1731,6 +1902,58 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("City");
+                });
+
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.DocumentApplicationForm", b =>
+                {
+                    b.HasOne("TravelAgencyFrontendAPI.Models.Member", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgencyFrontendAPI.Models.Region", "Region")
+                        .WithMany()
+                        .HasForeignKey("RegionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Member");
+
+                    b.Navigation("Region");
+                });
+
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.DocumentOrderDetails", b =>
+                {
+                    b.HasOne("TravelAgencyFrontendAPI.Models.Agency", "Agency")
+                        .WithMany()
+                        .HasForeignKey("AgencyCode")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgencyFrontendAPI.Models.DocumentApplicationForm", "DocumentApplicationForm")
+                        .WithMany()
+                        .HasForeignKey("ApplicationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgencyFrontendAPI.Models.PickupInformation", "PickupInformation")
+                        .WithMany()
+                        .HasForeignKey("PickupInfoId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("TravelAgencyFrontendAPI.Models.PickupMethod", "PickupMethod")
+                        .WithMany()
+                        .HasForeignKey("PickupMethodId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Agency");
+
+                    b.Navigation("DocumentApplicationForm");
+
+                    b.Navigation("PickupInformation");
+
+                    b.Navigation("PickupMethod");
                 });
 
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Employee", b =>
@@ -1896,6 +2119,17 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Payment", b =>
+                {
+                    b.HasOne("TravelAgencyFrontendAPI.Models.DocumentOrderDetails", "DocumentOrderDetails")
+                        .WithMany()
+                        .HasForeignKey("DocumentOrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DocumentOrderDetails");
+                });
+
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.ResetPassword", b =>
                 {
                     b.HasOne("TravelAgencyFrontendAPI.Models.Member", "Member")
@@ -1946,25 +2180,6 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.VisaInformation", b =>
-                {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Country", "Country")
-                        .WithMany()
-                        .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TravelAgencyFrontendAPI.Models.VisaType", "VisaType")
-                        .WithMany()
-                        .HasForeignKey("VisaTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Country");
-
-                    b.Navigation("VisaType");
                 });
 
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Member", b =>

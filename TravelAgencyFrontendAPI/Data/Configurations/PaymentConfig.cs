@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TravelAgencyFrontendAPI.Models;
 
 namespace TravelAgencyFrontendAPI.Data.Configurations
@@ -15,9 +16,9 @@ namespace TravelAgencyFrontendAPI.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(20);
 
-            entity.HasCheckConstraint("CK_PaymentMethod", "payment_method IN ('信用卡', '電子支付')");
+            entity.Property(e => e.PaymentMethod).HasConversion<string>().HasMaxLength(20).IsRequired();
 
-            entity.HasOne<DocumentOrderDetails>()
+            entity.HasOne(e => e.DocumentOrderDetails)
                 .WithMany()
                 .HasForeignKey(e => e.DocumentOrderId)
                 .OnDelete(DeleteBehavior.Restrict);

@@ -54,48 +54,7 @@ namespace TravelAgencyFrontendAPI.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfiguration(new MemberConfig());
-            modelBuilder.ApplyConfiguration(new EmployeeConfig());
-            modelBuilder.ApplyConfiguration(new RoleConfig());
-            modelBuilder.ApplyConfiguration(new ResetPasswordConfig());
-            modelBuilder.ApplyConfiguration(new MemberFavoriteTravelerConfig());
-            modelBuilder.ApplyConfiguration(new ChatRoomConfig());
-            modelBuilder.ApplyConfiguration(new MessageConfig());
-            modelBuilder.ApplyConfiguration(new MessageMediaConfig());
-            modelBuilder.ApplyConfiguration(new StickerConfig());
-            modelBuilder.ApplyConfiguration(new CallLogConfig());
-            modelBuilder.ApplyConfiguration(new AnnouncementConfig());
-            modelBuilder.ApplyConfiguration(new OfficialTravelConfig());
-            modelBuilder.ApplyConfiguration(new OfficialTravelDetailConfig());
-            modelBuilder.ApplyConfiguration(new RegionConfig());
-            modelBuilder.ApplyConfiguration(new GroupTravelConfig());
-            modelBuilder.ApplyConfiguration(new OfficialTravelScheduleConfig());
-            modelBuilder.ApplyConfiguration(new TravelSupplierConfig());
-            modelBuilder.ApplyConfiguration(new OfficialAccommodationConfig());
-            modelBuilder.ApplyConfiguration(new OfficialAttractionConfig());
-            modelBuilder.ApplyConfiguration(new OfficialRestaurantConfig());
-            modelBuilder.ApplyConfiguration(new CustomTravelConfig());
-            modelBuilder.ApplyConfiguration(new CustomTravelContentConfig());
-            modelBuilder.ApplyConfiguration(new OrderConfig());
-            modelBuilder.ApplyConfiguration(new TravelRecordConfig());
-            modelBuilder.ApplyConfiguration(new CountryConfig());
-            modelBuilder.ApplyConfiguration(new PermissionConfig());
-            modelBuilder.ApplyConfiguration(new RolePermissionConfig());
-            modelBuilder.ApplyConfiguration(new CityConfig());
-            modelBuilder.ApplyConfiguration(new DistrictConfig());
-            modelBuilder.ApplyConfiguration(new AccommodationConfig());
-            modelBuilder.ApplyConfiguration(new AttractionConfig());
-            modelBuilder.ApplyConfiguration(new RestaurantConfig());
-            modelBuilder.ApplyConfiguration(new TransportConfig());
-            modelBuilder.ApplyConfiguration(new CollectConfig());
-            modelBuilder.ApplyConfiguration(new CommentConfig());
-            modelBuilder.ApplyConfiguration(new OrderParticipantConfig());
-            modelBuilder.ApplyConfiguration(new DocumentApplicationFormConfig());
-            modelBuilder.ApplyConfiguration(new DocumentOrderDetailsConfig());
-            modelBuilder.ApplyConfiguration(new PickupMethodConfig());
-            modelBuilder.ApplyConfiguration(new PickupInformationConfig());
-            modelBuilder.ApplyConfiguration(new AgencyConfig());
-            modelBuilder.ApplyConfiguration(new PaymentConfig());
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }
     }
 }

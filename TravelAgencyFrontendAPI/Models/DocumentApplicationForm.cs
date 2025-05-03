@@ -15,7 +15,7 @@
         public int ApplicationId { get; set; }
 
         public int MemberId { get; set; }
-        public string? RegionCode { get; set; }
+        public int? RegionId { get; set; }
 
         public ApplicationType ApplicationType { get; set; } 
         public string ProcessingItem { get; set; } = null!;
