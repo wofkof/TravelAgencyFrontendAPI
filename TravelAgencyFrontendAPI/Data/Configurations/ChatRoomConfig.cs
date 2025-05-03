@@ -13,7 +13,7 @@ namespace TravelAgencyFrontendAPI.Data.Configurations
             entity.HasKey(c => c.ChatRoomId);
 
             entity.Property(c => c.IsBlocked).HasDefaultValue(false);
-            entity.Property(c => c.CreatedAt).HasDefaultValueSql("GETDATE()").IsRequired();
+            entity.Property(c => c.CreatedAt).HasColumnType("datetime").HasDefaultValueSql("GETDATE()").IsRequired();
             entity.Property(c => c.LastMessageAt).HasColumnType("datetime").IsRequired(false);
 
             entity.HasOne(c => c.Employee)

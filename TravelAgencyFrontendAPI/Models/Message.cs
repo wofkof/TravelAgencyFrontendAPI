@@ -5,7 +5,7 @@
         Employee,
         Member 
     }
-    public enum  MessageType
+    public enum MessageType
     {
         text,
         emoji,

@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TravelAgencyFrontendAPI.Data;
-using TravelAgencyFrontendAPI.DTOs;
+using TravelAgencyFrontendAPI.DTOs.ChatRoomDTOs;
 using TravelAgencyFrontendAPI.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace TravelAgencyFrontendAPI.Controllers
+namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -48,9 +48,9 @@ namespace TravelAgencyFrontendAPI.Controllers
             var message = new Message
             {
                 ChatRoomId = dto.ChatRoomId,
-                SenderType = Enum.Parse<SenderType>(dto.SenderType),
+                SenderType = Enum.Parse<SenderType>(dto.SenderType, true),
                 SenderId = dto.SenderId,
-                MessageType = Enum.Parse<MessageType>(dto.MessageType),
+                MessageType = Enum.Parse<MessageType>(dto.MessageType, true),
                 Content = dto.Content,
                 SentAt = DateTime.Now,
                 IsRead = false,
@@ -71,6 +71,26 @@ namespace TravelAgencyFrontendAPI.Controllers
             dto.SentAt = message.SentAt;
 
             return CreatedAtAction(nameof(GetMessages), new { chatRoomId = dto.ChatRoomId }, dto);
+        }
+
+        // POST: api/mark-as-read
+        [HttpPost("mark-as-read")]
+        public async Task<IActionResult> MarkAsRead([FromBody] MarkAsReadDto dto)
+        {
+            var senderTypeEnum = Enum.Parse<SenderType>(dto.SenderType, true);
+
+            var unreadMessages = await _context.Messages
+                .Where(m => m.ChatRoomId == dto.ChatRoomId
+                    && !m.IsRead
+                    && m.SenderType != senderTypeEnum
+                    && m.SenderId != dto.SenderId)
+                .ToListAsync();
+
+            foreach (var msg in unreadMessages)
+                msg.IsRead = true;
+
+            await _context.SaveChangesAsync();
+            return Ok();
         }
     }
 }
