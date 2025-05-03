@@ -53,5 +53,11 @@ namespace TravelAgencyFrontendAPI.Hubs
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatRoomId);
         }
+
+        public async Task NotifyRead(int chatRoomId, int readerId, string readerType)
+        {
+            await Clients.Group(chatRoomId.ToString()).SendAsync("MessageRead", chatRoomId, readerId, readerType);
+        }
+
     }
 }

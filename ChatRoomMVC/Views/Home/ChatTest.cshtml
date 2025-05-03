@@ -1,0 +1,92 @@
+﻿@{
+    ViewData["Title"] = "SignalR Chat Test";
+}
+
+<h2>SignalR Chat 測試頁</h2>
+
+<label>聊天室 ID：</label>
+<input type="number" id="chatRoomId" value="1" />
+<br />
+
+<label>身分：</label>
+<select id="senderType">
+    <option value="Member">Member</option>
+    <option value="Employee">Employee</option>
+</select>
+
+<label>使用者 ID：</label>
+<input type="number" id="senderId" value="11110" />
+
+<hr />
+
+<div>
+    <input id="messageInput" placeholder="輸入訊息..." />
+    <button onclick="sendMessage()">送出</button>
+    <button onclick="markAsRead()">標記已讀</button>
+</div>
+
+<hr />
+<h4>訊息記錄：</h4>
+<ul id="messagesList"></ul>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("https://localhost:7265/chathub") 
+            .withAutomaticReconnect()
+            .build();
+
+        const messagesList = document.getElementById("messagesList");
+
+        connection.on("ReceiveMessage", (msg) => {
+            const li = document.createElement("li");
+            li.textContent = `[${msg.chatRoomId}] ${msg.senderType}(${msg.senderId}) - ${msg.messageType}: ${msg.content}`;
+            messagesList.appendChild(li);
+        });
+
+        connection.start().then(() => {
+            const roomId = document.getElementById("chatRoomId").value;
+            connection.invoke("JoinGroup", roomId.toString());
+        });
+
+        function sendMessage() {
+            const chatRoomId = parseInt(document.getElementById("chatRoomId").value);
+            const senderType = document.getElementById("senderType").value;
+            const senderId = parseInt(document.getElementById("senderId").value);
+            const messageType = "text";
+            const content = document.getElementById("messageInput").value;
+
+          connection.invoke("SendMessage", {
+            chatRoomId: parseInt(document.getElementById("chatRoomId").value),
+            senderType: document.getElementById("senderType").value,
+            senderId: parseInt(document.getElementById("senderId").value),
+            messageType: "text",
+            content: document.getElementById("messageInput").value,
+        });
+
+        }
+
+        async function markAsRead() {
+          const chatRoomId = parseInt(document.getElementById("chatRoomId").value);
+          const senderId = parseInt(document.getElementById("senderId").value);
+          const senderType = document.getElementById("senderType").value;
+
+          await fetch("https://localhost:7265/api/messages/mark-as-read", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              chatRoomId,
+              senderId,
+              senderType
+            })
+          });
+
+          await connection.invoke("NotifyRead", chatRoomId, senderId, senderType);
+          alert("✅ 已標記已讀");
+        }
+
+    </script>
+}

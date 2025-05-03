@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35919.96 d17.13
+VisualStudioVersion = 17.13.35919.96
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TravelAgencyFrontendAPI", "TravelAgencyFrontendAPI\TravelAgencyFrontendAPI.csproj", "{8FA3A57D-189D-40F2-AEB0-79A0A3E9638D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRoomMVC", "ChatRoomMVC\ChatRoomMVC.csproj", "{5384980C-2B6A-40AF-8350-5920A4354E19}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{8FA3A57D-189D-40F2-AEB0-79A0A3E9638D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8FA3A57D-189D-40F2-AEB0-79A0A3E9638D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8FA3A57D-189D-40F2-AEB0-79A0A3E9638D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5384980C-2B6A-40AF-8350-5920A4354E19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5384980C-2B6A-40AF-8350-5920A4354E19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5384980C-2B6A-40AF-8350-5920A4354E19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5384980C-2B6A-40AF-8350-5920A4354E19}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

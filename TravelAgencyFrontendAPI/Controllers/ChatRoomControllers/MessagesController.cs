@@ -73,12 +73,17 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
             return CreatedAtAction(nameof(GetMessages), new { chatRoomId = dto.ChatRoomId }, dto);
         }
 
-        // POST: api/mark-as-read/{chatRoomId}
-        [HttpPost("mark-as-read/{chatRoomId}")]
-        public async Task<IActionResult> MarkAsRead(int chatRoomId)
+        // POST: api/mark-as-read
+        [HttpPost("mark-as-read")]
+        public async Task<IActionResult> MarkAsRead([FromBody] MarkAsReadDto dto)
         {
+            var senderTypeEnum = Enum.Parse<SenderType>(dto.SenderType, true);
+
             var unreadMessages = await _context.Messages
-                .Where(m => m.ChatRoomId == chatRoomId && !m.IsRead && m.SenderType != SenderType.Member)
+                .Where(m => m.ChatRoomId == dto.ChatRoomId
+                    && !m.IsRead
+                    && m.SenderType != senderTypeEnum
+                    && m.SenderId != dto.SenderId)
                 .ToListAsync();
 
             foreach (var msg in unreadMessages)
@@ -87,6 +92,5 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
             await _context.SaveChangesAsync();
             return Ok();
         }
-
     }
 }
