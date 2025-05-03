@@ -32,10 +32,6 @@ namespace TravelAgencyFrontendAPI.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<TravelRecord> TravelRecords { get; set; }
         public DbSet<Country> Countrys { get; set; }
-        public DbSet<VisaType> VisaTypes { get; set; }
-        public DbSet<Requirement> Requirements { get; set; }
-        public DbSet<Document> Documents { get; set; }
-        public DbSet<VisaInformation> VisaInformations { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
         public DbSet<City> Cities { get; set; }
@@ -47,6 +43,13 @@ namespace TravelAgencyFrontendAPI.Data
         public DbSet<Collect> Collects { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<OrderParticipant> OrderParticipants { get; set; }
+        public DbSet<DocumentApplicationForm> DocumentApplicationForms { get; set; }
+        public DbSet<DocumentOrderDetails> DocumentOrderDetails { get; set; }
+        public DbSet<PickupMethod> PickupMethods { get; set; }
+        public DbSet<PickupInformation> PickupInformations { get; set; }
+        public DbSet<Agency> Agencies { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -76,10 +79,6 @@ namespace TravelAgencyFrontendAPI.Data
             modelBuilder.ApplyConfiguration(new OrderConfig());
             modelBuilder.ApplyConfiguration(new TravelRecordConfig());
             modelBuilder.ApplyConfiguration(new CountryConfig());
-            modelBuilder.ApplyConfiguration(new VisaTypeConfig());
-            modelBuilder.ApplyConfiguration(new RequirementConfig());
-            modelBuilder.ApplyConfiguration(new DocumentConfig());
-            modelBuilder.ApplyConfiguration(new VisaInformationConfig());
             modelBuilder.ApplyConfiguration(new PermissionConfig());
             modelBuilder.ApplyConfiguration(new RolePermissionConfig());
             modelBuilder.ApplyConfiguration(new CityConfig());
@@ -91,6 +90,12 @@ namespace TravelAgencyFrontendAPI.Data
             modelBuilder.ApplyConfiguration(new CollectConfig());
             modelBuilder.ApplyConfiguration(new CommentConfig());
             modelBuilder.ApplyConfiguration(new OrderParticipantConfig());
+            modelBuilder.ApplyConfiguration(new DocumentApplicationFormConfig());
+            modelBuilder.ApplyConfiguration(new DocumentOrderDetailsConfig());
+            modelBuilder.ApplyConfiguration(new PickupMethodConfig());
+            modelBuilder.ApplyConfiguration(new PickupInformationConfig());
+            modelBuilder.ApplyConfiguration(new AgencyConfig());
+            modelBuilder.ApplyConfiguration(new PaymentConfig());
         }
     }
 }
