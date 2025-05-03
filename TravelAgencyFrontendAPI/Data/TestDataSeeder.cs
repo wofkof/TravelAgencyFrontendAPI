@@ -16,6 +16,8 @@ namespace TravelAgencyFrontendAPI.Data
             await SeedRolesAsync();
             await SeedEmployeesAsync();
             await SeedMembersAsync();
+            await SeedChatRoomsAsync();
+            await SeedMessagesAsync();
         }
 
         private async Task SeedRolesAsync()
@@ -67,6 +69,39 @@ namespace TravelAgencyFrontendAPI.Data
                     Note = "這是測試用會員"
                 });
 
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        private async Task SeedChatRoomsAsync()
+        {
+            if (!_context.ChatRooms.Any())
+            {
+                var member = 11110;
+                var employee = 1;
+
+                _context.ChatRooms.Add(new ChatRoom
+                {
+                    MemberId = member,
+                    EmployeeId = employee,
+                    IsBlocked = false
+                });
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        private async Task SeedMessagesAsync()
+        {
+            if (!_context.Messages.Any())
+            {
+                var chatRoomId = _context.ChatRooms.First().ChatRoomId;
+                _context.Messages.Add(new Message
+                {
+                    ChatRoomId = chatRoomId,
+                    SenderType = SenderType.Employee,
+                    SenderId = 1,
+                    Content = "這是測試訊息",
+                });
                 await _context.SaveChangesAsync();
             }
         }

@@ -1,10 +1,22 @@
 using Microsoft.EntityFrameworkCore;
 using TravelAgencyFrontendAPI.Data;
+using TravelAgencyFrontendAPI.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
+builder.Services.AddSignalR();
 builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -21,6 +33,16 @@ if (app.Environment.IsDevelopment())
         await seeder.SeedAsync();
     }
 }
+
+app.UseRouting();
+app.UseCors("AllowFrontend");
+
+app.UseStaticFiles();
+
+app.UseAuthentication();
+
+app.MapControllers();
+app.MapHub<ChatHub>("/chathub");
 
 app.UseHttpsRedirection();
 

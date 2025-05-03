@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TravelAgencyFrontendAPI.Data;
-using TravelAgencyFrontendAPI.DTOs;
+using TravelAgencyFrontendAPI.DTOs.ChatRoomDTOs;
 using TravelAgencyFrontendAPI.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
-namespace TravelAgencyFrontendAPI.Controllers
+namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -48,9 +48,9 @@ namespace TravelAgencyFrontendAPI.Controllers
             var message = new Message
             {
                 ChatRoomId = dto.ChatRoomId,
-                SenderType = Enum.Parse<SenderType>(dto.SenderType),
+                SenderType = Enum.Parse<SenderType>(dto.SenderType, true),
                 SenderId = dto.SenderId,
-                MessageType = Enum.Parse<MessageType>(dto.MessageType),
+                MessageType = Enum.Parse<MessageType>(dto.MessageType, true),
                 Content = dto.Content,
                 SentAt = DateTime.Now,
                 IsRead = false,
@@ -72,5 +72,21 @@ namespace TravelAgencyFrontendAPI.Controllers
 
             return CreatedAtAction(nameof(GetMessages), new { chatRoomId = dto.ChatRoomId }, dto);
         }
+
+        // POST: api/mark-as-read/{chatRoomId}
+        [HttpPost("mark-as-read/{chatRoomId}")]
+        public async Task<IActionResult> MarkAsRead(int chatRoomId)
+        {
+            var unreadMessages = await _context.Messages
+                .Where(m => m.ChatRoomId == chatRoomId && !m.IsRead && m.SenderType != SenderType.Member)
+                .ToListAsync();
+
+            foreach (var msg in unreadMessages)
+                msg.IsRead = true;
+
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
     }
 }
