@@ -27,13 +27,13 @@ namespace TravelAgencyFrontendAPI.Models
         public DateTime? Birthday { get; set; }
         public string Email { get; set; } = null!;
         public string Phone { get; set; } = null!;
-        public GenderType Gender { get; set; }
+        public GenderType Gender { get; set; } = GenderType.Other;
         public string? IdNumber { get; set; } 
         public string? PassportSurname { get; set; }
         public string? PassportGivenName { get; set; }
         public DateTime? PassportExpireDate { get; set; }
         public string? Nationality { get; set; }
-        public DocumentType DocumentType { get; set; }
+        public DocumentType DocumentType { get; set; } = DocumentType.Passport;
         public string? DocumentNumber { get; set; }
         public string? Address { get; set; }
         public string PasswordHash { get; set; } = null!;
