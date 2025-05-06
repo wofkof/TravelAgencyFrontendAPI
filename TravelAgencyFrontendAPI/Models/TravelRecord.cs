@@ -3,13 +3,15 @@
     public class TravelRecord
     {
         public int TravelRecordId { get; set; }
-        public int OrderId { get; set; }
+        public int GroupTravelId { get; set; }
+        public int TotalParticipants { get; set; } = 0;
+        public int TotalOrders { get; set; } = 0;
+        public decimal TotalAmount { get; set; } = 0.00M;
+        public DateTime CompletionDate { get; set; }
+        public string? Note { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-        public decimal TotalAmount { get; set; }
-        public int TotalParticipants { get; set; }
-        public DateTime CreatedAt { get; set; }
-
-        public Order Order { get; set; }
+        public GroupTravel GroupTravel { get; set; } = null!;
     }
-
 }

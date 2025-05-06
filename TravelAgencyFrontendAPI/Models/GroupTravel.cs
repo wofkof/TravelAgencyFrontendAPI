@@ -17,6 +17,8 @@
         public string? RecordStatus { get; set; }
 
         public OfficialTravelDetail OfficialTravelDetail { get; set; }
+        public ICollection<TravelRecord> TravelRecords { get; set; } = new List<TravelRecord>();
     }
-
 }
+
+

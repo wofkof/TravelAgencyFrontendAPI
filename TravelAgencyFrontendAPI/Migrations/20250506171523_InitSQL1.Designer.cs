@@ -12,8 +12,8 @@ using TravelAgencyFrontendAPI.Data;
 namespace TravelAgencyFrontendAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250503183158_InitSQL")]
-    partial class InitSQL
+    [Migration("20250506171523_InitSQL1")]
+    partial class InitSQL1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -751,9 +751,10 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("DocumentType")
-                        .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Passport");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -761,9 +762,10 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Gender")
-                        .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("nvarchar(10)")
+                        .HasDefaultValue("Other");
 
                     b.Property<string>("GoogleId")
                         .HasMaxLength(100)
@@ -874,9 +876,10 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("DocumentType")
-                        .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Passport");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -884,9 +887,10 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Gender")
-                        .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("nvarchar(10)")
+                        .HasDefaultValue("Other");
 
                     b.Property<string>("IdNumber")
                         .IsRequired()
@@ -1328,18 +1332,38 @@ namespace TravelAgencyFrontendAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("GETDATE()");
 
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int");
+                    b.Property<bool>("InvoiceAddBillingAddr")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("InvoiceBillingAddress")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("InvoiceDeliveryEmail")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("InvoiceOption")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Personal");
+
+                    b.Property<string>("InvoiceTitle")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("InvoiceUniformNumber")
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
 
                     b.Property<int>("MemberId")
                         .HasColumnType("int");
@@ -1348,24 +1372,22 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<int>("OrderParticipantId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ParticipantsCount")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("PaymentDate")
                         .HasColumnType("datetime");
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Other");
 
                     b.Property<string>("Status")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Pending");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
@@ -1377,6 +1399,147 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Order", (string)null);
                 });
 
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OrderDetail", b =>
+                {
+                    b.Property<int>("OrderDetailId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderDetailId"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Quantity")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("datetime");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.HasKey("OrderDetailId");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("T_OrderDetail", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_OrderDetail_Price", "Price >= 0.00");
+
+                            t.HasCheckConstraint("CK_OrderDetail_Quantity", "Quantity > 0");
+                        });
+                });
+
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OrderInvoice", b =>
+                {
+                    b.Property<int>("InvoiceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InvoiceId"));
+
+                    b.Property<string>("BuyerName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("BuyerUniformNumber")
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("InvoiceFileURL")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("InvoiceItemDesc")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("InvoiceNumber")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("InvoiceStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Pending");
+
+                    b.Property<string>("InvoiceType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("ElectronicInvoice");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.HasKey("InvoiceId");
+
+                    b.HasIndex("InvoiceNumber")
+                        .IsUnique()
+                        .HasFilter("[InvoiceNumber] IS NOT NULL");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("T_OrderInvoices", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_OrderInvoices_TotalAmount", "TotalAmount >= 0.00");
+                        });
+                });
+
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OrderParticipant", b =>
                 {
                     b.Property<int>("OrderParticipantId")
@@ -1386,7 +1549,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderParticipantId"));
 
                     b.Property<DateTime>("BirthDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("date");
 
                     b.Property<string>("DocumentNumber")
                         .HasMaxLength(50)
@@ -1721,25 +1884,51 @@ namespace TravelAgencyFrontendAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TravelRecordId"));
 
+                    b.Property<DateTime>("CompletionDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("GETDATE()");
 
-                    b.Property<int>("OrderId")
+                    b.Property<int>("GroupTravelId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("TotalOrders")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
                     b.Property<int>("TotalParticipants")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.HasKey("TravelRecordId");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("GroupTravelId");
 
-                    b.ToTable("T_TravelRecord", (string)null);
+                    b.ToTable("T_TravelRecord", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_TravelRecord_TotalAmount", "TotalAmount >= 0.00");
+
+                            t.HasCheckConstraint("CK_TravelRecord_TotalOrders", "TotalOrders >= 0");
+
+                            t.HasCheckConstraint("CK_TravelRecord_TotalParticipants", "TotalParticipants >= 0");
+                        });
                 });
 
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.TravelSupplier", b =>
@@ -2105,10 +2294,32 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.HasOne("TravelAgencyFrontendAPI.Models.Member", "Member")
                         .WithMany("Orders")
                         .HasForeignKey("MemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Member");
+                });
+
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OrderDetail", b =>
+                {
+                    b.HasOne("TravelAgencyFrontendAPI.Models.Order", "Order")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OrderInvoice", b =>
+                {
+                    b.HasOne("TravelAgencyFrontendAPI.Models.Order", "Order")
+                        .WithMany("OrderInvoices")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OrderParticipant", b =>
@@ -2176,13 +2387,18 @@ namespace TravelAgencyFrontendAPI.Migrations
 
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.TravelRecord", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("TravelAgencyFrontendAPI.Models.GroupTravel", "GroupTravel")
+                        .WithMany("TravelRecords")
+                        .HasForeignKey("GroupTravelId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Order");
+                    b.Navigation("GroupTravel");
+                });
+
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.GroupTravel", b =>
+                {
+                    b.Navigation("TravelRecords");
                 });
 
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Member", b =>
@@ -2194,6 +2410,10 @@ namespace TravelAgencyFrontendAPI.Migrations
 
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Order", b =>
                 {
+                    b.Navigation("OrderDetails");
+
+                    b.Navigation("OrderInvoices");
+
                     b.Navigation("OrderParticipants");
                 });
 

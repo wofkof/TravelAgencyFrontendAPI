@@ -15,7 +15,7 @@ namespace TravelAgencyFrontendAPI.Data.Configurations
 
             entity.Property(p => p.Name).HasMaxLength(50).IsRequired();
 
-            entity.Property(p => p.Gender).HasMaxLength(10).HasConversion<string>().HasDefaultValueSql("N'Other'").IsRequired();
+            entity.Property(p => p.Gender).HasMaxLength(10).HasConversion<string>().HasDefaultValue(GenderType.Other).IsRequired(false);
 
             entity.Property(p => p.Phone).HasMaxLength(20).IsRequired();
             entity.HasIndex(p => p.Phone).IsUnique();
@@ -23,7 +23,7 @@ namespace TravelAgencyFrontendAPI.Data.Configurations
             entity.Property(p => p.Email).HasMaxLength(100).IsRequired();
             entity.HasIndex(p => p.Email).IsUnique();
 
-            entity.Property(p => p.DocumentType).HasMaxLength(20).HasConversion<string>().HasDefaultValueSql("N'Passport'").IsRequired();
+            entity.Property(p => p.DocumentType).HasMaxLength(20).HasConversion<string>().HasDefaultValue(DocumentType.Passport).IsRequired(false);
             entity.Property(p => p.DocumentNumber).HasMaxLength(50).IsRequired(false);
 
             entity.Property(p => p.PassportSurname).HasMaxLength(50).IsRequired(false);

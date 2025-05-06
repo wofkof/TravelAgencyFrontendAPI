@@ -36,8 +36,8 @@ namespace TravelAgencyFrontendAPI.Data.Configurations
             builder.Property(m => m.Gender)
                    .HasConversion<string>()
                    .HasMaxLength(10)
-                   .HasDefaultValueSql("N'Other'")
-                   .IsRequired();
+                   .HasDefaultValue(GenderType.Other)
+                   .IsRequired(false);
 
             builder.Property(m => m.IdNumber)
                    .HasMaxLength(20)
@@ -61,9 +61,9 @@ namespace TravelAgencyFrontendAPI.Data.Configurations
 
             builder.Property(m => m.DocumentType)
                    .HasConversion<string>()
-                   .HasDefaultValueSql("N'Passport'")
+                   .HasDefaultValue(DocumentType.Passport)
                    .HasMaxLength(20)
-                   .IsRequired();
+                   .IsRequired(false);
 
             builder.Property(m => m.DocumentNumber)
                    .HasMaxLength(50)
