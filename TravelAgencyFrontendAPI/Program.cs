@@ -1,8 +1,12 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using TravelAgencyFrontendAPI.Data;
 using TravelAgencyFrontendAPI.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
+//新增 Swagger 設定
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 
 // Add services to the container.
 builder.Services.AddCors(options =>
@@ -22,6 +26,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
+// 啟用 Swagger
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -34,20 +42,17 @@ if (app.Environment.IsDevelopment())
     }
 }
 
-app.UseRouting();
-app.UseCors("AllowFrontend");
-
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseAuthentication();
+app.UseRouting();               
 
-app.MapControllers();
-app.MapHub<ChatHub>("/chathub");
+app.UseCors("AllowFrontend");  
 
-app.UseHttpsRedirection();
-
+// app.UseAuthentication(); 
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ChatHub>("/chathub");
 
 app.Run();
