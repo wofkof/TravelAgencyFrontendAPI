@@ -50,7 +50,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
             // 手機格式驗證
             if (!IsValidPhone(dto.Phone))
             {
-                ModelState.AddModelError("Phone", "手機號碼格式錯誤，需為09開頭共10碼數字");
+                ModelState.AddModelError("Phone", "手機號碼格式錯誤，需為09開頭的10碼數字");
                 hasError = true;
             }
 
@@ -96,13 +96,14 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
             return Regex.IsMatch(phone, @"^09\d{8}$");
         }
 
-
-
         // POST: api/Account/login
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            var member = await _context.Members.SingleOrDefaultAsync(m => m.Email == dto.Email);
+            // 帳號比對已註冊的 Email 或 Phone 欄位
+            var member = await _context.Members
+                .SingleOrDefaultAsync(m => m.Email == dto.Account || m.Phone == dto.Account);
+
             if (member == null)
             {
                 return Unauthorized("帳號或密碼錯誤");
@@ -116,5 +117,6 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
 
             return Ok("登入成功");
         }
+
     }
 }
