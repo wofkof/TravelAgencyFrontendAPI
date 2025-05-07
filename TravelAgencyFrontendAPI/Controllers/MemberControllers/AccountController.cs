@@ -87,7 +87,8 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
 
         private bool IsValidEmail(string email)
         {
-            return Regex.IsMatch(email, @"^[\w.-]+@[\w-]+\.[a-zA-Z]{2,}$");
+            return Regex.IsMatch(email, @"^[\w.-]+@([\w-]+\.)+[a-zA-Z]{2,}$"
+);
         }
 
         private bool IsValidPhone(string phone)
