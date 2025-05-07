@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using TravelAgencyFrontendAPI.Data;
 using TravelAgencyFrontendAPI.DTOs.ChatRoomDTOs;
+using TravelAgencyFrontendAPI.Hubs;
 using TravelAgencyFrontendAPI.Models;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
 {
@@ -13,9 +13,14 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
     public class MessagesController : ControllerBase
     {
         private readonly AppDbContext _context;
-        public MessagesController(AppDbContext context)
+        private readonly IWebHostEnvironment _env;
+        private readonly IHubContext<ChatHub> _hub;
+
+        public MessagesController(AppDbContext context, IWebHostEnvironment env, IHubContext<ChatHub> hub)
         {
             _context = context;
+            _env = env;
+            _hub = hub;
         }
 
         // GET: api/Messages/{chatRoomId}
@@ -66,14 +71,18 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
             }
 
             await _context.SaveChangesAsync();
-            
+
             dto.MessageId = message.MessageId;
             dto.SentAt = message.SentAt;
+
+            // SignalR 廣播
+            await _hub.Clients.Group(dto.ChatRoomId.ToString())
+                .SendAsync("ReceiveMessage", dto);
 
             return CreatedAtAction(nameof(GetMessages), new { chatRoomId = dto.ChatRoomId }, dto);
         }
 
-        // POST: api/mark-as-read
+        // POST: api/messages/mark-as-read
         [HttpPost("mark-as-read")]
         public async Task<IActionResult> MarkAsRead([FromBody] MarkAsReadDto dto)
         {

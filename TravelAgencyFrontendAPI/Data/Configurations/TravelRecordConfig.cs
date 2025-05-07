@@ -6,19 +6,30 @@ namespace TravelAgencyFrontendAPI.Data.Configurations
 {
     public class TravelRecordConfig : IEntityTypeConfiguration<TravelRecord>
     {
-        public void Configure(EntityTypeBuilder<TravelRecord> entity)
+        public void Configure(EntityTypeBuilder<TravelRecord> builder)
         {
-            entity.ToTable("T_TravelRecord");
-            entity.HasKey(e => e.TravelRecordId);
+            builder.ToTable("T_TravelRecord");
 
-            entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)").IsRequired();
-            entity.Property(e => e.TotalParticipants).IsRequired();
-            entity.Property(e => e.CreatedAt).HasColumnType("datetime").HasDefaultValueSql("GETDATE()");
+            builder.HasKey(t => t.TravelRecordId);
 
-            entity.HasOne(e => e.Order)
-                  .WithMany()
-                  .HasForeignKey(e => e.OrderId);
+            builder.Property(t => t.TotalParticipants).HasDefaultValue(0);
+            builder.Property(t => t.TotalOrders).HasDefaultValue(0);
+            builder.Property(t => t.TotalAmount).HasColumnType("decimal(18,2)");
+            builder.Property(t => t.Note).HasMaxLength(255);
+            builder.Property(t => t.CreatedAt).HasDefaultValueSql("GETDATE()").HasColumnType("datetime");
+            builder.Property(t => t.UpdatedAt).HasDefaultValueSql("GETDATE()").HasColumnType("datetime");
+
+            builder.HasOne(t => t.GroupTravel)
+                   .WithMany(g => g.TravelRecords)
+                   .HasForeignKey(t => t.GroupTravelId)
+                   .OnDelete(DeleteBehavior.NoAction);
+
+            builder.ToTable(t =>
+            {
+                t.HasCheckConstraint("CK_TravelRecord_TotalParticipants", "TotalParticipants >= 0");
+                t.HasCheckConstraint("CK_TravelRecord_TotalOrders", "TotalOrders >= 0");
+                t.HasCheckConstraint("CK_TravelRecord_TotalAmount", "TotalAmount >= 0.00");
+            });
         }
     }
-
 }

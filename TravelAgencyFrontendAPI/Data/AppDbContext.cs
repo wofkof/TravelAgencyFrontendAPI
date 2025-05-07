@@ -49,8 +49,8 @@ namespace TravelAgencyFrontendAPI.Data
         public DbSet<PickupInformation> PickupInformations { get; set; }
         public DbSet<Agency> Agencies { get; set; }
         public DbSet<Payment> Payments { get; set; }
-
-
+        public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<OrderInvoice> OrderInvoices { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

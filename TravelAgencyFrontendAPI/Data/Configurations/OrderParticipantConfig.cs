@@ -20,6 +20,7 @@ namespace TravelAgencyFrontendAPI.Data.Configurations
                   .HasMaxLength(50);
 
             entity.Property(e => e.BirthDate)
+                  .HasColumnType("date")
                   .IsRequired();
 
             entity.Property(e => e.IdNumber)
