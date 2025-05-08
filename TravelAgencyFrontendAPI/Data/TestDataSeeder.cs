@@ -18,6 +18,12 @@ namespace TravelAgencyFrontendAPI.Data
             await SeedMembersAsync();
             await SeedChatRoomsAsync();
             await SeedMessagesAsync();
+            await SeedCityAsync();
+            await SeedDistrictAsync();
+            await SeedAttractionAsyync();
+            await SeedRestaurantAsync();
+            await SeedAccommodationAsync();
+            await SeedTransportAsync();
         }
 
         private async Task SeedRolesAsync()
@@ -105,5 +111,140 @@ namespace TravelAgencyFrontendAPI.Data
                 await _context.SaveChangesAsync();
             }
         }
+
+        private async Task SeedCityAsync()
+        {
+            if (!_context.Cities.Any())
+            {
+                _context.Cities.AddRange(
+                    new City { CityName = "臺北市" },
+                    new City { CityName = "新北市" }
+                    );
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        private async Task SeedDistrictAsync()
+        {
+            if (!_context.Districts.Any())
+            {
+                _context.Districts.AddRange(
+                    new District
+                    {
+                        CityId = _context.Cities.First().CityId,
+                        DistrictName = "信義區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.First().CityId,
+                        DistrictName = "中山區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(1).First().CityId,
+                        DistrictName = "淡水區"
+                    }
+                    );
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        private async Task SeedAttractionAsyync()
+        {
+            if (!_context.Attractions.Any())
+            {
+                _context.Attractions.AddRange(
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.First().DistrictId,
+                        AttractionName = "國立國父紀念堂"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.First().DistrictId,
+                        AttractionName = "臺北101購物中心"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(1).First().DistrictId,
+                        AttractionName = "美麗華百樂園"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(2).First().DistrictId,
+                        AttractionName = "淡水老街"
+                    }
+                    );
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        private async Task SeedRestaurantAsync()
+        {
+            if (!_context.Restaurants.Any())
+            {
+                _context.Restaurants.AddRange(
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.First().DistrictId,
+                        RestaurantName = "候布雄法式餐廳"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(1).First().DistrictId,
+                        RestaurantName = "晶華軒"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(1).First().DistrictId,
+                        RestaurantName = "頁小館"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(2).First().DistrictId,
+                        RestaurantName = "米特食堂"
+                    }
+                    );
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        private async Task SeedAccommodationAsync()
+        {
+            if (!_context.Accommodations.Any())
+            {
+                _context.Accommodations.AddRange(
+                    new Accommodation
+                    {
+                        DistrictId = _context.Districts.First().DistrictId,
+                        AccommodationName = "誠品行旅"
+                    },
+                    new Accommodation
+                    {
+                        DistrictId = _context.Districts.Skip(1).First().DistrictId,
+                        AccommodationName = "薇閣精品旅館-大直館"
+                    },
+                    new Accommodation
+                    {
+                        DistrictId = _context.Districts.Skip(2).First().DistrictId,
+                        AccommodationName = "將捷金鬱金香酒店"
+                    }
+                    );
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        private async Task SeedTransportAsync()
+        {
+            if (!_context.Transports.Any())
+            {
+                _context.Transports.AddRange(
+                    new Transport { TransportMethod = "遊覽車" },
+                    new Transport { TransportMethod = "租車" }
+                    );
+                await _context.SaveChangesAsync();
+            }
+        }
+
     }
 }
