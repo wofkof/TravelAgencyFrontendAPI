@@ -7,6 +7,7 @@ using TravelAgencyFrontendAPI.DTOs.MemberDTOs;
 using TravelAgencyFrontendAPI.Models;
 using TravelAgencyFrontendAPI.Helpers;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json.Linq;
 
 
 
@@ -76,7 +77,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
             _context.Members.Add(member);
             await _context.SaveChangesAsync();
 
-            return Ok("註冊成功");
+            return Ok("註冊成功，確定後將跳轉回登入頁");
         }
 
         // ==== 驗證封裝區塊 ====
@@ -115,7 +116,11 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 return Unauthorized("帳號或密碼錯誤");
             }
 
-            return Ok("登入成功");
+            return Ok(new
+            {
+                name = member.Name
+                
+            });
         }
 
     }
