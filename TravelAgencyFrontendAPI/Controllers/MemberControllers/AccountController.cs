@@ -39,7 +39,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
             // 密碼驗證
             if (!IsValidPassword(dto.Password))
             {
-                ModelState.AddModelError("Password", "密碼格式不正確（需包含大、小寫英文與特殊符號，長度6-12字元）");
+                ModelState.AddModelError("Password", "密碼格式不正確（需設定長度6~12位數，且包含大、小寫英文的密碼）");
                 hasError = true;
             }
 
@@ -100,7 +100,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
 
         private bool IsValidPassword(string password)
         {
-            return Regex.IsMatch(password, @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{6,12}$");
+            return Regex.IsMatch(password, @"^(?=.*[a-z])(?=.*[A-Z]).{6,12}$");
         }
 
         private bool IsValidEmail(string email)
