@@ -59,5 +59,19 @@ namespace TravelAgencyFrontendAPI.Hubs
             await Clients.Group(chatRoomId.ToString()).SendAsync("MessageRead", chatRoomId, readerId, readerType);
         }
 
+        public async Task SendCalloffer(string toConnectionId, object offer)
+        {
+            await Clients.Client(toConnectionId).SendAsync("ReceiveCallOffer", Context.ConnectionId, offer);
+        }
+
+        public async Task SendCallAnswer(string toConnectionId, object answer)
+        {
+            await Clients.Client(toConnectionId).SendAsync("ReceiveCallAnswer", Context.ConnectionId, answer);
+        }
+
+        public async Task SendIceCandidate(string toConnectionId, object candidate)
+        {
+            await Clients.Client(toConnectionId).SendAsync("ReceiveIceCandidate", Context.ConnectionId, candidate);
+        }
     }
 }
