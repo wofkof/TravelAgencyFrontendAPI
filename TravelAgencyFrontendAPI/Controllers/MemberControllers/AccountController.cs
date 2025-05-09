@@ -29,6 +29,13 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
         {
             bool hasError = false;
 
+            // 姓名格式驗證
+            if (!IsValidName(dto.Name))
+            {
+                ModelState.AddModelError("Name", "姓名格式錯誤，僅能包含中英文，且不可含數字或特殊符號");
+                hasError = true;
+            }
+
             // 密碼驗證
             if (!IsValidPassword(dto.Password))
             {
@@ -48,10 +55,15 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 hasError = true;
             }
 
-            // 手機格式驗證
+            // 手機格式驗證 + 重複驗證
             if (!IsValidPhone(dto.Phone))
             {
                 ModelState.AddModelError("Phone", "手機號碼格式錯誤，需為09開頭的10碼數字");
+                hasError = true;
+            }
+            else if (await _context.Members.AnyAsync(m => m.Phone == dto.Phone))
+            {
+                ModelState.AddModelError("Phone", "此手機號碼已被使用");
                 hasError = true;
             }
 
@@ -81,6 +93,11 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
         }
 
         // ==== 驗證封裝區塊 ====
+        private bool IsValidName(string name)
+        {
+            return Regex.IsMatch(name, @"^[\u4e00-\u9fa5a-zA-Z\s]{2,30}$");
+        }
+
         private bool IsValidPassword(string password)
         {
             return Regex.IsMatch(password, @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{6,12}$");
