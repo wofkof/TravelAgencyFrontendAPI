@@ -10,12 +10,12 @@
 
 <label>身分：</label>
 <select id="senderType">
-    <option value="Member">Member</option>
     <option value="Employee">Employee</option>
+    <option value="Member">Member</option>
 </select>
 
 <label>使用者 ID：</label>
-<input type="number" id="senderId" value="11110" />
+<input type="number" id="senderId" value="1" />
 
 <hr />
 
@@ -29,26 +29,72 @@
 <h4>訊息記錄：</h4>
 <ul id="messagesList"></ul>
 
+<hr />
+<h4>語音通話</h4>
+<button onclick="startCall()">📞 發起語音通話</button>
+<audio id="remoteAudio" autoplay controls></audio>
+
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script>
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("https://localhost:7265/chathub") 
-            .withAutomaticReconnect()
-            .build();
+        let connection;
+        let localStream = null;
+        let peer = null;
 
         const messagesList = document.getElementById("messagesList");
 
-        connection.on("ReceiveMessage", (msg) => {
-            const li = document.createElement("li");
-            li.textContent = `[${msg.chatRoomId}] ${msg.senderType}(${msg.senderId}) - ${msg.messageType}: ${msg.content}`;
-            messagesList.appendChild(li);
-        });
+        async function setupConnection() {
+            const senderId = document.getElementById("senderId").value;
+            const senderType = document.getElementById("senderType").value;
 
-        connection.start().then(() => {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl(`https://localhost:7265/chathub?userId=${senderId}&userType=${senderType}`)
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on("ReceiveMessage", (msg) => {
+                const li = document.createElement("li");
+                li.textContent = `[${msg.chatRoomId}] ${msg.senderType}(${msg.senderId}) - ${msg.messageType}: ${msg.content}`;
+                messagesList.appendChild(li);
+            });
+
+            connection.on("ReceiveCallOffer", async (fromId, offer) => {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                peer = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+
+                localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
+
+                peer.onicecandidate = (e) => {
+                    if (e.candidate) {
+                        connection.invoke("SendIceCandidate", fromId, e.candidate);
+                    }
+                };
+
+                peer.ontrack = (e) => {
+                    const audio = document.getElementById("remoteAudio");
+                    audio.srcObject = e.streams[0];
+                };
+
+                await peer.setRemoteDescription(new RTCSessionDescription(offer));
+                const answer = await peer.createAnswer();
+                await peer.setLocalDescription(answer);
+                await connection.invoke("SendCallAnswer", fromId, answer);
+            });
+
+            connection.on("ReceiveCallAnswer", async (fromId, answer) => {
+                await peer.setRemoteDescription(new RTCSessionDescription(answer));
+            });
+
+            connection.on("ReceiveIceCandidate", async (fromId, candidate) => {
+                await peer.addIceCandidate(new RTCIceCandidate(candidate));
+            });
+
+            await connection.start();
             const roomId = document.getElementById("chatRoomId").value;
-            connection.invoke("JoinGroup", roomId.toString());
-        });
+            await connection.invoke("JoinGroup", roomId.toString());
+        }
+
+        setupConnection();
 
         function sendMessage() {
             const chatRoomId = parseInt(document.getElementById("chatRoomId").value);
@@ -57,36 +103,62 @@
             const messageType = "text";
             const content = document.getElementById("messageInput").value;
 
-          connection.invoke("SendMessage", {
-            chatRoomId: parseInt(document.getElementById("chatRoomId").value),
-            senderType: document.getElementById("senderType").value,
-            senderId: parseInt(document.getElementById("senderId").value),
-            messageType: "text",
-            content: document.getElementById("messageInput").value,
-        });
-
+            connection.invoke("SendMessage", {
+                chatRoomId,
+                senderType,
+                senderId,
+                messageType,
+                content
+            });
         }
 
         async function markAsRead() {
-          const chatRoomId = parseInt(document.getElementById("chatRoomId").value);
-          const senderId = parseInt(document.getElementById("senderId").value);
-          const senderType = document.getElementById("senderType").value;
+            const chatRoomId = parseInt(document.getElementById("chatRoomId").value);
+            const senderId = parseInt(document.getElementById("senderId").value);
+            const senderType = document.getElementById("senderType").value;
 
-          await fetch("https://localhost:7265/api/messages/mark-as-read", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              chatRoomId,
-              senderId,
-              senderType
-            })
-          });
+            await fetch("https://localhost:7265/api/messages/mark-as-read", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chatRoomId, senderId, senderType })
+            });
 
-          await connection.invoke("NotifyRead", chatRoomId, senderId, senderType);
-          alert("✅ 已標記已讀");
+            await connection.invoke("NotifyRead", chatRoomId, senderId, senderType);
+            alert("✅ 已標記已讀");
         }
 
+        async function startCall() {
+            const senderType = document.getElementById("senderType").value;
+            const senderId = parseInt(document.getElementById("senderId").value);
+
+            const targetType = senderType === "Member" ? "Employee" : "Member";
+            const targetId = senderType === "Member" ? 1 : 11110;
+
+            const targetConnId = await connection.invoke("GetConnectionId", targetType, targetId);
+            if (!targetConnId) {
+                alert("⚠️ 找不到對方的連線 ID，可能不在線上");
+                return;
+            }
+
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            peer = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+
+            localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
+
+            peer.onicecandidate = (e) => {
+                if (e.candidate) {
+                    connection.invoke("SendIceCandidate", targetConnId, e.candidate);
+                }
+            };
+
+            peer.ontrack = (e) => {
+                const audio = document.getElementById("remoteAudio");
+                audio.srcObject = e.streams[0];
+            };
+
+            const offer = await peer.createOffer();
+            await peer.setLocalDescription(offer);
+            await connection.invoke("SendCallOffer", targetConnId, offer);
+        }
     </script>
 }
