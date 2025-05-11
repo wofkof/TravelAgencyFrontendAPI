@@ -40,6 +40,7 @@
         let connection;
         let localStream = null;
         let peer = null;
+        let remoteConnectionId = null;
 
         const messagesList = document.getElementById("messagesList");
 
@@ -59,22 +60,11 @@
             });
 
             connection.on("ReceiveCallOffer", async (fromId, offer) => {
+                remoteConnectionId = fromId;
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                peer = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+                peer = createPeerConnection();
 
                 localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
-
-                peer.onicecandidate = (e) => {
-                    if (e.candidate) {
-                        connection.invoke("SendIceCandidate", fromId, e.candidate);
-                    }
-                };
-
-                peer.ontrack = (e) => {
-                    const audio = document.getElementById("remoteAudio");
-                    audio.srcObject = e.streams[0];
-                };
-
                 await peer.setRemoteDescription(new RTCSessionDescription(offer));
                 const answer = await peer.createAnswer();
                 await peer.setLocalDescription(answer);
@@ -87,6 +77,15 @@
 
             connection.on("ReceiveIceCandidate", async (fromId, candidate) => {
                 await peer.addIceCandidate(new RTCIceCandidate(candidate));
+            });
+
+            connection.on("CallRejected", (fromId) => {
+                alert("❌ 對方已拒絕通話");
+            });
+
+            connection.on("CallEnded", (fromId) => {
+                alert("📴 對方已結束通話");
+                endCall(false); // 關閉本地通話介面
             });
 
             await connection.start();
@@ -130,7 +129,6 @@
         async function startCall() {
             const senderType = document.getElementById("senderType").value;
             const senderId = parseInt(document.getElementById("senderId").value);
-
             const targetType = senderType === "Member" ? "Employee" : "Member";
             const targetId = senderType === "Member" ? 1 : 11110;
 
@@ -140,25 +138,57 @@
                 return;
             }
 
+            remoteConnectionId = targetConnId;
             localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            peer = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+            peer = createPeerConnection();
 
             localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
-
-            peer.onicecandidate = (e) => {
-                if (e.candidate) {
-                    connection.invoke("SendIceCandidate", targetConnId, e.candidate);
-                }
-            };
-
-            peer.ontrack = (e) => {
-                const audio = document.getElementById("remoteAudio");
-                audio.srcObject = e.streams[0];
-            };
-
             const offer = await peer.createOffer();
             await peer.setLocalDescription(offer);
             await connection.invoke("SendCallOffer", targetConnId, offer);
         }
+
+        function createPeerConnection() {
+            const pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+
+            pc.onicecandidate = (e) => {
+                if (e.candidate) {
+                    connection.invoke("SendIceCandidate", remoteConnectionId, e.candidate);
+                }
+            };
+
+            pc.ontrack = (e) => {
+                const audio = document.getElementById("remoteAudio");
+                audio.srcObject = e.streams[0];
+            };
+
+            return pc;
+        }
+
+        async function endCall(sendSignal = true) {
+            if (localStream) {
+                localStream.getTracks().forEach((t) => t.stop());
+                localStream = null;
+            }
+
+            if (peer) {
+                peer.close();
+                peer = null;
+            }
+
+            document.getElementById("remoteAudio").srcObject = null;
+
+            if (sendSignal && remoteConnectionId) {
+                await connection.invoke("EndCall", remoteConnectionId);
+            }
+        }
+
+        async function rejectCall() {
+            if (remoteConnectionId) {
+                await connection.invoke("RejectCall", remoteConnectionId);
+                alert("已拒絕通話");
+            }
+        }
     </script>
+
 }

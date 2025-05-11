@@ -115,5 +115,17 @@ namespace TravelAgencyFrontendAPI.Hubs
 
             return base.OnDisconnectedAsync(exception);
         }
+
+        public async Task EndCall(string toConnectionId)
+        {
+            Console.WriteLine($"[Hub] 來自 {Context.ConnectionId} 通知掛斷給 {toConnectionId}");
+            await Clients.Client(toConnectionId).SendAsync("ReceiveEndCall", Context.ConnectionId);
+        }
+
+        public async Task RejectCall(string toConnectionId)
+        {
+            await Clients.Client(toConnectionId).SendAsync("CallRejected", Context.ConnectionId);
+        }
+
     }
 }
