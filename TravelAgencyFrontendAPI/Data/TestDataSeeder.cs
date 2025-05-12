@@ -25,6 +25,10 @@ namespace TravelAgencyFrontendAPI.Data
             await SeedAccommodationAsync();
             await SeedTransportAsync();
             await SeedRegionAsync();
+            await SeedTravelSupplierAsync();
+            await SeedOfficialAccommodationAsync();
+            await SeedOfficialRestaurantAsync();
+            await SeedOfficialAttractionAsync();
         }
 
         private async Task SeedRolesAsync()
@@ -265,6 +269,105 @@ namespace TravelAgencyFrontendAPI.Data
                 await _context.SaveChangesAsync();
             }
         }
+
+        private async Task SeedTravelSupplierAsync()
+        {
+            if (!_context.TravelSuppliers.Any())
+            {
+                _context.TravelSuppliers.AddRange(
+                    new TravelSupplier
+                    {
+                        SupplierName = "測試飯店供應商",
+                        SupplierType = SupplierType.Accommodation,
+                        ContactName = "測試飯店聯絡人",
+                        ContactPhone = "0900000000",
+                        ContactEmail = "testAccomodation@gmail.com",
+                        SupplierNote = "這是測試用飯店供應商"
+
+                    },
+                    new TravelSupplier
+                    {
+                        SupplierName = "測試餐廳供應商",
+                        SupplierType = SupplierType.Restaurant,
+                        ContactName = "測試餐廳聯絡人",
+                        ContactPhone = "0900000001",
+                        ContactEmail = "testRestaurant@gmail.com",
+                        SupplierNote = "這是測試用餐廳供應商"
+                    },
+                    new TravelSupplier
+                    {
+                        SupplierName = "測試景點供應商",
+                        SupplierType = SupplierType.Attraction,
+                        ContactName = "測試景點聯絡人",
+                        ContactPhone = "0900000002",
+                        ContactEmail = "testAttraction@gmail.com",
+                        SupplierNote = "這是測試用景點供應商"
+                    }
+                    );
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        private async Task SeedOfficialAccommodationAsync()
+        {
+            if (!_context.OfficialAccommodations.Any())
+            {
+                var Accommodation = _context.TravelSuppliers.FirstOrDefault(s => s.SupplierType == SupplierType.Accommodation);
+                _context.OfficialAccommodations.AddRange(
+                    new OfficialAccommodation
+                    {
+                        TravelSupplierId = Accommodation.TravelSupplierId,
+                        RegionId = 1,
+                        Name = "測試官方飯店",
+                        Description = "這是測試用飯店",
+                        Longitude = 121.5654m,
+                        Latitude = 25.0330m
+                    }
+                    );
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        private async Task SeedOfficialRestaurantAsync()
+        {
+            if (!_context.OfficialRestaurants.Any())
+            {
+                var Restaurant = _context.TravelSuppliers.FirstOrDefault(s => s.SupplierType == SupplierType.Restaurant);
+                _context.OfficialRestaurants.AddRange(
+                    new OfficialRestaurant
+                    {
+                        TravelSupplierId = Restaurant.TravelSupplierId,
+                        RegionId = 1,
+                        Name = "測試官方餐廳",
+                        Description = "這是測試用餐廳",
+                        Longitude = 121.5654m,
+                        Latitude = 25.0330m
+                    }
+                    );
+                await _context.SaveChangesAsync();
+            }
+        }
+        private async Task SeedOfficialAttractionAsync()
+        {
+            if (!_context.OfficialAttractions.Any())
+            {
+                var Attraction = _context.TravelSuppliers.FirstOrDefault(s => s.SupplierType == SupplierType.Attraction);
+                _context.OfficialAttractions.AddRange(
+                    new OfficialAttraction
+                    {
+                        TravelSupplierId = Attraction.TravelSupplierId,
+                        RegionId = 1,
+                        Name = "測試官方景點",
+                        Description = "這是測試用景點",
+                        Longitude = 121.5654m,
+                        Latitude = 25.0330m
+                    }
+                    );
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        
 
     }
 }
