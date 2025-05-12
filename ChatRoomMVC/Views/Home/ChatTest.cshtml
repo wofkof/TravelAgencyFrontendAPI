@@ -30,10 +30,10 @@
 <ul id="messagesList"></ul>
 
 <hr />
-<h4>語音通話</h4>
-<button onclick="startCall()">📞 發起語音通話</button>
+<h4>通話測試</h4>
+<button onclick="startCall(false)">📞 語音通話</button>
+<button onclick="startCall(true)">📹 視訊通話</button>
 
-<!-- 📞 來電控制區 -->
 <div id="callControls" style="display: none; margin-top: 10px;">
     <p id="callTimer" style="margin-top: 4px; color: #555;"></p>
     <p id="callStatus">📞 來電中...</p>
@@ -42,8 +42,9 @@
     <button onclick="endCall()">📴 掛斷</button>
 </div>
 
-<!-- 音訊輸出 -->
-<audio id="remoteAudio" autoplay controls></audio>
+<audio id="remoteAudio" autoplay style="display: none"></audio>
+<video id="remoteVideo" autoplay playsinline style="max-width: 300px; border: 1px solid #ccc;"></video>
+<video id="localVideo" autoplay playsinline muted style="max-width: 300px; right: 10px; border: 2px solid #fff; background: black;"></video>
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
@@ -56,7 +57,7 @@
         let remoteConnectionId = null;
         let incomingOffer = null;
 
-        const messagesList = document.getElementById("messagesList");
+        setupConnection();
 
         async function setupConnection() {
             const senderId = document.getElementById("senderId").value;
@@ -89,12 +90,12 @@
                 await peer.addIceCandidate(new RTCIceCandidate(candidate));
             });
 
-            connection.on("CallRejected", (fromId) => {
+            connection.on("CallRejected", () => {
                 alert("❌ 對方已拒絕通話");
                 endCall(false);
             });
 
-            connection.on("ReceiveEndCall", (fromId) => {
+            connection.on("ReceiveEndCall", () => {
                 alert("📴 對方已掛斷");
                 endCall(false);
             });
@@ -103,8 +104,6 @@
             const roomId = document.getElementById("chatRoomId").value;
             await connection.invoke("JoinGroup", roomId.toString());
         }
-
-        setupConnection();
 
         function sendMessage() {
             const chatRoomId = parseInt(document.getElementById("chatRoomId").value);
@@ -120,50 +119,11 @@
                 messageType,
                 content
             });
+
+            document.getElementById("messageInput").value = "";
         }
 
-        function startCallTimer() {
-            callStartTime = new Date();
-            updateCallTimer(); 
-
-            callTimerInterval = setInterval(() => {
-                updateCallTimer();
-            }, 1000);
-        }
-
-        function updateCallTimer() {
-            const now = new Date();
-            const seconds = Math.floor((now - callStartTime) / 1000);
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            const formatted = `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
-            document.getElementById("callTimer").innerText = `通話時間：${formatted}`;
-        }
-
-        function stopCallTimer() {
-            clearInterval(callTimerInterval);
-            callTimerInterval = null;
-            callStartTime = null;
-            document.getElementById("callTimer").innerText = "";
-        }
-
-
-        async function markAsRead() {
-            const chatRoomId = parseInt(document.getElementById("chatRoomId").value);
-            const senderId = parseInt(document.getElementById("senderId").value);
-            const senderType = document.getElementById("senderType").value;
-
-            await fetch("https://localhost:7265/api/messages/mark-as-read", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chatRoomId, senderId, senderType })
-            });
-
-            await connection.invoke("NotifyRead", chatRoomId, senderId, senderType);
-            alert("✅ 已標記已讀");
-        }
-
-        async function startCall() {
+        async function startCall(useVideo = false) {
             const senderType = document.getElementById("senderType").value;
             const senderId = parseInt(document.getElementById("senderId").value);
             const targetType = senderType === "Member" ? "Employee" : "Member";
@@ -176,9 +136,12 @@
             }
 
             remoteConnectionId = targetConnId;
-            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: useVideo });
             peer = createPeerConnection();
+
             localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
+            document.getElementById("localVideo").srcObject = localStream;
 
             const offer = await peer.createOffer();
             await peer.setLocalDescription(offer);
@@ -189,9 +152,11 @@
 
         async function acceptCall() {
             updateCallStatus("⏳ 接通中...");
-            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+
             peer = createPeerConnection();
             localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
+            document.getElementById("localVideo").srcObject = localStream;
 
             await peer.setRemoteDescription(new RTCSessionDescription(incomingOffer));
             const answer = await peer.createAnswer();
@@ -211,8 +176,9 @@
 
         async function endCall(sendSignal = true) {
             if (localStream) {
-                localStream.getTracks().forEach((t) => t.stop());
+                localStream.getTracks().forEach(t => t.stop());
                 localStream = null;
+                document.getElementById("localVideo").srcObject = null;
             }
 
             stopCallTimer();
@@ -223,7 +189,10 @@
             }
 
             document.getElementById("remoteAudio").srcObject = null;
+            document.getElementById("remoteVideo").srcObject = null;
+
             document.getElementById("callControls").style.display = "none";
+
             if (sendSignal && remoteConnectionId) {
                 await connection.invoke("EndCall", remoteConnectionId);
             }
@@ -241,19 +210,58 @@
             };
 
             pc.ontrack = (e) => {
-                document.getElementById("remoteAudio").srcObject = e.streams[0];
+                const stream = e.streams[0];
+                document.getElementById("remoteAudio").srcObject = stream;
+                document.getElementById("remoteVideo").srcObject = stream;
             };
 
             return pc;
         }
 
+        function startCallTimer() {
+            callStartTime = new Date();
+            updateCallTimer();
+            callTimerInterval = setInterval(updateCallTimer, 1000);
+        }
+
+        function updateCallTimer() {
+            const now = new Date();
+            const seconds = Math.floor((now - callStartTime) / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const remaining = seconds % 60;
+            document.getElementById("callTimer").innerText =
+                `通話時間：${String(minutes).padStart(2, '0')}:${String(remaining).padStart(2, '0')}`;
+        }
+
+        function stopCallTimer() {
+            clearInterval(callTimerInterval);
+            callTimerInterval = null;
+            callStartTime = null;
+            document.getElementById("callTimer").innerText = "";
+        }
+
         function showCallControls(statusText) {
             document.getElementById("callControls").style.display = "block";
-            document.getElementById("callStatus").innerText = statusText;
+            updateCallStatus(statusText);
         }
 
         function updateCallStatus(statusText) {
             document.getElementById("callStatus").innerText = statusText;
+        }
+
+        async function markAsRead() {
+            const chatRoomId = parseInt(document.getElementById("chatRoomId").value);
+            const senderId = parseInt(document.getElementById("senderId").value);
+            const senderType = document.getElementById("senderType").value;
+
+            await fetch("https://localhost:7265/api/messages/mark-as-read", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chatRoomId, senderId, senderType })
+            });
+
+            await connection.invoke("NotifyRead", chatRoomId, senderId, senderType);
+            alert("✅ 已標記已讀");
         }
     </script>
 }
