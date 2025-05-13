@@ -50,6 +50,18 @@ namespace TravelAgencyFrontendAPI.Data.Configurations
             builder.Property(o => o.InvoiceBillingAddress).HasMaxLength(255);
             builder.Property(o => o.Note).HasMaxLength(255);
 
+            builder.Property(o => o.OrdererName)
+                   .IsRequired()
+                   .HasMaxLength(50);
+
+            builder.Property(o => o.OrdererPhone)
+                     .IsRequired()
+                     .HasMaxLength(20);
+
+            builder.Property(o => o.OrdererEmail)
+                        .IsRequired()
+                        .HasMaxLength(50);
+
             builder.HasOne(o => o.Member)
                    .WithMany(m => m.Orders)
                    .HasForeignKey(o => o.MemberId)

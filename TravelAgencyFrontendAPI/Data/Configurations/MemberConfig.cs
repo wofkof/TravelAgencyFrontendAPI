@@ -119,6 +119,29 @@ namespace TravelAgencyFrontendAPI.Data.Configurations
                    .HasColumnType("datetime")
                    .HasDefaultValueSql("GETDATE()")
                    .IsRequired(false);
+
+            builder.Property(m => m.ProfileImage)
+                   .HasMaxLength(100)
+                   .IsUnicode(true)
+                   .IsRequired(false);
+
+            builder.Property(m => m.IsCustomAvatar)
+                   .HasDefaultValue(false)
+                   .IsRequired();
+
+            builder.Property(m => m.EmailVerificationCode)
+                   .HasMaxLength(20)
+                   .IsUnicode(true)
+                   .IsRequired(false);
+
+            builder.Property(m => m.EmailVerificationExpireTime)
+                   .HasColumnType("datetime")
+                   .IsRequired(false);
+
+            builder.Property(m => m.IsEmailVerified)
+                   .HasDefaultValue(false)
+                   .IsRequired();
+
         }
     }
 }

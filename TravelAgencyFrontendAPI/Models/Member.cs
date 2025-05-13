@@ -47,6 +47,12 @@ namespace TravelAgencyFrontendAPI.Models
         public string? Note { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public DateTime? DeletedAt { get; set; }
+        public string? ProfileImage { get; set; }
+        public bool IsCustomAvatar { get; set; } = false;
+        public string? EmailVerificationCode { get; set; }
+        public DateTime? EmailVerificationExpireTime { get; set; }
+        public bool IsEmailVerified { get; set; } = false;
+
 
         public ICollection<Order> Orders { get; set; } = new List<Order>();
         public ICollection<MemberFavoriteTraveler> MemberFavoriteTravelers { get; set; } = new List<MemberFavoriteTraveler>();
