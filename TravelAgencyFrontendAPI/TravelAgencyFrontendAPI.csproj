@@ -17,7 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DTOs\OfficialDTOs\SearchDTOs\" />
     <Folder Include="Migrations\" />
     <Folder Include="wwwroot\Uploads\chat\" />
   </ItemGroup>
