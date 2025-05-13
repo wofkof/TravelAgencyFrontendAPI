@@ -135,8 +135,8 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
 
             return Ok(new
             {
-                name = member.Name
-                
+                name = member.Name,
+                id = member.MemberId
             });
         }
 
