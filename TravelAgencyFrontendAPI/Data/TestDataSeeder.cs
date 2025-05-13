@@ -24,6 +24,7 @@ namespace TravelAgencyFrontendAPI.Data
             await SeedRestaurantAsync();
             await SeedAccommodationAsync();
             await SeedTransportAsync();
+            await SeedRegionAsync();
             await SeedCustomTravelAsync();
             await SeedCustomTravelContentAsync();
         }
@@ -248,6 +249,25 @@ namespace TravelAgencyFrontendAPI.Data
             }
         }
 
+        private async Task SeedRegionAsync()
+        {
+            if (!_context.Regions.Any())
+            {
+                _context.Regions.AddRange(
+                    new Region { Country = "日本",Name = "北海道" },
+                    new Region { Country = "日本", Name = "東北" },
+                    new Region { Country = "日本", Name = "關東" },
+                    new Region { Country = "日本", Name = "沖繩" },
+                    new Region { Country = "日本", Name = "近畿" },
+                    new Region { Country = "日本", Name = "中國" },
+                    new Region { Country = "日本", Name = "四國" },
+                    new Region { Country = "日本", Name = "九州" },
+                    new Region { Country = "日本", Name = "中部" }
+                );
+              await _context.SaveChangesAsync();
+             }
+         }
+      
         private async Task SeedCustomTravelAsync()
         {
             if (!_context.CustomTravels.Any())
@@ -308,8 +328,7 @@ namespace TravelAgencyFrontendAPI.Data
                         TotalAmount = 20000,
                         Status = CustomTravelStatus.Rejected,
                         Note = "測試行程3",
-                    }
-                    );
+                    });
                 await _context.SaveChangesAsync();
             }
         }
