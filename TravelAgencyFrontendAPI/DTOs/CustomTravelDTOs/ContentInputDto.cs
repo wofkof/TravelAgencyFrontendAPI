@@ -1,16 +1,13 @@
 ﻿using TravelAgencyFrontendAPI.Models;
-using TravelAgencyFrontendAPI.Extensions;
 
 namespace TravelAgencyFrontendAPI.DTOs.CustomTravelDTOs
-{    
-    public class CustomTravelContentDto
+{
+    public class ContentInputDto
     {
         public int CustomTravelId { get; set; }
 
         public int ItemId { get; set; }
-        public string ItemName { get; set; }
         public TravelItemCategory Category { get; set; }
-        public string CategoryText => Category.TurnChinese();
 
         public int Day { get; set; }
         public string Time { get; set; }

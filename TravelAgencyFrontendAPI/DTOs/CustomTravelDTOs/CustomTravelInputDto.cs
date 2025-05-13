@@ -1,8 +1,8 @@
 ﻿using TravelAgencyFrontendAPI.Models;
-using TravelAgencyFrontendAPI.Extensions;
+
 namespace TravelAgencyFrontendAPI.DTOs.CustomTravelDTOs
-{   
-    public class CustomTravelDto
+{
+    public class CustomTravelInputDto
     {
         public int CustomTravelId { get; set; }
         public int MemberId { get; set; }
@@ -18,8 +18,7 @@ namespace TravelAgencyFrontendAPI.DTOs.CustomTravelDTOs
         public decimal TotalAmount { get; set; }
 
         public CustomTravelStatus Status { get; set; }
-        public string StatusText => Status.ToChinese();
         public string? Note { get; set; }
-        public List<CustomTravelContentDto> Contents { get; set; } = new();
+        public List<ContentInputDto> Contents { get; set; } = new();
     }
 }
