@@ -7,6 +7,7 @@ using TravelAgencyFrontendAPI.DTOs.MemberDTOs;
 using TravelAgencyFrontendAPI.Models;
 using TravelAgencyFrontendAPI.Helpers;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json.Linq;
 
 
 
@@ -28,10 +29,17 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
         {
             bool hasError = false;
 
+            // 姓名格式驗證
+            if (!IsValidName(dto.Name))
+            {
+                ModelState.AddModelError("Name", "姓名格式錯誤，僅能包含中英文，且不可含數字或特殊符號");
+                hasError = true;
+            }
+
             // 密碼驗證
             if (!IsValidPassword(dto.Password))
             {
-                ModelState.AddModelError("Password", "密碼格式不正確（需包含大、小寫英文與特殊符號，長度6-12字元）");
+                ModelState.AddModelError("Password", "密碼格式不正確（需設定長度6~12位數，且包含大、小寫英文的密碼）");
                 hasError = true;
             }
 
@@ -47,10 +55,15 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 hasError = true;
             }
 
-            // 手機格式驗證
+            // 手機格式驗證 + 重複驗證
             if (!IsValidPhone(dto.Phone))
             {
                 ModelState.AddModelError("Phone", "手機號碼格式錯誤，需為09開頭的10碼數字");
+                hasError = true;
+            }
+            else if (await _context.Members.AnyAsync(m => m.Phone == dto.Phone))
+            {
+                ModelState.AddModelError("Phone", "此手機號碼已被使用");
                 hasError = true;
             }
 
@@ -76,13 +89,18 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
             _context.Members.Add(member);
             await _context.SaveChangesAsync();
 
-            return Ok("註冊成功");
+            return Ok("註冊成功，確定後將跳轉回登入頁");
         }
 
         // ==== 驗證封裝區塊 ====
+        private bool IsValidName(string name)
+        {
+            return Regex.IsMatch(name, @"^[\u4e00-\u9fa5a-zA-Z\s]{2,30}$");
+        }
+
         private bool IsValidPassword(string password)
         {
-            return Regex.IsMatch(password, @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{6,12}$");
+            return Regex.IsMatch(password, @"^(?=.*[a-z])(?=.*[A-Z]).{6,12}$");
         }
 
         private bool IsValidEmail(string email)
@@ -115,7 +133,11 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 return Unauthorized("帳號或密碼錯誤");
             }
 
-            return Ok("登入成功");
+            return Ok(new
+            {
+                name = member.Name
+                
+            });
         }
 
     }
