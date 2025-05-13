@@ -367,7 +367,219 @@ namespace TravelAgencyFrontendAPI.Data
             }
         }
 
-        
+        private async Task SeedOfficialTravelAsync()
+        {
+            if (!_context.OfficialTravels.Any())
+            {
+                _context.OfficialTravels.AddRange(
+                    new OfficialTravel
+                    {
+                        CreatedByEmployeeId = _context.Employees.First().EmployeeId,
+                        RegionId = _context.Regions.First().RegionId,
+                        ItemId = 1,
+                        Category = TravelCategory.Foreign,
+                        Title = "國外旅行專案標題",
+                        AvailableFrom = new DateTime(2025,4,10),
+                        AvailableUntil = new DateTime(2025,8,10),
+                        Description = "這是國外旅行專案",
+                        TotalTravelCount = 1,
+                        TotalDepartureCount = 10,
+                        Days = 7,
+                        CoverPath = null,
+                        CreatedAt = new DateTime(2024,8,11),
+                        UpdatedAt = new DateTime(2025,1,5),
+                        Status = TravelStatus.Active
+                    },
+                    new OfficialTravel 
+                    {
+                        CreatedByEmployeeId = _context.Employees.First().EmployeeId,
+                        RegionId = _context.Regions.First().RegionId,
+                        ItemId = 1,
+                        Category = TravelCategory.Domestic,
+                        Title = "國內旅行專案標題",
+                        AvailableFrom = new DateTime(2025, 4, 10),
+                        AvailableUntil = new DateTime(2025, 8, 10),
+                        Description = "這是國內旅行專案",
+                        TotalTravelCount = 1,
+                        TotalDepartureCount = 10,
+                        Days = 7,
+                        CoverPath = null,
+                        CreatedAt = new DateTime(2024, 8, 11),
+                        UpdatedAt = new DateTime(2025, 1, 5),
+                        Status = TravelStatus.Active
+                    },
+                    new OfficialTravel
+                    {
+                        CreatedByEmployeeId = _context.Employees.First().EmployeeId,
+                        RegionId = _context.Regions.First().RegionId,
+                        ItemId = 1,
+                        Category = TravelCategory.CruiseShip,
+                        Title = "郵輪旅行專案標題",
+                        AvailableFrom = new DateTime(2025, 4, 10),
+                        AvailableUntil = new DateTime(2025, 8, 10),
+                        Description = "這是郵輪旅行專案",
+                        TotalTravelCount = 1,
+                        TotalDepartureCount = 10,
+                        Days = 7,
+                        CoverPath = null,
+                        CreatedAt = new DateTime(2024, 8, 11),
+                        UpdatedAt = new DateTime(2025, 1, 5),
+                        Status = TravelStatus.Active
+                    },
+                    new OfficialTravel
+                    {
+                        CreatedByEmployeeId = _context.Employees.First().EmployeeId,
+                        RegionId = _context.Regions.First().RegionId,
+                        ItemId = 1,
+                        Category = TravelCategory.Foreign,
+                        Title = "國外旅行專案標題[隱藏]",
+                        AvailableFrom = new DateTime(2025, 4, 10),
+                        AvailableUntil = new DateTime(2025, 8, 10),
+                        Description = "這是隱藏的國外旅行專案，你不應該看見它",
+                        TotalTravelCount = 1,
+                        TotalDepartureCount = 10,
+                        Days = 7,
+                        CoverPath = null,
+                        CreatedAt = new DateTime(2024, 8, 11),
+                        UpdatedAt = new DateTime(2025, 1, 5),
+                        Status = TravelStatus.Hidden
+                    },
+                    new OfficialTravel
+                    {
+                        CreatedByEmployeeId = _context.Employees.First().EmployeeId,
+                        RegionId = _context.Regions.First().RegionId,
+                        ItemId = 1,
+                        Category = TravelCategory.Foreign,
+                        Title = "國外旅行專案標題[刪除]",
+                        AvailableFrom = new DateTime(2025, 4, 10),
+                        AvailableUntil = new DateTime(2025, 8, 10),
+                        Description = "這是刪除的國外旅行專案，你不應該看見它",
+                        TotalTravelCount = 1,
+                        TotalDepartureCount = 10,
+                        Days = 7,
+                        CoverPath = null,
+                        CreatedAt = new DateTime(2024, 8, 11),
+                        UpdatedAt = new DateTime(2025, 1, 5),
+                        Status = TravelStatus.Deleted
+                    },
+                    new OfficialTravel
+                    {
+                        CreatedByEmployeeId = _context.Employees.First().EmployeeId,
+                        RegionId = _context.Regions.First().RegionId,
+                        ItemId = 1,
+                        Category = TravelCategory.Domestic,
+                        Title = "國內旅行專案標題[隱藏]",
+                        AvailableFrom = new DateTime(2025, 4, 10),
+                        AvailableUntil = new DateTime(2025, 8, 10),
+                        Description = "這是隱藏的國內旅行專案，你不應該看見它",
+                        TotalTravelCount = 1,
+                        TotalDepartureCount = 10,
+                        Days = 7,
+                        CoverPath = null,
+                        CreatedAt = new DateTime(2024, 8, 11),
+                        UpdatedAt = new DateTime(2025, 1, 5),
+                        Status = TravelStatus.Hidden
+                    },
+                    new OfficialTravel 
+                    {
+                        CreatedByEmployeeId = _context.Employees.First().EmployeeId,
+                        RegionId = _context.Regions.First().RegionId,
+                        ItemId = 1,
+                        Category = TravelCategory.Domestic,
+                        Title = "國內旅行專案標題[刪除]",
+                        AvailableFrom = new DateTime(2025, 4, 10),
+                        AvailableUntil = new DateTime(2025, 8, 10),
+                        Description = "這是刪除的國內旅行專案，你不應該看見它",
+                        TotalTravelCount = 1,
+                        TotalDepartureCount = 10,
+                        Days = 7,
+                        CoverPath = null,
+                        CreatedAt = new DateTime(2024, 8, 11),
+                        UpdatedAt = new DateTime(2025, 1, 5),
+                        Status = TravelStatus.Deleted
+                    },
+                    new OfficialTravel 
+                    {
+                        CreatedByEmployeeId = _context.Employees.First().EmployeeId,
+                        RegionId = _context.Regions.First().RegionId,
+                        ItemId = 1,
+                        Category = TravelCategory.CruiseShip,
+                        Title = "郵輪旅行專案標題[隱藏]",
+                        AvailableFrom = new DateTime(2025, 4, 10),
+                        AvailableUntil = new DateTime(2025, 8, 10),
+                        Description = "這是隱藏的郵輪旅行專案，你不應該看見它",
+                        TotalTravelCount = 1,
+                        TotalDepartureCount = 10,
+                        Days = 7,
+                        CoverPath = null,
+                        CreatedAt = new DateTime(2024, 8, 11),
+                        UpdatedAt = new DateTime(2025, 1, 5),
+                        Status = TravelStatus.Hidden
+                    },
+                    new OfficialTravel
+                    {
+                        CreatedByEmployeeId = _context.Employees.First().EmployeeId,
+                        RegionId = _context.Regions.First().RegionId,
+                        ItemId = 1,
+                        Category = TravelCategory.CruiseShip,
+                        Title = "郵輪旅行專案標題[刪除]",
+                        AvailableFrom = new DateTime(2025, 4, 10),
+                        AvailableUntil = new DateTime(2025, 8, 10),
+                        Description = "這是刪除的郵輪旅行專案，你不應該看見它",
+                        TotalTravelCount = 1,
+                        TotalDepartureCount = 10,
+                        Days = 7,
+                        CoverPath = null,
+                        CreatedAt = new DateTime(2024, 8, 11),
+                        UpdatedAt = new DateTime(2025, 1, 5),
+                        Status = TravelStatus.Deleted
+                    }
+                    );
+                await _context.SaveChangesAsync();
+            }
+        }
 
-    }
+        private async Task SeedOfficialTravelDetailAsync()
+        {
+            if (!_context.OfficialTravelDetails.Any())
+            {
+                var ForeigntravelId = _context.OfficialTravels.FirstOrDefault(f => f.Category == TravelCategory.Foreign && f.Status == TravelStatus.Active).OfficialTravelId;
+                var DomestictravelId = _context.OfficialTravels.FirstOrDefault(f => f.Category == TravelCategory.Domestic && f.Status == TravelStatus.Active).OfficialTravelId;
+                var CruisetravelId = _context.OfficialTravels.FirstOrDefault(f => f.Category == TravelCategory.CruiseShip && f.Status == TravelStatus.Active).OfficialTravelId;
+                _context.OfficialTravelDetails.AddRange(
+                    new OfficialTravelDetail
+                    {
+                        OfficialTravelId = ForeigntravelId,
+                        TravelNumber = 1,
+                        AdultPrice = 10000,
+                        ChildPrice = 5000,
+                        BabyPrice = 0,
+                        UpdatedAt = new DateTime(2025, 1, 5),
+                        State = DetailState.Locked
+                    },
+                    new OfficialTravelDetail
+                    {
+                        OfficialTravelId = DomestictravelId,
+                        TravelNumber = 1,
+                        AdultPrice = 10000,
+                        ChildPrice = 5000,
+                        BabyPrice = 0,
+                        UpdatedAt = new DateTime(2025, 1, 5),
+                        State = DetailState.Locked
+                    },
+                    new OfficialTravelDetail
+                    {
+                        OfficialTravelId = CruisetravelId,
+                        TravelNumber = 1,
+                        AdultPrice = 10000,
+                        ChildPrice = 5000,
+                        BabyPrice = 0,
+                        UpdatedAt = new DateTime(2025, 1, 5),
+                        State = DetailState.Locked
+                    }
+                    );
+                await _context.SaveChangesAsync();
+            }
+        }
+    }   
 }
