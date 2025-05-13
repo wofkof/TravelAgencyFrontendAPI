@@ -31,6 +31,8 @@ namespace TravelAgencyFrontendAPI.Data
             await SeedOfficialAttractionAsync();
             await SeedOfficialTravelAsync();
             await SeedOfficialTravelDetailAsync();
+            await SeedOfficialTravelScheduleAsync();
+            await SeedGroupTravelAsync();
         }
 
         private async Task SeedRolesAsync()
