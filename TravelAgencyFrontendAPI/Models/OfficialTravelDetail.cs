@@ -19,6 +19,9 @@
         public DetailState? State { get; set; }
 
         public OfficialTravel OfficialTravel { get; set; }
+
+        public ICollection<GroupTravel> GroupTravels { get; set; } = new List<GroupTravel>();
+
     }
 
 }
