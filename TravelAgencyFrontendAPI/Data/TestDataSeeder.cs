@@ -25,6 +25,7 @@ namespace TravelAgencyFrontendAPI.Data
             await SeedAccommodationAsync();
             await SeedTransportAsync();
             await SeedRegionAsync();
+<<<<<<< HEAD
             await SeedTravelSupplierAsync();
             await SeedOfficialAccommodationAsync();
             await SeedOfficialRestaurantAsync();
@@ -33,6 +34,10 @@ namespace TravelAgencyFrontendAPI.Data
             await SeedOfficialTravelDetailAsync();
             await SeedOfficialTravelScheduleAsync();
             await SeedGroupTravelAsync();
+=======
+            await SeedCustomTravelAsync();
+            await SeedCustomTravelContentAsync();
+>>>>>>> 51d653704506939844835859078ecdd13aac146a
         }
 
         private async Task SeedRolesAsync()
@@ -260,7 +265,11 @@ namespace TravelAgencyFrontendAPI.Data
             if (!_context.Regions.Any())
             {
                 _context.Regions.AddRange(
+<<<<<<< HEAD
                     new Region { Country = "日本", Name = "北海道" },
+=======
+                    new Region { Country = "日本",Name = "北海道" },
+>>>>>>> 51d653704506939844835859078ecdd13aac146a
                     new Region { Country = "日本", Name = "東北" },
                     new Region { Country = "日本", Name = "關東" },
                     new Region { Country = "日本", Name = "沖繩" },
@@ -269,11 +278,77 @@ namespace TravelAgencyFrontendAPI.Data
                     new Region { Country = "日本", Name = "四國" },
                     new Region { Country = "日本", Name = "九州" },
                     new Region { Country = "日本", Name = "中部" }
-                    );
+                );
+              await _context.SaveChangesAsync();
+             }
+         }
+      
+        private async Task SeedCustomTravelAsync()
+        {
+            if (!_context.CustomTravels.Any())
+            {
+                _context.CustomTravels.AddRange(
+                    new CustomTravel 
+                    { 
+                        MemberId = _context.Members.First().MemberId,
+                        ReviewEmployeeId =_context.Employees.First().EmployeeId,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now,
+                        DepartureDate = DateTime.Parse("2025-05-11"),
+                        EndDate = DateTime.Parse("2025-05-13"),
+                        Days = 3,
+                        People = 3,
+                        TotalAmount = 30000,
+                        Status = CustomTravelStatus.Pending,
+                        Note = "測試行程",
+                    },
+                    new CustomTravel
+                    {
+                        MemberId = _context.Members.First().MemberId,
+                        ReviewEmployeeId = _context.Employees.First().EmployeeId,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now,
+                        DepartureDate = DateTime.Parse("2025-06-11"),
+                        EndDate = DateTime.Parse("2025-06-12"),
+                        Days = 2,
+                        People = 3,
+                        TotalAmount = 20000,
+                        Status = CustomTravelStatus.Approved,
+                        Note = "測試行程1",
+                    },
+                    new CustomTravel
+                    {
+                        MemberId = _context.Members.First().MemberId,
+                        ReviewEmployeeId = _context.Employees.First().EmployeeId,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now,
+                        DepartureDate = DateTime.Parse("2025-05-11"),
+                        EndDate = DateTime.Parse("2025-05-11"),
+                        Days = 1,
+                        People = 2,
+                        TotalAmount = 10000,
+                        Status = CustomTravelStatus.Completed,
+                        Note = "測試行程2",
+                    },
+                    new CustomTravel
+                    {
+                        MemberId = _context.Members.First().MemberId,
+                        ReviewEmployeeId = _context.Employees.First().EmployeeId,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now,
+                        DepartureDate = DateTime.Parse("2025-05-13"),
+                        EndDate = DateTime.Parse("2025-05-13"),
+                        Days = 1,
+                        People = 3,
+                        TotalAmount = 20000,
+                        Status = CustomTravelStatus.Rejected,
+                        Note = "測試行程3",
+                    });
                 await _context.SaveChangesAsync();
             }
         }
 
+<<<<<<< HEAD
         private async Task SeedTravelSupplierAsync()
         {
             if (!_context.TravelSuppliers.Any())
@@ -722,11 +797,81 @@ namespace TravelAgencyFrontendAPI.Data
                         Attraction5 = null,
                         Note1 = "這是郵輪旅行行程第二天的備註1",
                         Note2 = "這是郵輪旅行行程第二天的備註2"
+=======
+        private async Task SeedCustomTravelContentAsync()
+        {
+            if (!_context.CustomTravelContents.Any())
+            {
+                _context.CustomTravelContents.AddRange(
+                    new CustomTravelContent
+                    {
+                        CustomTravelId = _context.CustomTravels.First().CustomTravelId,
+                        ItemId = _context.Restaurants.First().RestaurantId,
+                        Category = TravelItemCategory.Restaurant,
+                        Day = 1,
+                        Time = "11:00",
+                        AccommodationName = "測試"
+                    },
+                    new CustomTravelContent
+                    {
+                        CustomTravelId = _context.CustomTravels.First().CustomTravelId,
+                        ItemId = _context.Attractions.First().AttractionId,
+                        Category = TravelItemCategory.Attraction,
+                        Day = 2,
+                        Time = "13:00",
+                        AccommodationName = "測試1"
+                    },
+                    new CustomTravelContent
+                    {
+                        CustomTravelId = _context.CustomTravels.First().CustomTravelId,
+                        ItemId = _context.Accommodations.First().AccommodationId,
+                        Category = TravelItemCategory.Accommodation,
+                        Day = 3,
+                        Time = "12:00",
+                        AccommodationName = "測試2"
+                    },
+                    new CustomTravelContent
+                    {
+                        CustomTravelId = _context.CustomTravels.Skip(1).First().CustomTravelId,
+                        ItemId = _context.Transports.First().TransportId,
+                        Category = TravelItemCategory.Transport,
+                        Day = 1,
+                        Time = "12:00",
+                        AccommodationName = "1測試"
+                    },
+                    new CustomTravelContent
+                    {
+                        CustomTravelId = _context.CustomTravels.Skip(1).First().CustomTravelId,
+                        ItemId = _context.Accommodations.First().AccommodationId,
+                        Category = TravelItemCategory.Accommodation,
+                        Day = 2,
+                        Time = "12:00",
+                        AccommodationName = "1測試1"
+                    },
+                    new CustomTravelContent
+                    {
+                        CustomTravelId = _context.CustomTravels.Skip(2).First().CustomTravelId,
+                        ItemId = _context.Restaurants.First().RestaurantId,
+                        Category = TravelItemCategory.Restaurant,
+                        Day = 1,
+                        Time = "12:00",
+                        AccommodationName = "2測試"
+                    },
+                    new CustomTravelContent
+                    {
+                        CustomTravelId = _context.CustomTravels.Skip(3).First().CustomTravelId,
+                        ItemId = _context.Accommodations.First().AccommodationId,
+                        Category = TravelItemCategory.Accommodation,
+                        Day = 1,
+                        Time = "12:00",
+                        AccommodationName = "3測試"
+>>>>>>> 51d653704506939844835859078ecdd13aac146a
                     }
                     );
                 await _context.SaveChangesAsync();
             }
         }
+<<<<<<< HEAD
 
         private async Task SeedGroupTravelAsync()
         {
@@ -783,5 +928,7 @@ namespace TravelAgencyFrontendAPI.Data
                 await _context.SaveChangesAsync();
             }
         }
+=======
+>>>>>>> 51d653704506939844835859078ecdd13aac146a
     }
 }
