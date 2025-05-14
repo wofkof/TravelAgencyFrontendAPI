@@ -16,8 +16,6 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
         [HttpPost("search")]
         public async Task<IEnumerable<SearchBoxResultDTO>> Search([FromBody] SearchBoxInputDTO searchBoxInput)
         {
-                
-
             return _context.OfficialTravels
                 .Where(t => t.Title.Contains(searchBoxInput.Destination) || t.Description.Contains(searchBoxInput.Destination) && t.Status == TravelStatus.Active)
                 .Select(t => new SearchBoxResultDTO
