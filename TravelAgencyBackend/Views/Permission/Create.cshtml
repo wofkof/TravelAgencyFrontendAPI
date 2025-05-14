@@ -1,0 +1,48 @@
+﻿@model TravelAgencyBackend.ViewModels.PermissionViewModel
+
+@{
+    ViewData["Title"] = "新增權限";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label asp-for="PermissionName" class="form-label"></label>
+        <input asp-for="PermissionName" class="form-control" />
+        <span asp-validation-for="PermissionName" class="text-danger"></span>
+    </div>
+
+    <div>
+        <label asp-for="Caption" class="form-label"></label>
+        <textarea asp-for="Caption" class="form-control" placeholder="請填寫權限說明" rows="10"></textarea>
+        <span asp-validation-for="Caption" class="text-danger"></span>
+    </div>
+
+    @if (PermissionChecker.CanManagePermissions)
+    {
+        <button type="submit" class="btn btn-primary">儲存</button>
+    }
+    else
+    {
+        <button type="submit" class="btn btn-primary disabled"
+        tabindex="-1" aria-disabled="true" onclick="return false;">
+            儲存
+        </button>
+    }
+    @if (PermissionChecker.CanManagePermissions)
+    {
+        <a asp-action="Index" class="btn btn-secondary">返回</a>
+    }
+    else
+    {
+        <a asp-action="Index" class="btn btn-secondary disabled"
+           tabindex="-1" aria-disabled="true" onclick="return false;">
+        返回
+        </a>
+    }
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

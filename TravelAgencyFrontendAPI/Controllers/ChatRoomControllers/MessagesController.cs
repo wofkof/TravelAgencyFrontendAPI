@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using TravelAgencyFrontendAPI.Data;
 using TravelAgencyFrontendAPI.DTOs.ChatRoomDTOs;
 using TravelAgencyFrontendAPI.Hubs;
-using TravelAgencyFrontendAPI.Models;
+using TravelAgency.Shared.Data;
+using TravelAgency.Shared.Models;
+
 
 namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
 {

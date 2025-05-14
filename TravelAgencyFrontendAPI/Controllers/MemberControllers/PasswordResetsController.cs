@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TravelAgencyFrontendAPI.Data;
-using TravelAgencyFrontendAPI.Models;
 using System.Security.Cryptography;
 using System.Text;
 using TravelAgencyFrontendAPI.Helpers;
+using TravelAgency.Shared.Data;
+using TravelAgency.Shared.Models;
 
 //using Microsoft.AspNetCore.Identity;
 using TravelAgencyFrontendAPI.DTOs.MemberDTOs;

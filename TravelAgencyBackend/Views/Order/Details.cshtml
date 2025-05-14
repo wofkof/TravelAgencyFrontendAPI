@@ -1,0 +1,128 @@
+﻿@model TravelAgencyBackend.ViewModels.Order.OrderDetailsViewModel
+@using TravelAgencyBackend.Models 
+
+@{
+    ViewData["Title"] = "訂單詳細資料"; // 將 Title 改為中文
+}
+
+<h1 class="text-center mb-4">訂單詳細資料</h1>
+
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h4 class="my-0 fw-normal">訂單資訊</h4>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.OrderId)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.OrderId)
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.MemberId)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Member.Name) 
+            </dd>
+
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.ItemName) 
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.ItemName) 
+            </dd>
+
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Category)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Category)
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.ParticipantId) 
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Participant.Name) 
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.CreatedAt)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.CreatedAt)
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.ParticipantsCount)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.ParticipantsCount)
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.TotalAmount)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.TotalAmount)
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Status)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Status)
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.PaymentMethod)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.PaymentMethod)
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.PaymentDate)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.PaymentDate)
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Note)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Note)
+            </dd>
+        </dl>
+    </div>
+    <div class="card-footer text-center bg-light">
+        @if (PermissionChecker.CanManageOrders)
+        {
+            <a asp-action="Edit" asp-route-id="@Model?.OrderId" class="btn btn-primary">編輯</a>
+        }
+        else
+        {
+            <a asp-action="Edit" asp-route-id="@Model?.OrderId" class="btn btn-primary disabled"
+            tabindex="-1" aria-disabled="true" onclick="return false;">
+                編輯
+            </a>
+        }
+        |
+        @if (PermissionChecker.CanViewOrders)
+        {
+            <a asp-action="Index" class="btn btn-secondary">返回列表</a>
+        }
+        else
+        {
+            <a asp-action="Index" class="btn btn-secondary disabled"
+               tabindex="-1" aria-disabled="true" onclick="return false;">
+            返回列表
+            </a>
+        }
+    </div>
+</div>

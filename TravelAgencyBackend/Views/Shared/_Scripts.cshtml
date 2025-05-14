@@ -1,0 +1,21 @@
+﻿<!-- ArchitectUI JS -->
+<script src="~/assets/scripts/main.js" defer></script>
+<script src="~/assets/scripts/demo.js" defer></script>
+<script src="~/assets/scripts/toastr.js" defer></script>
+<script src="~/assets/scripts/scrollbar.js" defer></script>
+<script src="~/assets/scripts/fullcalendar.js" defer></script>
+<script src="~/assets/scripts/maps.js" defer></script>
+<script src="~/assets/scripts/chart_js.js" defer></script>
+
+<!-- jQuery + Bootstrap -->
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+
+
+<!-- 畫面載入完成後移除 loading class -->
+<script>
+    window.addEventListener('DOMContentLoaded', function () {
+        document.body.classList.remove('loading');
+    });
+</script>

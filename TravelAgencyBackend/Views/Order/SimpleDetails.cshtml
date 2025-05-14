@@ -1,0 +1,68 @@
+﻿    @model TravelAgencyBackend.ViewModels.Order.OrderSimpleDetailsViewModel
+    @using TravelAgencyBackend.Models 
+
+@{
+    ViewData["Title"] = "訂單基本資訊";
+    bool hasOriginInfo = ViewBag.HasOriginInfo ?? false; // 從 ViewBag 取出標記
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.OrderId)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.OrderId)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.MemberName)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.MemberName)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ItemName)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.ItemName)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ParticipantsCount)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.ParticipantsCount)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TotalAmount)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.TotalAmount)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.CreatedAt)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.CreatedAt)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Status)</dt>
+            <dd class="col-sm-9">
+                @* 可以套用狀態樣式 *@
+                @{
+                    string badgeClass = "bg-secondary"; string statusText = Model.Status.ToString();
+                    switch (Model.Status)
+                    {
+                        case OrderStatus.Paid: badgeClass = "bg-success"; statusText = "已付款"; break;
+                        case OrderStatus.Pending: badgeClass = "bg-warning text-dark"; statusText = "待付款"; break; // 假設 Enum 是 Pending
+                        case OrderStatus.Cancelled: badgeClass = "bg-danger"; statusText = "已取消"; break;
+                        default: badgeClass = "bg-info text-dark"; break;
+                    }
+                }
+                <span class="badge @badgeClass">@statusText</span>
+            </dd>
+        </dl>
+    </div>
+    <div class="card-footer bg-light">
+        @* --- 修改返回按鈕邏輯 --- *@
+        @if (PermissionChecker.CanViewOrders)
+        {
+            @if (hasOriginInfo)
+            {
+                // 如果有來源資訊，則返回行程統計詳細頁面
+                <a asp-controller="TravelRecord" asp-action="Details"
+                   asp-route-itemId="@ViewBag.OriginItemId"
+                   asp-route-category="@ViewBag.OriginCategory"
+                   class="btn btn-secondary">返回行程訂單列表</a> @* 修改按鈕文字 *@
+            }
+            else
+            {
+                // 否則，提供返回一般訂單列表的連結
+                <a asp-controller="Order" asp-action="Index" class="btn btn-secondary">返回訂單列表</a>
+            }
+        }
+    </div>
+</div>

@@ -1,0 +1,102 @@
+﻿@model TravelAgencyBackend.Models.OfficialTravelDetail
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>新增行程</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="OfficialTravelId" class="control-label"></label>
+                <select asp-for="OfficialTravelId" class ="form-control" asp-items="ViewBag.OfficialTravelId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="FlightId" class="control-label"></label>
+                <select asp-for="FlightId" class ="form-control" asp-items="ViewBag.FlightId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="DepartureDate" class="control-label"></label>
+                <input asp-for="DepartureDate" class="form-control" />
+                <span asp-validation-for="DepartureDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ReturnDate" class="control-label"></label>
+                <input asp-for="ReturnDate" class="form-control" />
+                <span asp-validation-for="ReturnDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Price" class="control-label"></label>
+                <input asp-for="Price" class="form-control" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Seats" class="control-label"></label>
+                <input asp-for="Seats" class="form-control" />
+                <span asp-validation-for="Seats" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SoldSeats" class="control-label"></label>
+                <input asp-for="SoldSeats" class="form-control" />
+                <span asp-validation-for="SoldSeats" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="MinimumGroupSize" class="control-label"></label>
+                <input asp-for="MinimumGroupSize" class="form-control" />
+                <span asp-validation-for="MinimumGroupSize" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="BookingDeadline" class="control-label"></label>
+                <input asp-for="BookingDeadline" class="form-control" />
+                <span asp-validation-for="BookingDeadline" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="GroupStatus" class="control-label"></label>
+                <select asp-for="GroupStatus" class="form-control" asp-items="Html.GetEnumSelectList<GroupStatus>()"></select>
+                <span asp-validation-for="GroupStatus" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CreatedAt" class="control-label"></label>
+                <input asp-for="CreatedAt" class="form-control" />
+                <span asp-validation-for="CreatedAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="UpdatedAt" class="control-label"></label>
+                <input asp-for="UpdatedAt" class="form-control" />
+                <span asp-validation-for="UpdatedAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                @if (PermissionChecker.CanManageOfficialTravels)
+                {
+                    <input type="submit" value="新增" class="btn btn-primary" />
+                }
+                else
+                {
+                    <input type="submit" value="新增" class="btn btn-primary disabled"
+                    tabindex="-1" aria-disabled="true" onclick="return false;" />
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    @if (PermissionChecker.CanViewOfficialTravels)
+    {
+        <a asp-action="Index">回到行程目錄</a>
+    }
+    else
+    {
+        <a asp-action="Index" class="disabled"
+           tabindex="-1" aria-disabled="true" onclick="return false;">
+        回到行程目錄
+        </a>
+    }
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

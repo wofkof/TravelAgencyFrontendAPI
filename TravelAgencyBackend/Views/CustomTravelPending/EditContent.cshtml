@@ -1,0 +1,188 @@
+﻿@model TravelAgencyBackend.ViewModels.CustomTravelPendingViewModel 
+
+@{
+    ViewData["Title"] = "EditContent";
+}
+
+<h2>修改行程內容</h2>
+
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="EditContent" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="EditContent.ContentId" />
+            <div class="form-group">
+                <label asp-for="EditContent.CustomTravelId" class="control-label"></label>
+                <input asp-for="EditContent.CustomTravelId" class="form-control" readonly />
+                <span asp-validation-for="EditContent.CustomTravelId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SelectedCityId" class="control-label">縣市</label>
+                <select asp-for="SelectedCityId" class="form-select">
+                    <option selected disabled value="">請選擇縣市</option>
+                    @foreach (var t in Model.City)
+                    {
+                        <option value="@t.CityId">@t.CityName</option>
+                    }
+
+                </select>
+                <label asp-for="SelectedDistrictId" class="control-label">區</label>
+                <select asp-for="SelectedDistrictId" class="form-select">
+                    <option selected disabled value="">請選擇區</option>
+                    @foreach (var t in Model.District)
+                    {
+                        <option value="@t.DistrictId" data-city="@t.CityId">@t.DistrictName</option>
+                    }
+
+                </select>
+                <span asp-validation-for="SelectedDistrictId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EditContent.Category" class="control-label"></label>
+                <select asp-for="EditContent.Category"
+                asp-items="Html.GetEnumSelectList<Category>()"
+                class="form-select d-inline w-auto mx-2" id="EditContent_Category">
+                </select>
+                <span asp-validation-for="EditContent.Category" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EditContent.ItemId" class="control-label"></label>                
+                <select asp-for="EditContent.ItemId" class="form-select" required id="EditContent_ItemId">
+                    @{                        
+                        string itemName = "";
+
+                        switch (Model.EditContent.Category)
+                        {
+                            case Category.Attraction:
+                                itemName = Model.Attraction.FirstOrDefault(a => a.AttractionId == Model.EditContent.ItemId)?.ScenicSpotName;
+                                break;
+                            case Category.Restaurant:
+                                itemName = Model.Restaurant.FirstOrDefault(r => r.RestaurantId == Model.EditContent.ItemId)?.RestaurantName;
+                                break;
+                            case Category.Hotel:
+                                itemName = Model.Hotel.FirstOrDefault(h => h.HotelId == Model.EditContent.ItemId)?.HotelName;
+                                break;
+                            case Category.Transport:
+                                itemName = Model.Transportation.FirstOrDefault(t => t.TransportId == Model.EditContent.ItemId)?.TransportMethod;
+                                break;
+                        }
+                    }                    
+                    <option selected disabled value="">@itemName</option>
+                    @{
+                        foreach (var t in Model.Attraction)
+                        {
+                            <option data-category="3" data-district="@t.DistrictId" value="@t.AttractionId" hidden>@t.ScenicSpotName</option>
+                        }
+
+                        foreach (var t in Model.Restaurant)
+                        {
+                            <option data-category="2" data-district="@t.DistrictId" value="@t.RestaurantId" hidden>@t.RestaurantName</option>
+                        }
+
+                        foreach (var h in Model.Hotel)
+                        {
+                            <option data-category="0" data-district="@h.DistrictId" value="@h.HotelId" hidden>@h.HotelName</option>
+                        }
+
+                        foreach (var t in Model.Transportation)
+                        {
+                            <option data-category="1" value="@t.TransportId" hidden>@t.TransportMethod</option>
+                        }
+
+                    }
+                </select>
+                <span asp-validation-for="EditContent.ItemId" class="text-danger"></span>                
+            </div>
+
+            <div class="form-group">
+                <label asp-for="EditContent.Day" class="control-label"></label>
+                <input asp-for="EditContent.Day" class="form-control" />
+                <span asp-validation-for="EditContent.Day" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EditContent.Time" class="control-label"></label>
+                <input asp-for="EditContent.Time" class="form-control" />
+                <span asp-validation-for="EditContent.Time" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EditContent.HotelName" class="control-label"></label>
+                <input asp-for="EditContent.HotelName" class="form-control" />
+                <span asp-validation-for="EditContent.HotelName" class="text-danger"></span>
+            </div>
+            <div class="mt-4">
+                @if (PermissionChecker.CanManageCustomTravels)
+                {
+                    <input type="submit" value="修改" class="btn btn-primary" />
+                }
+                else
+                {
+                    <input type="submit" value="修改" class="btn btn-primary disabled"
+                    tabindex="-1" aria-disabled="true" onclick="return false;" />
+                }
+                @if (PermissionChecker.CanViewEmployees)
+                {
+                    <a asp-action="ContentList" asp-route-id="@Model.EditContent.CustomTravelId" class="btn btn-secondary">返回</a>
+                }
+                else
+                {
+                    <a asp-action="ContentList" asp-route-id="@Model.EditContent.CustomTravelId" class="btn btn-secondary disabled"
+                       tabindex="-1" aria-disabled="true" onclick="return false;">
+                    返回
+                    </a>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const citySelect = document.getElementById("SelectedCityId");
+        const districtSelect = document.getElementById("SelectedDistrictId");
+                const categorySelect = document.getElementById("EditContent_Category");
+            const itemSelect = document.getElementById("EditContent_ItemId");
+
+            function filterDistrictsByCity() {
+            const selectedCity = citySelect.value;
+            const allDistricts = districtSelect.querySelectorAll('option[data-city]');
+            allDistricts.forEach(opt => {
+                opt.hidden = opt.getAttribute("data-city") !== selectedCity;
+            });
+            districtSelect.value = "";
+        }
+
+        function filterItemsByDistrictAndCategory() {
+            const selectedDistrict = districtSelect.value;
+            const selectedCategory = categorySelect.value;
+
+            const allItems = itemSelect.querySelectorAll('option[data-category]');
+            allItems.forEach(opt => {
+                const categoryMatch = opt.getAttribute("data-category") === selectedCategory;
+                let districtMatch = true;
+                if(selectedCategory !== "1"){
+                    districtMatch = opt.getAttribute("data-district") === selectedDistrict;
+                }
+                opt.hidden = !(categoryMatch && districtMatch);
+            });
+            itemSelect.value = "";
+        }
+
+        citySelect.addEventListener("change", () => {
+            filterDistrictsByCity();
+            filterItemsByDistrictAndCategory(); // 避免地區改變後項目殘留
+        });
+
+        districtSelect.addEventListener("change", filterItemsByDistrictAndCategory);
+        categorySelect.addEventListener("change", filterItemsByDistrictAndCategory);
+
+        // 頁面一進來就初始化一次
+        filterDistrictsByCity();
+        filterItemsByDistrictAndCategory();
+        });
+    </script>
+}

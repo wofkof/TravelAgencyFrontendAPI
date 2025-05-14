@@ -1,0 +1,180 @@
+﻿@model TravelAgencyBackend.ViewModels.Order.OrderEditViewModel
+
+@{
+    ViewData["Title"] = "編輯訂單"; // 頁面標題
+}
+
+<h1 class="text-center mb-4">編輯訂單</h1> 
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+        <form asp-action="Edit" class="needs-validation" novalidate>
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <input type="hidden" asp-for="OrderId" /> 
+
+            <div class="mb-3 row">
+                <label asp-for="MemberId" class="col-sm-3 col-form-label">會員</label> 
+                <div class="col-sm-6">
+                    <select asp-for="MemberId" class="form-select form-select-sm" asp-items="ViewBag.MemberId"></select>
+                    <span asp-validation-for="MemberId" class="text-danger"></span> 
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <label asp-for="Category" class="col-sm-3 col-form-label">類別</label>
+                <div class="col-sm-6">
+                    <select asp-for="Category" class="form-select form-select-sm" asp-items="Html.GetEnumSelectList<TravelAgencyBackend.Models.OrderCategory>()" id="Category"></select> 
+                    <span asp-validation-for="Category" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3 row" id="officialTravelDiv">
+                <label class="col-sm-3 col-form-label">官方行程</label>
+                <div class="col-sm-6">
+                    <select class="form-select form-select-sm" id="officialItemId">
+                        // 下拉式選單
+                        @foreach (var item in Model.OfficialTravels)
+                        {
+                            int itemValueAsInt;
+                            bool isItemValueValidInt = int.TryParse(item.Value.ToString(), out itemValueAsInt);
+
+                            <option value="@item.Value" selected="@(Model.Category == TravelAgencyBackend.Models.OrderCategory.OfficialTravelDetail && isItemValueValidInt && Model.ItemId == itemValueAsInt ? "selected" : null)">@item.Text</option>
+                        }
+                    </select>
+                    <span asp-validation-for="ItemId" class="text-danger"></span> 
+                </div>
+            </div>
+
+            <div class="mb-3 row" id="customTravelDiv" style="display:none;">
+                <label class="col-sm-3 col-form-label">客製化行程</label> 
+                <div class="col-sm-6">
+                    <select class="form-select form-select-sm" id="customItemId">
+                        @foreach (var item in Model.CustomTravels)
+                        {
+                            int itemValueAsInt;
+                            bool isItemValueValidInt = int.TryParse(item.Value.ToString(), out itemValueAsInt);
+
+                            <option value="@item.Value" selected="@(Model.Category == TravelAgencyBackend.Models.OrderCategory.CustomTravel && isItemValueValidInt && Model.ItemId == itemValueAsInt ? "selected" : null)">@item.Text</option>
+                        }
+                    </select>
+                    <span asp-validation-for="ItemId" class="text-danger"></span> 
+                </div>
+            </div>
+
+            <input type="hidden" asp-for="ItemId" id="ItemId" /> 
+
+            <div class="mb-3 row">
+                <label asp-for="ParticipantId" class="col-sm-3 col-form-label">參與者</label> 
+                <div class="col-sm-6">
+                    <select asp-for="ParticipantId" class="form-select form-select-sm" asp-items="ViewBag.ParticipantId"></select> 
+                    <span asp-validation-for="ParticipantId" class="text-danger"></span> 
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <label asp-for="ParticipantsCount" class="col-sm-3 col-form-label">參與人數</label> 
+                <div class="col-sm-6">
+                    <input asp-for="ParticipantsCount" class="form-control form-control-sm" placeholder="請輸入參與人數" /> 
+                    <span asp-validation-for="ParticipantsCount" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <label asp-for="TotalAmount" class="col-sm-3 col-form-label">總金額</label> 
+                <div class="col-sm-6">
+                    <input asp-for="TotalAmount" class="form-control form-control-sm" placeholder="請輸入總金額" /> 
+                    <span asp-validation-for="TotalAmount" class="text-danger"></span> 
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <label asp-for="Status" class="col-sm-3 col-form-label">狀態</label>
+                <div class="col-sm-6">
+                    <select asp-for="Status" class="form-select form-select-sm" asp-items="Html.GetEnumSelectList<TravelAgencyBackend.Models.OrderStatus>()"></select> 
+                    <span asp-validation-for="Status" class="text-danger"></span> 
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <label asp-for="PaymentMethod" class="col-sm-3 col-form-label">付款方式</label> 
+                <div class="col-sm-6">
+                    <select asp-for="PaymentMethod" class="form-select form-select-sm" asp-items="Html.GetEnumSelectList<TravelAgencyBackend.Models.PaymentMethod>()"></select> 
+                    <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-4 row">
+                <label asp-for="PaymentDate" class="col-sm-3 col-form-label">付款日期</label> 
+                <div class="col-sm-6">
+                    <input asp-for="PaymentDate" type="date" class="form-control form-control-sm" /> 
+                    <span asp-validation-for="PaymentDate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-9 offset-sm-3 d-flex align-items-center">
+                    @if (PermissionChecker.CanManageOrders)
+                    {
+                        <button type="submit" class="btn btn-primary me-3">儲存</button>
+                    }
+                    else
+                    {
+                        <button type="submit" class="btn btn-primary me-3 disabled"
+                        tabindex="-1" aria-disabled="true" onclick="return false;">
+                            儲存
+                        </button>
+                    }
+                    @if (PermissionChecker.CanViewOrders)
+                    {
+                        <a asp-action="Index" class="btn btn-secondary">返回列表</a>
+                    }
+                    else
+                    {
+                        <a asp-action="Index" class="btn btn-secondary disabled"
+                           tabindex="-1" aria-disabled="true" onclick="return false;">
+                        返回列表
+                        </a>
+                    }
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial"); // 引入驗證腳本
+    }
+    <script>
+        function updateItemId() {
+            const category = parseInt(document.getElementById('Category').value); // 取得選取的類別
+            const itemIdInput = document.getElementById('ItemId'); // 隱藏的 ItemId 輸入框
+            const official = document.getElementById('officialItemId'); // 官方行程下拉式選單
+            const custom = document.getElementById('customItemId'); // 客製化行程下拉式選單
+
+            if (category === 0) { // 如果選擇的是官方行程 (假設 enum 值為 0)
+                document.getElementById('officialTravelDiv').style.display = 'flex'; // 顯示官方行程下拉式選單
+                document.getElementById('customTravelDiv').style.display = 'none'; // 隱藏客製化行程下拉式選單
+                itemIdInput.value = official.value; // 更新隱藏欄位的值
+            } else if (category === 1) { // 如果選擇的是客製化行程 (假設 enum 值為 1)
+                document.getElementById('officialTravelDiv').style.display = 'none'; // 隱藏官方行程下拉式選單
+                document.getElementById('customTravelDiv').style.display = 'flex'; // 顯示客製化行程下拉式選單
+                itemIdInput.value = custom.value; // 更新隱藏欄位的值
+            } else { // 如果選擇了其他 (理論上不應該發生)
+                document.getElementById('officialTravelDiv').style.display = 'none'; // 隱藏官方行程下拉式選單
+                document.getElementById('customTravelDiv').style.display = 'none'; // 隱藏客製化行程下拉式選單
+                itemIdInput.value = ''; // 清空隱藏欄位的值
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () { // 頁面載入完成後執行
+            document.getElementById('Category').addEventListener('change', updateItemId); // 監聽類別下拉式選單的 change 事件
+            document.getElementById('officialItemId').addEventListener('change', updateItemId); // 監聽官方行程下拉式選單的 change 事件
+            document.getElementById('customItemId').addEventListener('change', updateItemId); // 監聽客製化行程下拉式選單的 change 事件
+            updateItemId(); // 初始呼叫，設定預設值
+        });
+    </script>
+}

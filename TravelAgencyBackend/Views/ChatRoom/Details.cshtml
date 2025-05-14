@@ -1,0 +1,128 @@
+﻿@model TravelAgencyBackend.ViewModels.ChatRoomDetailViewModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>與 @Model.MemberName 的對話</h1>
+
+<div class="mb-3">
+
+    @* 管理聊天室 *@
+    @if (PermissionChecker.CanManageChatRooms)
+    {
+        <a asp-action="Index" class="btn btn-secondary">返回聊天室列表</a>
+    }
+    else
+    {
+        <a asp-action="Index" class="btn btn-secondary disabled"
+        tabindex="-1" aria-disabled="true" onclick="return false">
+            返回聊天室列表
+        </a>
+    }
+</div>
+
+<h4>聊天室</h4>
+
+@if (Model.Status == ChatStatus.Opened)
+{
+    <form asp-action="Close" method="post" class="mb-3">
+        <input type="hidden" name="id" value="@Model.ChatRoomId" />
+
+        @* 管理聊天室 *@
+        @if (PermissionChecker.CanManageChatRooms)
+        {
+            <button type="submit" class="btn btn-warning" onclick="return confirm('確定要關閉聊天室嗎?')">關閉聊天室</button>
+        }
+        else
+        {
+            <button type="submit" class="btn btn-warning disabled"
+            tabindex="-1" aria-disabled="true" onclick="return false">
+                關閉聊天室
+            </button>
+        }
+    </form>
+}
+else
+{
+    <div class="alert alert-secondary">此聊天室已關閉</div>
+}
+
+<hr />
+
+<div id="chatArea" class="border p-3 bg-light mb-4" style="max-height: 400px; overflow-y: auto;">
+    @foreach (var msg in Model.Messages)
+    {
+        <div class="mb-2">
+            <strong>@(msg.SenderType == "Employee" ? "員工" : "會員")：</strong>
+            @msg.Content
+            <div class="text-muted" style="font-size: 0.9em;">
+                @msg.SentAt
+                @if (!msg.IsRead)
+                {
+                    <span class="badge bg-warning text-dark">未讀</span>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<form asp-action="SendMessage" method="post">
+    <input name="ChatRoomId" type="hidden" value="@Model.ChatRoomId" />
+
+    <div class="mb-3">
+        <textarea name="Content" class="form-control" rows="3" required maxlength="500"></textarea>
+    </div>
+
+    @* 管理聊天室 *@
+    @if (PermissionChecker.CanManageChatRooms)
+    {
+        <button type="submit" class="btn btn-primary">送出訊息</button>
+    }
+    else
+    {
+        <button type="submit" class="btn btn-primary disabled"
+        tabindex="-1" aria-disabled="true" onclick="return false">
+        送出訊息
+        </button>
+    }
+</form>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            scrollToBottom();
+        });
+
+        function scrollToBottom() {
+            var chatArea = document.getElementById("chatArea");
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function loadMessages() {
+            $.get('/ChatRoom/GetMessages', { chatRoomId: @Model.ChatRoomId }, function (data) {
+                let html = '';
+                data.forEach(function (msg) {
+                    html += `
+                        <div class="mb-2">
+                            <strong>${msg.sender == "Employee" ? "員工" : "會員"}：</strong>
+                            ${msg.content}
+                            <div class="text-muted" style="font-size: 0.9em;">
+                                ${msg.sentAt}
+                                ${msg.sender == "Employee" && !msg.isRead ? '<span class="badge bg-warning text-dark">未讀</span>' : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                $('#chatArea').html(html);
+            });
+        }
+
+        setInterval(loadMessages, 3000);
+    </script>
+}
+

@@ -1,0 +1,212 @@
+﻿@model TravelAgencyBackend.ViewModels.Order.OrderCreateViewModel
+@using TravelAgencyBackend.Models
+
+@{
+    ViewData["Title"] = "新增訂單";
+}
+
+<h1 class="text-center mb-4">新增訂單</h1>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form asp-action="Create" class="needs-validation" novalidate>
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            @* --- 範例：會員欄位 --- *@
+            <div class="mb-3 row">
+                <label asp-for="MemberId" class="col-sm-3 col-form-label"></label>
+                <div class="col-sm-6">
+                    <select asp-for="MemberId" class="form-select form-select-sm" asp-items="ViewBag.MemberId">
+                        <option value="">-- 請選擇會員 --</option> @* 確保有 value="" 的預設選項 *@
+                    </select>
+                    <span asp-validation-for="MemberId" class="text-danger"></span> @* 確保有驗證訊息標籤 *@
+                </div>
+            </div>
+
+            @* --- 範例：參與人數欄位 --- *@
+            <div class="mb-3 row">
+                <label asp-for="ParticipantsCount" class="col-sm-3 col-form-label"></label>
+                <div class="col-sm-6">
+                    <input asp-for="ParticipantsCount" class="form-control form-control-sm" placeholder="請輸入參與人數" />
+                    <span asp-validation-for="ParticipantsCount" class="text-danger"></span> @* 確保有驗證訊息標籤 *@
+                </div>
+            </div>
+
+            @* --- 範例：總金額欄位 --- *@
+            <div class="mb-3 row">
+                <label asp-for="TotalAmount" class="col-sm-3 col-form-label"></label>
+                <div class="col-sm-6">
+                    <input asp-for="TotalAmount" class="form-control form-control-sm" placeholder="請輸入總金額" />
+                    <span asp-validation-for="TotalAmount" class="text-danger"></span> @* 確保有驗證訊息標籤 *@
+                </div>
+            </div>
+
+            @* --- 其他欄位 (類別, 行程, 參與者, 狀態, 付款方式等) --- *@
+            @* 請確保每個需要驗證的欄位都有 <select asp-for...> 或 <input asp-for...> *@
+            @* 並且緊隨其後有 <span asp-validation-for="..."></span> *@
+            @* 必填的 <select> 務必有 <option value="">...</option> *@
+
+            <div class="mb-3 row">
+                <label asp-for="Category" class="col-sm-3 col-form-label"></label>
+                <div class="col-sm-6">
+                    <select asp-for="Category" class="form-select form-select-sm" asp-items="Html.GetEnumSelectList<OrderCategory>()" id="Category">
+                        <option value="">-- 請選擇類別 --</option>
+                    </select>
+                    <span asp-validation-for="Category" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="mb-3 row" id="officialTravelDiv" style="display:none;">
+                <label class="col-sm-3 col-form-label">訂單內容</label>
+                <div class="col-sm-6">
+                    <select class="form-select form-select-sm" id="officialItemId">
+                        <option value="">-- 請選擇官方行程 --</option>
+                        @if (Model.OfficialTravels != null)
+                        {
+                            foreach (var item in Model.OfficialTravels)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        }
+                    </select>
+                    @* ItemId 的驗證訊息會顯示在 hidden input 旁邊，可能不明顯 *@
+                    <span asp-validation-for="ItemId" class="text-danger d-block"></span> @* 強制顯示為 block 或許有幫助 *@
+                </div>
+            </div>
+            <div class="mb-3 row" id="customTravelDiv" style="display:none;">
+                <label class="col-sm-3 col-form-label">訂單內容</label>
+                <div class="col-sm-6">
+                    <select class="form-select form-select-sm" id="customItemId">
+                        <option value="">-- 請選擇客製化行程 --</option>
+                        @if (Model.CustomTravels != null)
+                        {
+                            foreach (var item in Model.CustomTravels)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="ItemId" class="text-danger d-block"></span>
+                </div>
+            </div>
+            <input type="hidden" asp-for="ItemId" id="ItemId" />
+
+            <div class="mb-3 row">
+                <label asp-for="ParticipantId" class="col-sm-3 col-form-label"></label>
+                <div class="col-sm-6">
+                    <select asp-for="ParticipantId" class="form-select form-select-sm" asp-items="ViewBag.ParticipantId">
+                        <option value="">-- 請選擇參與者 --</option>
+                    </select>
+                    <span asp-validation-for="ParticipantId" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="mb-3 row">
+                <label asp-for="Status" class="col-sm-3 col-form-label"></label>
+                <div class="col-sm-6">
+                    <select asp-for="Status" class="form-select form-select-sm" asp-items="Html.GetEnumSelectList<OrderStatus>()">
+                        <option value="">-- 請選擇狀態 --</option>
+                    </select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="mb-3 row">
+                <label asp-for="PaymentMethod" class="col-sm-3 col-form-label"></label>
+                <div class="col-sm-6">
+                    <select asp-for="PaymentMethod" class="form-select form-select-sm" asp-items="Html.GetEnumSelectList<PaymentMethod>()">
+                        <option value="">-- 請選擇付款方式 --</option>
+                    </select>
+                    <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="mb-4 row">
+                <label asp-for="PaymentDate" class="col-sm-3 col-form-label"></label>
+                <div class="col-sm-6">
+                    <input asp-for="PaymentDate" type="date" class="form-control form-control-sm" />
+                    <span asp-validation-for="PaymentDate" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="mb-4 row">
+                <label asp-for="Note" class="col-sm-3 col-form-label"></label>
+                <div class="col-sm-6">
+                    <textarea asp-for="Note" class="form-control form-control-sm" rows="3" placeholder="請輸入備註 (非必填)"></textarea>
+                    <span asp-validation-for="Note" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-9 offset-sm-3 d-flex align-items-center">
+                    @if (PermissionChecker.CanManageOrders)
+                    {
+                        <button type="submit" class="btn btn-primary me-3">創建訂單</button>
+                    }
+                    else
+                    {
+                        <button type="submit" class="btn btn-primary me-3 disabled"
+                        tabindex="-1" aria-disabled="true" onclick="return false;">
+                            創建訂單
+                        </button>
+                    }
+                    @if (PermissionChecker.CanViewOrders)
+                    {
+                        <a asp-action="Index" class="btn btn-secondary">返回列表</a>
+                    }
+                    else
+                    {
+                        <a asp-action="Index" class="btn btn-secondary disabled"
+                           tabindex="-1" aria-disabled="true" onclick="return false;">
+                        返回列表
+                        </a>
+                    }
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @* 確保載入驗證腳本 *@
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    @* 您原本的 ItemId 設定腳本 *@
+    <script>
+        function updateItemId() {
+            const categorySelect = document.getElementById('Category');
+            const itemIdInput = document.getElementById('ItemId');
+            const officialDiv = document.getElementById('officialTravelDiv');
+            const customDiv = document.getElementById('customTravelDiv');
+            const officialSelect = document.getElementById('officialItemId');
+            const customSelect = document.getElementById('customItemId');
+
+            officialDiv.style.display = 'none';
+            customDiv.style.display = 'none';
+            itemIdInput.value = '';
+            // 清除可能存在的 ItemId 驗證錯誤
+             $('span[data-valmsg-for="ItemId"]').text('');
+
+
+            if (!categorySelect.value) { return; }
+            const category = parseInt(categorySelect.value);
+
+            if (category === @((int)OrderCategory.OfficialTravelDetail)) {
+                officialDiv.style.display = 'flex';
+                itemIdInput.value = officialSelect.value;
+            } else if (category === @((int)OrderCategory.CustomTravel)) {
+                customDiv.style.display = 'flex';
+                itemIdInput.value = customSelect.value;
+            }
+             // 手動觸發 ItemId 的驗證 (如果需要更即時的反應)
+             // $(itemIdInput).valid();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const categorySelect = document.getElementById('Category');
+            const officialSelect = document.getElementById('officialItemId');
+            const customSelect = document.getElementById('customItemId');
+
+            if(categorySelect) categorySelect.addEventListener('change', updateItemId);
+            if(officialSelect) officialSelect.addEventListener('change', updateItemId);
+            if(customSelect) customSelect.addEventListener('change', updateItemId);
+
+            updateItemId(); // 初始載入時執行一次
+        });
+    </script>
+}
