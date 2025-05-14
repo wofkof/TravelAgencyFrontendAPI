@@ -15,10 +15,10 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class FavoriteTravelerController : ControllerBase
+    public class AccountController : ControllerBase
     {
         private readonly AppDbContext _context;
-        public FavoriteTravelerController(AppDbContext context)
+        public AccountController(AppDbContext context)
         {
             _context = context;
         }
