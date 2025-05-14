@@ -5,6 +5,7 @@ using TravelAgencyFrontendAPI.Data;
 using TravelAgencyFrontendAPI.DTOs.ChatRoomDTOs;
 using TravelAgencyFrontendAPI.Hubs;
 using TravelAgencyFrontendAPI.Models;
+using static TravelAgencyFrontendAPI.Hubs.ChatHub;
 
 namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
 {
@@ -101,5 +102,19 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
             await _context.SaveChangesAsync();
             return Ok();
         }
+
+        // GET: api/messages/connection-id
+        [HttpGet("connection-id")]
+        public IActionResult GetConnectionId([FromQuery] string userType, [FromQuery] int userId)
+        {
+            var key = $"{userType}:{userId}";
+            if (ChatHub.ConnectedUsers.UserToConnectionMap.TryGetValue(key, out var connectionId))
+            {
+                return Ok(connectionId);
+            }
+
+            return NotFound("使用者尚未連線");
+        }
+
     }
 }
