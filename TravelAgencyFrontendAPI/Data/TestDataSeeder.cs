@@ -69,18 +69,27 @@ namespace TravelAgencyFrontendAPI.Data
                 await _context.SaveChangesAsync();
             }
         }
+        private (string hash, string salt) HashPassword(string password)
+        {
+            using var hmac = new System.Security.Cryptography.HMACSHA512();
+            var salt = Convert.ToBase64String(hmac.Key);
+            var hash = Convert.ToBase64String(hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)));
+            return (hash, salt);
+        }
 
         private async Task SeedMembersAsync()
         {
             if (!_context.Members.Any())
             {
+                var (hash, salt) = HashPassword("Test@123");
+
                 _context.Members.Add(new Member
                 {
                     Name = "測試會員",
                     Email = "member@test.com",
                     Phone = "0911111111",
-                    PasswordHash = "FakeHashValue",
-                    PasswordSalt = "FakeSaltValue",
+                    PasswordHash = hash,
+                    PasswordSalt = salt,
                     GoogleId = null,
                     IsBlacklisted = false,
                     Note = "這是測試用會員"
@@ -89,6 +98,25 @@ namespace TravelAgencyFrontendAPI.Data
                 await _context.SaveChangesAsync();
             }
         }
+        //private async Task SeedMembersAsync()
+        //{
+        //    if (!_context.Members.Any())
+        //    {
+        //        _context.Members.Add(new Member
+        //        {
+        //            Name = "測試會員",
+        //            Email = "member@test.com",
+        //            Phone = "0911111111",
+        //            PasswordHash = "FakeHashValue",
+        //            PasswordSalt = "FakeSaltValue",
+        //            GoogleId = null,
+        //            IsBlacklisted = false,
+        //            Note = "這是測試用會員"
+        //        });
+
+        //        await _context.SaveChangesAsync();
+        //    }
+        //}
 
         private async Task SeedChatRoomsAsync()
         {
@@ -788,10 +816,12 @@ namespace TravelAgencyFrontendAPI.Data
                         Attraction4 = null,
                         Attraction5 = null,
                         Note1 = "這是郵輪旅行行程第二天的備註1",
-                        Note2 = "這是郵輪旅行行程第二天的備註2",
+                        Note2 = "這是郵輪旅行行程第二天的備註2"
                     });
+                     await _context.SaveChangesAsync();
             }
         }
+
         private async Task SeedCustomTravelContentAsync()
         {
             if (!_context.CustomTravelContents.Any())
