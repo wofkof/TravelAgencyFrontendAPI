@@ -6,6 +6,7 @@ using TravelAgencyBackend.Helpers;
 using AutoMapper;
 using TravelAgencyBackend.ViewComponent;
 using TravelAgencyBackend.Services;
+using TravelAgency.Shared.Models;
 
 namespace TravelAgencyBackend.Controllers
 {
@@ -33,7 +34,7 @@ namespace TravelAgencyBackend.Controllers
             if (member == null) return NotFound($"找不到 ID 為 {id} 的會員");
 
             ViewBag.MemberId = id;
-            ViewBag.Account = member.Account;
+            ViewBag.Account = member.Email;
             return View();
         }
 
@@ -55,7 +56,7 @@ namespace TravelAgencyBackend.Controllers
             var member = _context.Members.Find(id);
             if (member == null) return NotFound($"找不到 ID 為 {id} 的會員");
 
-            member.Password = PasswordHasher.Hash(newPassword);
+            member.PasswordHash = PasswordHasher.Hash(newPassword);
             member.UpdatedAt = DateTime.Now;
             _context.SaveChanges();
 
@@ -77,7 +78,7 @@ namespace TravelAgencyBackend.Controllers
                      || m.Phone.Contains(keyword)
                      || m.Email.Contains(keyword))
                     &&
-                    (!model.FilterStatus.HasValue || m.Status == model.FilterStatus)
+                    (!model.FilterStatus.HasValue || m.Status == model.FilterStatus.Value)
                 );
 
             model.TotalCount = query.Count();
@@ -122,9 +123,6 @@ namespace TravelAgencyBackend.Controllers
             var check = CheckPermissionOrForbid("管理會員");
             if (check != null) return check;
 
-            if (_context.Members.Any(m => m.Account == vm.Account))
-                ModelState.AddModelError("Account", "此帳號已被註冊");
-
             if (_context.Members.Any(m => m.Email == vm.Email))
                 ModelState.AddModelError("Email", "此信箱已被註冊");
 
@@ -135,8 +133,8 @@ namespace TravelAgencyBackend.Controllers
                 return View(vm);
 
             var member = _mapper.Map<Member>(vm);
-            member.Password = PasswordHasher.Hash(vm.Password);
-            member.CreatedAt = DateTime.Now;
+            member.PasswordHash = PasswordHasher.Hash(vm.Password);
+            member.UpdatedAt = DateTime.Now;
             member.Status = MemberStatus.Active;
 
             _context.Members.Add(member);

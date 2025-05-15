@@ -31,7 +31,7 @@
 				@Html.DisplayNameFor(model => model.Content.First().Time)
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.Content.First().HotelName)
+				@Html.DisplayNameFor(model => model.Content.First().AccommodationName)
 			</th>
 			<th>修改</th>
 			<th>刪除</th>
@@ -57,16 +57,16 @@
 
 							switch (item.Category)
 							{
-								case Category.Attraction:
-									itemName = Model.Attraction.FirstOrDefault(a => a.AttractionId == item.ItemId)?.ScenicSpotName;
+								case TravelItemCategory.Attraction:
+									itemName = Model.Attraction.FirstOrDefault(a => a.AttractionId == item.ItemId)?.AttractionName;
 									break;
-								case Category.Restaurant:
+								case TravelItemCategory.Restaurant:
 									itemName = Model.Restaurant.FirstOrDefault(r => r.RestaurantId == item.ItemId)?.RestaurantName;
 									break;
-								case Category.Hotel:
-									itemName = Model.Hotel.FirstOrDefault(h => h.HotelId == item.ItemId)?.HotelName;
+								case TravelItemCategory.Accommodation:
+									itemName = Model.Hotel.FirstOrDefault(h => h.AccommodationId == item.ItemId)?.AccommodationName;
 									break;
-								case Category.Transport:
+								case TravelItemCategory.Transport:
 									itemName = Model.Transportation.FirstOrDefault(t => t.TransportId == item.ItemId)?.TransportMethod;
 									break;
 							}
@@ -81,7 +81,7 @@
 						@Html.DisplayFor(modelItem => item.Time)
 					</td>
 					<td>
-						@Html.DisplayFor(modelItem => item.HotelName)
+						@Html.DisplayFor(modelItem => item.AccommodationName)
 					</td>
 					<td>
 						@if (PermissionChecker.CanManageCustomTravels)

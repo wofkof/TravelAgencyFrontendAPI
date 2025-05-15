@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TravelAgency.Shared.Data;
+using TravelAgency.Shared.Models;
 using TravelAgencyBackend.Services;
 using TravelAgencyBackend.ViewModels;
 using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
@@ -46,7 +47,7 @@ namespace TravelAgencyBackend.Controllers
                 Attraction = _context.Attractions.OrderBy(d => d.DistrictId).ToList();
             }
             else
-                Attraction = _context.Attractions.Where(d => d.ScenicSpotName.Contains(p.txtKeywordAttraction)).OrderBy(d => d.DistrictId).ToList();
+                Attraction = _context.Attractions.Where(d => d.AttractionName.Contains(p.txtKeywordAttraction)).OrderBy(d => d.DistrictId).ToList();
 
             IEnumerable<Restaurant> Restaurant = null;
             if (string.IsNullOrEmpty(p.txtKeywordRestaurant))
@@ -56,21 +57,21 @@ namespace TravelAgencyBackend.Controllers
             else
                 Restaurant = _context.Restaurants.Where(d => d.RestaurantName.Contains(p.txtKeywordRestaurant)).OrderBy(d => d.DistrictId).ToList();
 
-            IEnumerable<Hotel> Hotel = null;
+            IEnumerable<Accommodation> Hotel = null;
             if (string.IsNullOrEmpty(p.txtKeywordHotel))
             {
-                Hotel = _context.Hotels.OrderBy(d => d.DistrictId).ToList();
+                Hotel = _context.Accommodations.OrderBy(d => d.DistrictId).ToList();
             }
             else
-                Hotel = _context.Hotels.Where(d => d.HotelName.Contains(p.txtKeywordHotel)).OrderBy(d => d.DistrictId).ToList();
+                Hotel = _context.Accommodations.Where(d => d.AccommodationName.Contains(p.txtKeywordHotel)).OrderBy(d => d.DistrictId).ToList();
 
-            IEnumerable<Transportation> Transportation = null;
+            IEnumerable<Transport> Transportation = null;
             if (string.IsNullOrEmpty(p.txtKeywordTransportation))
             {
-                Transportation = _context.Transportations.OrderBy(d => d.TransportId).ToList();
+                Transportation = _context.Transports.OrderBy(d => d.TransportId).ToList();
             }
             else
-                Transportation = _context.Transportations.Where(d => d.TransportMethod.Contains(p.txtKeywordTransportation)).OrderBy(d => d.TransportId).ToList();
+                Transportation = _context.Transports.Where(d => d.TransportMethod.Contains(p.txtKeywordTransportation)).OrderBy(d => d.TransportId).ToList();
 
 
             var datas = new CustomTravelProductsViewModel
@@ -245,10 +246,6 @@ namespace TravelAgencyBackend.Controllers
             {
                 ModelState.AddModelError("DistrictId", "請選擇有效的區");
             }
-            if (!_context.TravelSuppliers.Any(c => c.TravelSupplierId == p.TravelSupplierId))
-            {
-                ModelState.AddModelError("TravelSupplierId", "請選擇有效的供應商");
-            }
 
             _context.Attractions.Add(p);
             _context.SaveChanges();
@@ -295,15 +292,10 @@ namespace TravelAgencyBackend.Controllers
             if (dbAttraction == null)
                 return RedirectToAction("List");
             dbAttraction.DistrictId = uiAttraction.DistrictId;
-            dbAttraction.TravelSupplierId = uiAttraction.TravelSupplierId;
-            dbAttraction.ScenicSpotName = uiAttraction.ScenicSpotName;
+            dbAttraction.AttractionName = uiAttraction.AttractionName;
             if (!_context.Districts.Any(c => c.DistrictId == uiAttraction.DistrictId))
             {
                 ModelState.AddModelError("DistrictId", "請選擇有效的區");
-            }
-            if (!_context.TravelSuppliers.Any(c => c.TravelSupplierId == uiAttraction.TravelSupplierId))
-            {
-                ModelState.AddModelError("TravelSupplierId", "請選擇有效的供應商");
             }
             _context.SaveChanges();
             return RedirectToAction("List");
@@ -328,10 +320,6 @@ namespace TravelAgencyBackend.Controllers
             if (!_context.Districts.Any(c => c.DistrictId == p.DistrictId))
             {
                 ModelState.AddModelError("DistrictId", "請選擇有效的區");
-            }
-            if (!_context.TravelSuppliers.Any(c => c.TravelSupplierId == p.TravelSupplierId))
-            {
-                ModelState.AddModelError("TravelSupplierId", "請選擇有效的供應商");
             }
             _context.Restaurants.Add(p);
             _context.SaveChanges();
@@ -378,15 +366,10 @@ namespace TravelAgencyBackend.Controllers
             if (dbRestaurant == null)
                 return RedirectToAction("List");
             dbRestaurant.DistrictId = uiRestaurant.DistrictId;
-            dbRestaurant.TravelSupplierId = uiRestaurant.TravelSupplierId;
             dbRestaurant.RestaurantName = uiRestaurant.RestaurantName;
             if (!_context.Districts.Any(c => c.DistrictId == uiRestaurant.DistrictId))
             {
                 ModelState.AddModelError("DistrictId", "請選擇有效的區");
-            }
-            if (!_context.TravelSuppliers.Any(c => c.TravelSupplierId == uiRestaurant.TravelSupplierId))
-            {
-                ModelState.AddModelError("TravelSupplierId", "請選擇有效的供應商");
             }
             _context.SaveChanges();
             return RedirectToAction("List");
@@ -403,7 +386,7 @@ namespace TravelAgencyBackend.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult CreateHotel(Hotel p)
+        public IActionResult CreateHotel(Accommodation p)
         {
             var check = CheckPermissionOrForbid("管理客製化行程");
             if (check != null) return check;
@@ -412,11 +395,7 @@ namespace TravelAgencyBackend.Controllers
             {
                 ModelState.AddModelError("DistrictId", "請選擇有效的區");
             }
-            if (!_context.TravelSuppliers.Any(c => c.TravelSupplierId == p.TravelSupplierId))
-            {
-                ModelState.AddModelError("TravelSupplierId", "請選擇有效的供應商");
-            }
-            _context.Hotels.Add(p);
+            _context.Accommodations.Add(p);
             _context.SaveChanges();
             return RedirectToAction("List");
         }
@@ -427,11 +406,11 @@ namespace TravelAgencyBackend.Controllers
             if (check != null) return check;
 
             if (id != null)
-            {               
-                Hotel d = _context.Hotels.FirstOrDefault(p => p.HotelId == id);
+            {
+                Accommodation d = _context.Accommodations.FirstOrDefault(p => p.AccommodationId == id);
                 if (d != null)
                 {
-                    _context.Hotels.Remove(d);
+                    _context.Accommodations.Remove(d);
                     _context.SaveChanges();
                 }
             }
@@ -443,8 +422,8 @@ namespace TravelAgencyBackend.Controllers
             if (check != null) return check;
 
             if (id == null)
-                return RedirectToAction("List");           
-            Hotel d = _context.Hotels.FirstOrDefault(p => p.HotelId == id);
+                return RedirectToAction("List");
+            Accommodation d = _context.Accommodations.FirstOrDefault(p => p.AccommodationId == id);
             if (d == null)
                 return RedirectToAction("List");
             ViewBag.Districts = new SelectList(_context.Districts, "DistrictId", "DistrictName");
@@ -452,24 +431,19 @@ namespace TravelAgencyBackend.Controllers
             return View(d);
         }
         [HttpPost]
-        public IActionResult EditHotel(Hotel uiHotel)
+        public IActionResult EditHotel(Accommodation uiHotel)
         {
             var check = CheckPermissionOrForbid("管理客製化行程");
             if (check != null) return check;
 
-            Hotel dbHotel = _context.Hotels.FirstOrDefault(p => p.HotelId == uiHotel.HotelId);
+            Accommodation dbHotel = _context.Accommodations.FirstOrDefault(p => p.AccommodationId == uiHotel.AccommodationId);
             if (dbHotel == null)
                 return RedirectToAction("List");
             dbHotel.DistrictId = uiHotel.DistrictId;
-            dbHotel.TravelSupplierId = uiHotel.TravelSupplierId;
-            dbHotel.HotelName = uiHotel.HotelName;
+            dbHotel.AccommodationName = uiHotel.AccommodationName;
             if (!_context.Districts.Any(c => c.DistrictId == uiHotel.DistrictId))
             {
                 ModelState.AddModelError("DistrictId", "請選擇有效的區");
-            }
-            if (!_context.TravelSuppliers.Any(c => c.TravelSupplierId == uiHotel.TravelSupplierId))
-            {
-                ModelState.AddModelError("TravelSupplierId", "請選擇有效的供應商");
             }
             _context.SaveChanges();
             return RedirectToAction("List");
@@ -484,12 +458,12 @@ namespace TravelAgencyBackend.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult CreateTransportation(Transportation p)
+        public IActionResult CreateTransportation(Transport p)
         {
             var check = CheckPermissionOrForbid("管理客製化行程");
             if (check != null) return check;
 
-            _context.Transportations.Add(p);
+            _context.Transports.Add(p);
             _context.SaveChanges();
             return RedirectToAction("List");
         }
@@ -501,10 +475,10 @@ namespace TravelAgencyBackend.Controllers
 
             if (id != null)
             {                
-                Transportation d = _context.Transportations.FirstOrDefault(p => p.TransportId == id);
+                Transport d = _context.Transports.FirstOrDefault(p => p.TransportId == id);
                 if (d != null)
                 {
-                    _context.Transportations.Remove(d);
+                    _context.Transports.Remove(d);
                     _context.SaveChanges();
                 }
             }
@@ -517,19 +491,19 @@ namespace TravelAgencyBackend.Controllers
 
             if (id == null)
                 return RedirectToAction("List");
-            Transportation d = _context.Transportations.FirstOrDefault(p => p.TransportId == id);
+            Transport d = _context.Transports.FirstOrDefault(p => p.TransportId == id);
             if (d == null)
                 return RedirectToAction("List");
             ViewBag.Districts = new SelectList(_context.Districts, "DistrictId", "DistrictName");
             return View(d);
         }
         [HttpPost]
-        public IActionResult EditTransportation(Transportation uiTransportation)
+        public IActionResult EditTransportation(Transport uiTransportation)
         {
             var check = CheckPermissionOrForbid("管理客製化行程");
             if (check != null) return check;
 
-            Transportation dbTransportation = _context.Transportations.FirstOrDefault(p => p.TransportId == uiTransportation.TransportId);
+            Transport dbTransportation = _context.Transports.FirstOrDefault(p => p.TransportId == uiTransportation.TransportId);
             if (dbTransportation == null)
                 return RedirectToAction("List");
             dbTransportation.TransportMethod = uiTransportation.TransportMethod;

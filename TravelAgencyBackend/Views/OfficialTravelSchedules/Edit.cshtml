@@ -1,4 +1,4 @@
-﻿@model TravelAgencyBackend.Models.OfficialTravelSchedule
+﻿@model TravelAgency.Shared.Models.OfficialTravelSchedule
 
 @{
     ViewData["Title"] = "Edit";
@@ -16,31 +16,31 @@
                 <select asp-for="OfficialTravelDetailId" class="form-control" asp-items="ViewBag.OfficialTravelDetailId"></select>
                 <span asp-validation-for="OfficialTravelDetailId" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="ItemId" class="control-label"></label>
-                <input asp-for="ItemId" class="form-control" />
-                <span asp-validation-for="ItemId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Category" class="control-label"></label>
-                <select asp-for="Category" class="form-control" asp-items="Html.GetEnumSelectList<TravelActivityType>()"></select>
-                <span asp-validation-for="Category" class="text-danger"></span>
-            </div>
+            @* <div class="form-group"> *@
+            @*     <label asp-for="ItemId" class="control-label"></label> *@
+            @*     <input asp-for="ItemId" class="form-control" /> *@
+            @*     <span asp-validation-for="ItemId" class="text-danger"></span> *@
+            @* </div> *@
+            @* <div class="form-group"> *@
+            @*     <label asp-for="Category" class="control-label"></label> *@
+            @*     <select asp-for="Category" class="form-control" asp-items="Html.GetEnumSelectList<TravelActivityType>()"></select> *@
+            @*     <span asp-validation-for="Category" class="text-danger"></span> *@
+            @* </div> *@
             <div class="form-group">
                 <label asp-for="Day" class="control-label"></label>
                 <input asp-for="Day" class="form-control" />
                 <span asp-validation-for="Day" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="StartTime" class="control-label"></label>
-                <input asp-for="StartTime" class="form-control" type="time" step="1" />
-                <span asp-validation-for="StartTime" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Date" class="control-label"></label>
-                <input asp-for="Date" class="form-control" type="date" />
-                <span asp-validation-for="Date" class="text-danger"></span>
-            </div>
+            @* <div class="form-group"> *@
+            @*     <label asp-for="StartTime" class="control-label"></label> *@
+            @*     <input asp-for="StartTime" class="form-control" type="time" step="1" /> *@
+            @*     <span asp-validation-for="StartTime" class="text-danger"></span> *@
+            @* </div> *@
+            @* <div class="form-group"> *@
+            @*     <label asp-for="Date" class="control-label"></label> *@
+            @*     <input asp-for="Date" class="form-control" type="date" /> *@
+            @*     <span asp-validation-for="Date" class="text-danger"></span> *@
+            @* </div> *@
             <div class="form-group">
                 <label asp-for="Description" class="control-label"></label>
                 <input asp-for="Description" class="form-control" />

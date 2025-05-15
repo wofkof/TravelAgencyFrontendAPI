@@ -1,5 +1,5 @@
 ﻿@model TravelAgencyBackend.ViewModels.Order.OrderCreateViewModel
-@using TravelAgencyBackend.Models
+@using TravelAgency.Shared.Models
 
 @{
     ViewData["Title"] = "新增訂單";
@@ -49,7 +49,7 @@
             <div class="mb-3 row">
                 <label asp-for="Category" class="col-sm-3 col-form-label"></label>
                 <div class="col-sm-6">
-                    <select asp-for="Category" class="form-select form-select-sm" asp-items="Html.GetEnumSelectList<OrderCategory>()" id="Category">
+                    <select asp-for="Category" class="form-select form-select-sm" asp-items="Html.GetEnumSelectList<ProductCategory>()" id="Category">
                         <option value="">-- 請選擇類別 --</option>
                     </select>
                     <span asp-validation-for="Category" class="text-danger"></span>
@@ -186,10 +186,10 @@
             if (!categorySelect.value) { return; }
             const category = parseInt(categorySelect.value);
 
-            if (category === @((int)OrderCategory.OfficialTravelDetail)) {
+            if (category === @((int)ProductCategory.GroupTravel)) {
                 officialDiv.style.display = 'flex';
                 itemIdInput.value = officialSelect.value;
-            } else if (category === @((int)OrderCategory.CustomTravel)) {
+            } else if (category === @((int)ProductCategory.CustomTravel)) {
                 customDiv.style.display = 'flex';
                 itemIdInput.value = customSelect.value;
             }

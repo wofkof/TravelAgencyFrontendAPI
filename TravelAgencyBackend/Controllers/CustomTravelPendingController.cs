@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using TravelAgency.Shared.Data;
+using TravelAgency.Shared.Models;
 using TravelAgencyBackend.Services;
 using TravelAgencyBackend.ViewModels;
 
@@ -118,15 +119,15 @@ namespace TravelAgencyBackend.Controllers
                 var customTravel = _context.CustomTravels
             .Where(d => d.CustomTravelId == id)
             .ToList();
-                var content = _context.Contents
+                var content = _context.CustomTravelContents
                     .Where(c => c.CustomTravelId == id)
                     .OrderBy(c => c.Day)
                     .ThenBy(c => c.Time)
                     .ToList();
                 var attractions = _context.Attractions.ToList();
                 var restaurants = _context.Restaurants.ToList();
-                var hotels = _context.Hotels.ToList();
-                var transportations = _context.Transportations.ToList();
+                var hotels = _context.Accommodations.ToList();
+                var transportations = _context.Transports.ToList();
 
                 var ViewModel = new CustomTravelPendingViewModel
                 {
@@ -147,18 +148,18 @@ namespace TravelAgencyBackend.Controllers
             var check = CheckPermissionOrForbid("管理客製化行程");
             if (check != null) return check;
 
-            var id = _context.Contents.FirstOrDefault()?.CustomTravelId;
+            var id = _context.CustomTravelContents.FirstOrDefault()?.CustomTravelId;
             
             var datas = new CustomTravelPendingViewModel
             {
-                NewContent = new Content { CustomTravelId = id.Value },                
-                Content = _context.Contents.ToList(),
+                NewContent = new CustomTravelContent { CustomTravelId = id.Value },                
+                Content = _context.CustomTravelContents.ToList(),
                 City = _context.Cities.ToList(),
                 District = _context.Districts.ToList(),
                 Attraction = _context.Attractions.ToList(),
                 Restaurant = _context.Restaurants.ToList(),
-                Hotel = _context.Hotels.ToList(),
-                Transportation = _context.Transportations.ToList()
+                Hotel = _context.Accommodations.ToList(),
+                Transportation = _context.Transports.ToList()
             };
 
             return View(datas);
@@ -169,7 +170,7 @@ namespace TravelAgencyBackend.Controllers
             var check = CheckPermissionOrForbid("管理客製化行程");
             if (check != null) return check;
 
-            _context.Contents.Add(p.NewContent);
+            _context.CustomTravelContents.Add(p.NewContent);
             _context.SaveChanges();
             return RedirectToAction("ContentList", new { id = p.NewContent.CustomTravelId });
         }
@@ -180,10 +181,10 @@ namespace TravelAgencyBackend.Controllers
 
             if (id != null)
             {
-                Content d = _context.Contents.FirstOrDefault(p => p.ContentId == id);
+                CustomTravelContent d = _context.CustomTravelContents.FirstOrDefault(p => p.ContentId == id);
                 if (d != null)
                 {
-                    _context.Contents.Remove(d);
+                    _context.CustomTravelContents.Remove(d);
                     _context.SaveChanges();
 
                     int? customTravelId = d.CustomTravelId;
@@ -199,7 +200,7 @@ namespace TravelAgencyBackend.Controllers
 
             if (id == null)
                 return RedirectToAction("ContentList", new { id });
-            Content d = _context.Contents.FirstOrDefault(p => p.ContentId == id);
+            CustomTravelContent d = _context.CustomTravelContents.FirstOrDefault(p => p.ContentId == id);
             if (d == null)
                 return RedirectToAction("ContentList", new { id });
 
@@ -210,8 +211,8 @@ namespace TravelAgencyBackend.Controllers
                 District = _context.Districts.ToList(),
                 Attraction = _context.Attractions.ToList(),
                 Restaurant = _context.Restaurants.ToList(),
-                Hotel = _context.Hotels.ToList(),
-                Transportation = _context.Transportations.ToList()
+                Hotel = _context.Accommodations.ToList(),
+                Transportation = _context.Transports.ToList()
             };
             return View(datas);
         }
@@ -221,7 +222,7 @@ namespace TravelAgencyBackend.Controllers
             var check = CheckPermissionOrForbid("管理客製化行程");
             if (check != null) return check;
 
-            Content dbContent = _context.Contents.FirstOrDefault(p => p.ContentId == t.EditContent.ContentId);
+            CustomTravelContent dbContent = _context.CustomTravelContents.FirstOrDefault(p => p.ContentId == t.EditContent.ContentId);
             if (dbContent == null)
                 return RedirectToAction("ContentList", new { id = t.EditContent.CustomTravelId });
 
@@ -230,7 +231,7 @@ namespace TravelAgencyBackend.Controllers
             dbContent.Category = t.EditContent.Category;
             dbContent.Day = t.EditContent.Day;
             dbContent.Time = t.EditContent.Time;
-            dbContent.HotelName = t.EditContent.HotelName;
+            dbContent.AccommodationName = t.EditContent.AccommodationName;
                         
             _context.SaveChanges();
             

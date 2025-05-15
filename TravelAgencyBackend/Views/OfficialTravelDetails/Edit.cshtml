@@ -1,9 +1,9 @@
-﻿@model TravelAgencyBackend.Models.OfficialTravelDetail
+﻿@model TravelAgency.Shared.Models.OfficialTravelDetail
 
 @{
     ViewData["Title"] = "Edit";
 }
-
+@* 楷茵 *@
 <h1>編輯</h1>
 <hr />
 <div class="row">
@@ -16,56 +16,66 @@
                 <select asp-for="OfficialTravelId" class="form-control" asp-items="ViewBag.OfficialTravelId"></select>
                 <span asp-validation-for="OfficialTravelId" class="text-danger"></span>
             </div>
+            @* <div class="form-group"> *@
+            @*     <label asp-for="FlightId" class="control-label"></label> *@
+            @*     <select asp-for="FlightId" class="form-control" asp-items="ViewBag.FlightId"></select> *@
+            @*     <span asp-validation-for="FlightId" class="text-danger"></span> *@
+            @* </div> *@
+            @* <div class="form-group"> *@
+            @*     <label asp-for="DepartureDate" class="control-label"></label> *@
+            @*     <input asp-for="DepartureDate" class="form-control" /> *@
+            @*     <span asp-validation-for="DepartureDate" class="text-danger"></span> *@
+            @* </div> *@
+            @* <div class="form-group"> *@
+            @*     <label asp-for="ReturnDate" class="control-label"></label> *@
+            @*     <input asp-for="ReturnDate" class="form-control" /> *@
+            @*     <span asp-validation-for="ReturnDate" class="text-danger"></span> *@
+            @* </div> *@
             <div class="form-group">
-                <label asp-for="FlightId" class="control-label"></label>
-                <select asp-for="FlightId" class="form-control" asp-items="ViewBag.FlightId"></select>
-                <span asp-validation-for="FlightId" class="text-danger"></span>
+                <label asp-for="AdultPrice" class="control-label"></label>
+                <input asp-for="AdultPrice" class="form-control" />
+                <span asp-validation-for="AdultPrice" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="DepartureDate" class="control-label"></label>
-                <input asp-for="DepartureDate" class="form-control" />
-                <span asp-validation-for="DepartureDate" class="text-danger"></span>
+                <label asp-for="ChildPrice" class="control-label"></label>
+                <input asp-for="ChildPrice" class="form-control" />
+                <span asp-validation-for="ChildPrice" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="ReturnDate" class="control-label"></label>
-                <input asp-for="ReturnDate" class="form-control" />
-                <span asp-validation-for="ReturnDate" class="text-danger"></span>
+                <label asp-for="BabyPrice" class="control-label"></label>
+                <input asp-for="BabyPrice" class="form-control" />
+                <span asp-validation-for="BabyPrice" class="text-danger"></span>
             </div>
+            @* <div class="form-group"> *@
+            @*     <label asp-for="Seats" class="control-label"></label> *@
+            @*     <input asp-for="Seats" class="form-control" /> *@
+            @*     <span asp-validation-for="Seats" class="text-danger"></span> *@
+            @* </div> *@
+            @* <div class="form-group"> *@
+            @*     <label asp-for="SoldSeats" class="control-label"></label> *@
+            @*     <input asp-for="SoldSeats" class="form-control" /> *@
+            @*     <span asp-validation-for="SoldSeats" class="text-danger"></span> *@
+            @* </div> *@
+            @* <div class="form-group"> *@
+            @*     <label asp-for="MinimumGroupSize" class="control-label"></label> *@
+            @*     <input asp-for="MinimumGroupSize" class="form-control" /> *@
+            @*     <span asp-validation-for="MinimumGroupSize" class="text-danger"></span> *@
+            @* </div> *@
+            @* <div class="form-group"> *@
+            @*     <label asp-for="BookingDeadline" class="control-label"></label> *@
+            @*     <input asp-for="BookingDeadline" class="form-control" /> *@
+            @*     <span asp-validation-for="BookingDeadline" class="text-danger"></span> *@
+            @* </div> *@
             <div class="form-group">
-                <label asp-for="Price" class="control-label"></label>
-                <input asp-for="Price" class="form-control" />
-                <span asp-validation-for="Price" class="text-danger"></span>
+                <label asp-for="State" class="control-label"></label>
+                <select asp-for="State" class="form-control" asp-items="Html.GetEnumSelectList<DetailState>()"></select>
+                <span asp-validation-for="State" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Seats" class="control-label"></label>
-                <input asp-for="Seats" class="form-control" />
-                <span asp-validation-for="Seats" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="SoldSeats" class="control-label"></label>
-                <input asp-for="SoldSeats" class="form-control" />
-                <span asp-validation-for="SoldSeats" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MinimumGroupSize" class="control-label"></label>
-                <input asp-for="MinimumGroupSize" class="form-control" />
-                <span asp-validation-for="MinimumGroupSize" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="BookingDeadline" class="control-label"></label>
-                <input asp-for="BookingDeadline" class="form-control" />
-                <span asp-validation-for="BookingDeadline" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="GroupStatus" class="control-label"></label>
-                <select asp-for="GroupStatus" class="form-control" asp-items="Html.GetEnumSelectList<GroupStatus>()"></select>
-                <span asp-validation-for="GroupStatus" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CreatedAt" class="control-label"></label>
-                <input asp-for="CreatedAt" class="form-control" />
-                <span asp-validation-for="CreatedAt" class="text-danger"></span>
-            </div>
+            @* <div class="form-group"> *@
+            @*     <label asp-for="CreatedAt" class="control-label"></label> *@
+            @*     <input asp-for="CreatedAt" class="form-control" /> *@
+            @*     <span asp-validation-for="CreatedAt" class="text-danger"></span> *@
+            @* </div> *@
             <div class="form-group">
                 <label asp-for="UpdatedAt" class="control-label"></label>
                 <input asp-for="UpdatedAt" class="form-control" />

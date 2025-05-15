@@ -1,4 +1,4 @@
-﻿@model TravelAgencyBackend.Models.Restaurant
+﻿@model TravelAgency.Shared.Models.Restaurant
 
 @{
     ViewData["Title"] = "EditRestaurant";
@@ -19,13 +19,6 @@
                     <option value="">請選擇區</option>
                 </select>
                 <span asp-validation-for="DistrictId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="TravelSupplierId" class="control-label">供應商</label>
-                <select asp-for="TravelSupplierId" class="form-control" asp-items="ViewBag.TravelSuppliers">
-                    <option value="">請選擇供應商</option>
-                </select>
-                <span asp-validation-for="TravelSupplierId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="RestaurantName" class="control-label"></label>

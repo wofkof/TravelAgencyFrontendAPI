@@ -9,8 +9,8 @@
 
         public string? Keyword { get; set; }
 
-        public int TotalCount { get; set; }     // ✅ 總筆數
-        public int PageSize { get; set; }       // ✅ 每頁筆數
+        public int TotalCount { get; set; }    
+        public int PageSize { get; set; }       
 
     }
 }

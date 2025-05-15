@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using TravelAgencyBackend.Helpers;
-using TravelAgencyBackend.Models; // <--- 需要 Models
+using TravelAgency.Shared.Models;
+using TravelAgencyBackend.Helpers;  
 
 namespace TravelAgencyBackend.ViewModels.TravelRecord
 {
@@ -15,7 +15,7 @@ namespace TravelAgencyBackend.ViewModels.TravelRecord
         public string? SearchItemName { get; set; }
 
         [Display(Name = "行程類別")] // <--- 新增
-        public OrderCategory? SearchCategory { get; set; }
+        public ProductCategory? SearchCategory { get; set; }
 
         public SelectList? Categories { get; set; } // <--- 新增 (給下拉選單用)
 

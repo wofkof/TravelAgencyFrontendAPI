@@ -25,7 +25,7 @@
     </tr>
     <tr>
         <th>狀態</th>
-        <td>@(Model.Status == AnnouncementStatus.Announce ? "已公佈" : "未公佈")</td>
+        <td>@(Model.Status == AnnouncementStatus.Published ? "已公佈" : "未公佈")</td>
     </tr>
 </table>
 @if (PermissionChecker.CanViewAnnouncements)

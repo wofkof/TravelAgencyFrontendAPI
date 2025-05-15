@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using TravelAgencyBackend.Models;
+using TravelAgency.Shared.Models;
 using TravelAgencyBackend.Helpers;
 
 namespace TravelAgencyBackend.ViewModels.Employee

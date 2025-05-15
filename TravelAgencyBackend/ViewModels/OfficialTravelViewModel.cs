@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
-using TravelAgencyBackend.Models;
+using TravelAgency.Shared.Models;
 
 
 namespace TravelAgencyBackend.ViewModels // ← 修改成正確拼法

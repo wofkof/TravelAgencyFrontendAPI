@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using TravelAgencyBackend.Helpers;
-using TravelAgencyBackend.Models;
+using TravelAgency.Shared.Models;
 
 namespace TravelAgencyBackend.ViewModels.TravelRecord
 {

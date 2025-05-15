@@ -1,4 +1,4 @@
-﻿using TravelAgencyBackend.Models;
+﻿using TravelAgency.Shared.Models;
 
 namespace TravelAgencyBackend.ViewModels
 {
@@ -8,8 +8,8 @@ namespace TravelAgencyBackend.ViewModels
         public IEnumerable<District> District { get; set; }
         public IEnumerable<Attraction> Attraction { get; set; }
         public IEnumerable<Restaurant> Restaurant { get; set; }
-        public IEnumerable<Hotel> Hotel { get; set; }
-        public IEnumerable<Transportation> Transportation { get; set; }
+        public IEnumerable<Accommodation> Hotel { get; set; }
+        public IEnumerable<Transport> Transportation { get; set; }
              
     }
 }

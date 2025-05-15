@@ -8,6 +8,7 @@ using System.Reflection;
 using TravelAgencyBackend.Helpers;
 using Microsoft.AspNetCore.Hosting;
 using TravelAgencyBackend.Services;
+using TravelAgency.Shared.Models;
 
 
 
@@ -128,7 +129,7 @@ namespace TravelAgencyBackend.Controllers
                 EmployeeId = e.EmployeeId,
                 Name = e.Name,
                 Gender = e.Gender,
-                BirthDate = e.BirthDate,
+                BirthDate = (DateTime)e.BirthDate,
                 Phone = e.Phone,
                 Email = e.Email,
                 Address = e.Address,
@@ -303,7 +304,7 @@ namespace TravelAgencyBackend.Controllers
                 Name = emp.Name,
                 Email = emp.Email,
                 Phone = emp.Phone,
-                BirthDate = emp.BirthDate,
+                BirthDate = (DateTime)emp.BirthDate,
                 HireDate = emp.HireDate,
                 Gender = emp.Gender,
                 Status = emp.Status,
@@ -492,7 +493,7 @@ namespace TravelAgencyBackend.Controllers
                 EmployeeId = employee.EmployeeId,
                 Name = employee.Name,
                 Gender = employee.Gender.GetDisplayName(),
-                BirthDate = employee.BirthDate,
+                BirthDate = (DateTime)employee.BirthDate,
                 Phone = employee.Phone,
                 Email = employee.Email,
                 Address = employee.Address,

@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using TravelAgencyBackend.Models;
+using TravelAgency.Shared.Models;
 
 namespace TravelAgencyBackend.ViewModels.TravelRecord
 {
@@ -8,7 +8,7 @@ namespace TravelAgencyBackend.ViewModels.TravelRecord
     {
         // 這兩個欄位主要用於識別群組和查詢詳細資料
         public int ItemId { get; set; }
-        public OrderCategory Category { get; set; }
+        public ProductCategory Category { get; set; }
 
         [Display(Name = "行程名稱")]
         public string ItemName { get; set; } = string.Empty;

@@ -27,7 +27,7 @@
         @foreach (var m in Model.Members)
         {
             <option value="@m.MemberId" selected="@(Model.FilterMemberId == m.MemberId)">
-                @m.Name (@m.Account)
+                @m.Name (@m.Email)
             </option>
         }
     </select>

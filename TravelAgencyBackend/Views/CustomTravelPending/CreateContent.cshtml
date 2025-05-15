@@ -42,7 +42,7 @@
             <div class="form-group">
                 <label asp-for="NewContent.Category"  class="control-label"></label>
                 <select asp-for="NewContent.Category" 
-                asp-items="Html.GetEnumSelectList<Category>()"
+                asp-items="Html.GetEnumSelectList<TravelItemCategory>()"
                 class="form-select d-inline w-auto mx-2" id="NewContent_Category">
                     <option selected disabled value="">請選擇類別</option>
                 </select>
@@ -55,7 +55,7 @@
                     @{                       
                         foreach (var t in Model.Attraction)
                         {
-                            <option data-category="3" data-district="@t.DistrictId" value="@t.AttractionId" hidden>@t.ScenicSpotName</option>
+                            <option data-category="3" data-district="@t.DistrictId" value="@t.AttractionId" hidden>@t.AttractionName</option>
                         }
 
                         foreach (var t in Model.Restaurant)
@@ -65,7 +65,7 @@
 
                         foreach (var h in Model.Hotel)
                         {
-                            <option data-category="0" data-district="@h.DistrictId" value="@h.HotelId" hidden>@h.HotelName</option>
+                            <option data-category="0" data-district="@h.DistrictId" value="@h.AccommodationId" hidden>@h.AccommodationName</option>
                         }
 
                         foreach (var t in Model.Transportation)
@@ -88,9 +88,9 @@
                 <span asp-validation-for="NewContent.Time" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="NewContent.HotelName" class="control-label"></label>
-                <input asp-for="NewContent.HotelName" class="form-control" />
-                <span asp-validation-for="NewContent.HotelName" class="text-danger"></span>
+                <label asp-for="NewContent.AccommodationName" class="control-label"></label>
+                <input asp-for="NewContent.AccommodationName" class="form-control" />
+                <span asp-validation-for="NewContent.AccommodationName" class="text-danger"></span>
             </div>
             <div class="mt-4">
                 @if (PermissionChecker.CanManageCustomTravels)

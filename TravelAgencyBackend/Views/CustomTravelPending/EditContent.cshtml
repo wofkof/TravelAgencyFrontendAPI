@@ -42,7 +42,7 @@
             <div class="form-group">
                 <label asp-for="EditContent.Category" class="control-label"></label>
                 <select asp-for="EditContent.Category"
-                asp-items="Html.GetEnumSelectList<Category>()"
+                        asp-items="Html.GetEnumSelectList<TravelItemCategory>()"
                 class="form-select d-inline w-auto mx-2" id="EditContent_Category">
                 </select>
                 <span asp-validation-for="EditContent.Category" class="text-danger"></span>
@@ -55,16 +55,16 @@
 
                         switch (Model.EditContent.Category)
                         {
-                            case Category.Attraction:
-                                itemName = Model.Attraction.FirstOrDefault(a => a.AttractionId == Model.EditContent.ItemId)?.ScenicSpotName;
+                            case TravelItemCategory.Attraction:
+                                itemName = Model.Attraction.FirstOrDefault(a => a.AttractionId == Model.EditContent.ItemId)?.AttractionName;
                                 break;
-                            case Category.Restaurant:
+                            case TravelItemCategory.Restaurant:
                                 itemName = Model.Restaurant.FirstOrDefault(r => r.RestaurantId == Model.EditContent.ItemId)?.RestaurantName;
                                 break;
-                            case Category.Hotel:
-                                itemName = Model.Hotel.FirstOrDefault(h => h.HotelId == Model.EditContent.ItemId)?.HotelName;
+                            case TravelItemCategory.Accommodation:
+                                itemName = Model.Hotel.FirstOrDefault(h => h.AccommodationId == Model.EditContent.ItemId)?.AccommodationName;
                                 break;
-                            case Category.Transport:
+                            case TravelItemCategory.Transport:
                                 itemName = Model.Transportation.FirstOrDefault(t => t.TransportId == Model.EditContent.ItemId)?.TransportMethod;
                                 break;
                         }
@@ -73,7 +73,7 @@
                     @{
                         foreach (var t in Model.Attraction)
                         {
-                            <option data-category="3" data-district="@t.DistrictId" value="@t.AttractionId" hidden>@t.ScenicSpotName</option>
+                            <option data-category="3" data-district="@t.DistrictId" value="@t.AttractionId" hidden>@t.AttractionName</option>
                         }
 
                         foreach (var t in Model.Restaurant)
@@ -83,7 +83,7 @@
 
                         foreach (var h in Model.Hotel)
                         {
-                            <option data-category="0" data-district="@h.DistrictId" value="@h.HotelId" hidden>@h.HotelName</option>
+                            <option data-category="0" data-district="@h.DistrictId" value="@h.AccommodationId" hidden>@h.AccommodationName</option>
                         }
 
                         foreach (var t in Model.Transportation)
@@ -107,9 +107,9 @@
                 <span asp-validation-for="EditContent.Time" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="EditContent.HotelName" class="control-label"></label>
-                <input asp-for="EditContent.HotelName" class="form-control" />
-                <span asp-validation-for="EditContent.HotelName" class="text-danger"></span>
+                <label asp-for="EditContent.AccommodationName" class="control-label"></label>
+                <input asp-for="EditContent.AccommodationName" class="form-control" />
+                <span asp-validation-for="EditContent.AccommodationName" class="text-danger"></span>
             </div>
             <div class="mt-4">
                 @if (PermissionChecker.CanManageCustomTravels)

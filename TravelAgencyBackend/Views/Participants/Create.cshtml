@@ -46,7 +46,7 @@
 
     <div class="mb-3">
         <label asp-for="Gender" class="form-label"></label>
-        <select asp-for="Gender" class="form-control" asp-items="Html.GetEnumSelectList<GenderTypes>();"></select>
+        <select asp-for="Gender" class="form-control" asp-items="Html.GetEnumSelectList<GenderType>();"></select>
         <span asp-validation-for="Gender" class="text-danger"></span>
     </div>
 

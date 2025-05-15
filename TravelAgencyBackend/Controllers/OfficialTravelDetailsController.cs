@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TravelAgency.Shared.Data;
+using TravelAgency.Shared.Models;
 using TravelAgencyBackend.Services;
 
 namespace TravelAgencyBackend.Controllers
@@ -26,9 +27,11 @@ namespace TravelAgencyBackend.Controllers
         {
             var check = CheckPermissionOrForbid("查看官方行程");
             if (check != null) return check;
-
-            var appDbContext = _context.OfficialTravelDetails.Include(o => o.Flight).Include(o => o.OfficialTravel);
-            return View(appDbContext);
+            // 楷茵
+            //var appDbContext = _context.OfficialTravelDetails.Include(o => o.Flight).Include(o => o.OfficialTravel);
+            return View(
+                //appDbContext
+                );
         }
 
         // GET: OfficialTravelDetails/Details/5
@@ -43,7 +46,8 @@ namespace TravelAgencyBackend.Controllers
             }
 
             var officialTravelDetail = await _context.OfficialTravelDetails
-                .Include(o => o.Flight)
+                // 楷茵
+                //.Include(o => o.Flight)
                 .Include(o => o.OfficialTravel)
                 .FirstOrDefaultAsync(m => m.OfficialTravelDetailId == id);
             if (officialTravelDetail == null)
@@ -59,8 +63,8 @@ namespace TravelAgencyBackend.Controllers
         {
             var check = CheckPermissionOrForbid("管理官方行程");
             if (check != null) return check;
-
-            ViewData["FlightId"] = new SelectList(_context.Flights, "FlightId", "AirlineCode");
+            // 楷茵
+            //ViewData["FlightId"] = new SelectList(_context.Flights, "FlightId", "AirlineCode");
             ViewData["OfficialTravelId"] = new SelectList(_context.OfficialTravels, "OfficialTravelId", "Title");
             return View();
         }
@@ -83,7 +87,8 @@ namespace TravelAgencyBackend.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["FlightId"] = new SelectList(_context.Flights, "FlightId", "AirlineCode", officialTravelDetail.FlightId);
+            // 楷茵
+            //ViewData["FlightId"] = new SelectList(_context.Flights, "FlightId", "AirlineCode", officialTravelDetail.FlightId);
             ViewData["OfficialTravelId"] = new SelectList(_context.OfficialTravels, "OfficialTravelId", "Title", officialTravelDetail.OfficialTravelId);
             return View(officialTravelDetail);
         }
@@ -104,7 +109,8 @@ namespace TravelAgencyBackend.Controllers
             {
                 return NotFound();
             }
-            ViewData["FlightId"] = new SelectList(_context.Flights, "FlightId", "AirlineCode", officialTravelDetail.FlightId);
+            // 楷茵
+            //ViewData["FlightId"] = new SelectList(_context.Flights, "FlightId", "AirlineCode", officialTravelDetail.FlightId);
             ViewData["OfficialTravelId"] = new SelectList(_context.OfficialTravels, "OfficialTravelId", "Title", officialTravelDetail.OfficialTravelId);
             return View(officialTravelDetail);
         }
@@ -146,7 +152,8 @@ namespace TravelAgencyBackend.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["FlightId"] = new SelectList(_context.Flights, "FlightId", "AirlineCode", officialTravelDetail.FlightId);
+            // 楷茵
+            //ViewData["FlightId"] = new SelectList(_context.Flights, "FlightId", "AirlineCode", officialTravelDetail.FlightId);
             ViewData["OfficialTravelId"] = new SelectList(_context.OfficialTravels, "OfficialTravelId", "Title", officialTravelDetail.OfficialTravelId);
             return View(officialTravelDetail);
         }
@@ -163,7 +170,8 @@ namespace TravelAgencyBackend.Controllers
             }
 
             var officialTravelDetail = await _context.OfficialTravelDetails
-                .Include(o => o.Flight)
+                // 楷茵
+                //.Include(o => o.Flight)
                 .Include(o => o.OfficialTravel)
                 .FirstOrDefaultAsync(m => m.OfficialTravelDetailId == id);
             if (officialTravelDetail == null)

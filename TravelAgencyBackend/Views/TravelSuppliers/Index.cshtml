@@ -1,4 +1,4 @@
-﻿@model IEnumerable<TravelAgencyBackend.Models.TravelSupplier>
+﻿@model IEnumerable<TravelAgency.Shared.Models.TravelSupplier>
 
 @{
 	ViewData["Title"] = "Index";
@@ -19,7 +19,6 @@
 			<th>@Html.DisplayNameFor(model => model.ContactName)</th>
 			<th>@Html.DisplayNameFor(model => model.ContactPhone)</th>
 			<th>@Html.DisplayNameFor(model => model.ContactEmail)</th>
-			<th>@Html.DisplayNameFor(model => model.Note)</th>
 			<th></th>
 		</tr>
 	</thead>
@@ -47,9 +46,6 @@
 					</td>
 					<td>
 						@Html.DisplayFor(modelItem => item.ContactEmail)
-					</td>
-					<td>
-						@Html.DisplayFor(modelItem => item.Note)
 					</td>
 					<td>
 						<a asp-action="Edit" asp-route-id="@item.TravelSupplierId">編輯</a> |

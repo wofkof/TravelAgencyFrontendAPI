@@ -1,5 +1,5 @@
 ﻿@model TravelAgencyBackend.ViewModels.TravelRecord.TravelItemGroupIndexViewModel
-@using TravelAgencyBackend.Models
+@using TravelAgency.Shared.Models
 @{
     // ... (排序變數同之前) ...
     var currentSortField = Model.SortField;
@@ -10,12 +10,12 @@
     var nextSortDirectionCount = (currentSortField == "OrderCount" && currentSortDirection == "asc") ? "desc" : "asc";
 
     // 輔助方法或直接在 View 中判斷
-    Func<OrderCategory, string> GetCategoryPrefix = (category) =>
+    Func<ProductCategory, string> GetCategoryPrefix = (category) =>
     {
         switch (category)
         {
-            case OrderCategory.OfficialTravelDetail: return "[官方]";
-            case OrderCategory.CustomTravel: return "[客製]";
+            case ProductCategory.GroupTravel: return "[官方]";
+            case ProductCategory.CustomTravel: return "[客製]";
             default: return "";
         }
     };

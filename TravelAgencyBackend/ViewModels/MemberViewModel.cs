@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using TravelAgencyBackend.Models;
+using TravelAgency.Shared.Models;
 
 namespace TravelAgencyBackend.ViewModels
 {

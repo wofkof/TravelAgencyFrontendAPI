@@ -1,5 +1,5 @@
 ﻿@model TravelAgencyBackend.ViewModels.Order.OrderIndexViewModel
-@using TravelAgencyBackend.Models 
+@using TravelAgency.Shared.Models 
 
 @{
     var currentSortField = Model.SortField;
@@ -61,7 +61,7 @@
                                 // 假設 Enum 有 Paid, PendingPayment, Unpaid
                                 switch (item.Status)
                                 {
-                                    case OrderStatus.Paid: // 已付款
+                                    case OrderStatus.Completed: // 已付款
                                         badgeClass = "bg-success";
                                         statusText = "已付款"; // 顯示中文
                                         break;

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using TravelAgencyBackend.Models;
+using TravelAgency.Shared.Models;
 
 namespace TravelAgencyBackend.ViewModels.TravelRecord
 {
@@ -31,7 +31,7 @@ namespace TravelAgencyBackend.ViewModels.TravelRecord
         public string ItemName { get; set; } = string.Empty;
 
         [Display(Name = "行程類別")]
-        public OrderCategory OrderCategory { get; set; }
+        public ProductCategory OrderCategory { get; set; }
 
         [Display(Name = "訂單建立時間")]
         [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd HH:mm:ss}")]

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<TravelAgencyBackend.Models.OfficialTravelSchedule>
+﻿@model IEnumerable<TravelAgency.Shared.Models.OfficialTravelSchedule>
 
 @{
     ViewData["Title"] = "Index";
@@ -47,18 +47,19 @@
 <table id="myTable" class="display">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Category)
-            </th>
+            @* 楷茵 *@
+            @* <th> *@
+            @*     @Html.DisplayNameFor(model => model.Category) *@
+            @* </th> *@
             <th>
                 @Html.DisplayNameFor(model => model.Day)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.StartTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Date)
-            </th>
+            @* <th> *@
+            @*     @Html.DisplayNameFor(model => model.StartTime) *@
+            @* </th> *@
+            @* <th> *@
+            @*     @Html.DisplayNameFor(model => model.Date) *@
+            @* </th> *@
             <th>
                 @Html.DisplayNameFor(model => model.Description)
             </th>
@@ -77,18 +78,19 @@
     <tbody>
         @foreach (var item in Model) {
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Category)
-                </td>
+                @* 楷茵 *@
+                @* <td> *@
+                @*     @Html.DisplayFor(modelItem => item.Category) *@
+                @* </td> *@
                 <td>
                     @Html.DisplayFor(modelItem => item.Day)
                 </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.StartTime)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Date)
-                </td>
+                @* <td> *@
+                @*     @Html.DisplayFor(modelItem => item.StartTime) *@
+                @* </td> *@
+                @* <td> *@
+                @*     @Html.DisplayFor(modelItem => item.Date) *@
+                @* </td> *@
                 <td>
                     @Html.DisplayFor(modelItem => item.Description)
                 </td>

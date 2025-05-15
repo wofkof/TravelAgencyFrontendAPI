@@ -67,56 +67,56 @@ namespace TravelAgencyBackend.Controllers
         //}
 
         // GET: OfficialTravelSchedules/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            var check = CheckPermissionOrForbid("查看官方行程");
-            if (check != null) return check;
+        // 楷茵
+        //public async Task<IActionResult> Details(int? id)
+        //{
+        //    var check = CheckPermissionOrForbid("查看官方行程");
+        //    if (check != null) return check;
 
-            if (id == null)
-            {
-                return NotFound();
-            }
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var schedule = await _context.OfficialTravelSchedules
-                .Include(o => o.OfficialTravelDetail)
-                .FirstOrDefaultAsync(m => m.OfficialTravelScheduleId == id);
+        //    var schedule = await _context.OfficialTravelSchedules
+        //        .Include(o => o.OfficialTravelDetail)
+        //        .FirstOrDefaultAsync(m => m.OfficialTravelScheduleId == id);
 
-            if (schedule == null)
-            {
-                return NotFound();
-            }
+        //    if (schedule == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            // 根據活動類型查詢對應的資料表
-            // 楷茵
-            string activityName = schedule.Category switch
-            {
-                TravelActivityType.Hotel => await _context.Hotels
-                    .Where(h => h.HotelId == schedule.ItemId)
-                    .Select(h => h.HotelName)
-                    .FirstOrDefaultAsync() ?? "",
+        //    // 根據活動類型查詢對應的資料表
+        //    string activityName = schedule.Category switch
+        //    {
+        //        TravelActivityType.Hotel => await _context.Hotels
+        //            .Where(h => h.HotelId == schedule.ItemId)
+        //            .Select(h => h.HotelName)
+        //            .FirstOrDefaultAsync() ?? "",
 
-                TravelActivityType.Attraction => await _context.Attractions
-                    .Where(a => a.AttractionId == schedule.ItemId)
-                    .Select(a => a.ScenicSpotName)
-                    .FirstOrDefaultAsync() ?? "",
+        //        TravelActivityType.Attraction => await _context.Attractions
+        //            .Where(a => a.AttractionId == schedule.ItemId)
+        //            .Select(a => a.ScenicSpotName)
+        //            .FirstOrDefaultAsync() ?? "",
 
-                TravelActivityType.Restaurant => await _context.Restaurants
-                    .Where(r => r.RestaurantId == schedule.ItemId)
-                    .Select(r => r.RestaurantName)
-                    .FirstOrDefaultAsync() ?? "",
+        //        TravelActivityType.Restaurant => await _context.Restaurants
+        //            .Where(r => r.RestaurantId == schedule.ItemId)
+        //            .Select(r => r.RestaurantName)
+        //            .FirstOrDefaultAsync() ?? "",
 
-                _ => ""
-            };
+        //        _ => ""
+        //    };
 
-            // 建立 ViewModel
-            var viewModel = new ScheduleWithActivityNameViewModel
-            {
-                Schedule = schedule,
-                ActivityName = activityName
-            };
+        //    // 建立 ViewModel
+        //    var viewModel = new ScheduleWithActivityNameViewModel
+        //    {
+        //        Schedule = schedule,
+        //        ActivityName = activityName
+        //    };
 
-            return View(viewModel);
-        }
+        //    return View(viewModel);
+        //}
 
 
         // GET: OfficialTravelSchedules/Create

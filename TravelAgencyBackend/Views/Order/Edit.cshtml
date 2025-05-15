@@ -26,7 +26,7 @@
             <div class="mb-3 row">
                 <label asp-for="Category" class="col-sm-3 col-form-label">類別</label>
                 <div class="col-sm-6">
-                    <select asp-for="Category" class="form-select form-select-sm" asp-items="Html.GetEnumSelectList<TravelAgencyBackend.Models.OrderCategory>()" id="Category"></select> 
+                    <select asp-for="Category" class="form-select form-select-sm" asp-items="Html.GetEnumSelectList<TravelAgency.Shared.Models.ProductCategory>()" id="Category"></select> 
                     <span asp-validation-for="Category" class="text-danger"></span>
                 </div>
             </div>
@@ -41,7 +41,7 @@
                             int itemValueAsInt;
                             bool isItemValueValidInt = int.TryParse(item.Value.ToString(), out itemValueAsInt);
 
-                            <option value="@item.Value" selected="@(Model.Category == TravelAgencyBackend.Models.OrderCategory.OfficialTravelDetail && isItemValueValidInt && Model.ItemId == itemValueAsInt ? "selected" : null)">@item.Text</option>
+                            <option value="@item.Value" selected="@(Model.Category == TravelAgency.Shared.Models.ProductCategory.GroupTravel && isItemValueValidInt && Model.ItemId == itemValueAsInt ? "selected" : null)">@item.Text</option>
                         }
                     </select>
                     <span asp-validation-for="ItemId" class="text-danger"></span> 
@@ -57,7 +57,7 @@
                             int itemValueAsInt;
                             bool isItemValueValidInt = int.TryParse(item.Value.ToString(), out itemValueAsInt);
 
-                            <option value="@item.Value" selected="@(Model.Category == TravelAgencyBackend.Models.OrderCategory.CustomTravel && isItemValueValidInt && Model.ItemId == itemValueAsInt ? "selected" : null)">@item.Text</option>
+                            <option value="@item.Value" selected="@(Model.Category == TravelAgency.Shared.Models.ProductCategory.CustomTravel && isItemValueValidInt && Model.ItemId == itemValueAsInt ? "selected" : null)">@item.Text</option>
                         }
                     </select>
                     <span asp-validation-for="ItemId" class="text-danger"></span> 
@@ -93,7 +93,7 @@
             <div class="mb-3 row">
                 <label asp-for="Status" class="col-sm-3 col-form-label">狀態</label>
                 <div class="col-sm-6">
-                    <select asp-for="Status" class="form-select form-select-sm" asp-items="Html.GetEnumSelectList<TravelAgencyBackend.Models.OrderStatus>()"></select> 
+                    <select asp-for="Status" class="form-select form-select-sm" asp-items="Html.GetEnumSelectList<TravelAgency.Shared.Models.OrderStatus>()"></select> 
                     <span asp-validation-for="Status" class="text-danger"></span> 
                 </div>
             </div>
@@ -101,7 +101,7 @@
             <div class="mb-3 row">
                 <label asp-for="PaymentMethod" class="col-sm-3 col-form-label">付款方式</label> 
                 <div class="col-sm-6">
-                    <select asp-for="PaymentMethod" class="form-select form-select-sm" asp-items="Html.GetEnumSelectList<TravelAgencyBackend.Models.PaymentMethod>()"></select> 
+                    <select asp-for="PaymentMethod" class="form-select form-select-sm" asp-items="Html.GetEnumSelectList<TravelAgency.Shared.Models.PaymentMethod>()"></select> 
                     <span asp-validation-for="PaymentMethod" class="text-danger"></span>
                 </div>
             </div>

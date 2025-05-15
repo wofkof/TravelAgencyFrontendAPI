@@ -4,7 +4,7 @@
     {
         Active,
         Suspended,
-        Deleted
+        Deleted 
     }
     public class Employee
     {
@@ -19,6 +19,10 @@
         public DateTime HireDate { get; set; }
         public EmployeeStatus Status { get; set; }
         public string? Note { get; set; }
+
+        public GenderType Gender { get; set; } = GenderType.Male;
+        public string Address { get; set; }
+        public string? ImagePath { get; set; }
 
         public Role Role { get; set; }
         public ICollection<ChatRoom> ChatRooms { get; set; } = new List<ChatRoom>();

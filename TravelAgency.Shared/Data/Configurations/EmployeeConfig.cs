@@ -27,11 +27,25 @@ namespace TravelAgency.Shared.Data.Configurations
             entity.Property(e => e.Phone)
                 .HasMaxLength(20)
                 .IsRequired();
+
             entity.HasIndex(e => e.Phone).IsUnique();
 
             entity.Property(e => e.BirthDate).HasColumnType("date").IsRequired(false);
 
             entity.Property(e => e.HireDate).HasColumnType("date").HasDefaultValueSql("GETDATE()").IsRequired();
+
+            entity.Property(e => e.Address)
+                  .HasMaxLength(255)
+                  .IsRequired(false);
+
+            entity.Property(e => e.Gender)
+                  .HasConversion<string>()
+                  .HasDefaultValue(GenderType.Other)
+                  .IsRequired();
+
+            entity.Property(e => e.ImagePath)
+                  .HasMaxLength(255)
+                  .IsRequired(false);
 
             entity.Property(e => e.Status)
                 .HasConversion<string>()
