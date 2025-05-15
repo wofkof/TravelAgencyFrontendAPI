@@ -12,8 +12,8 @@ using TravelAgencyFrontendAPI.Data;
 namespace TravelAgencyFrontendAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250506171523_InitSQL1")]
-    partial class InitSQL1
+    [Migration("20250515021223_InitSQL")]
+    partial class InitSQL
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2162,7 +2162,7 @@ namespace TravelAgencyFrontendAPI.Migrations
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.GroupTravel", b =>
                 {
                     b.HasOne("TravelAgencyFrontendAPI.Models.OfficialTravelDetail", "OfficialTravelDetail")
-                        .WithMany()
+                        .WithMany("GroupTravels")
                         .HasForeignKey("OfficialTravelDetailId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2270,7 +2270,7 @@ namespace TravelAgencyFrontendAPI.Migrations
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OfficialTravelDetail", b =>
                 {
                     b.HasOne("TravelAgencyFrontendAPI.Models.OfficialTravel", "OfficialTravel")
-                        .WithMany()
+                        .WithMany("OfficialTravelDetails")
                         .HasForeignKey("OfficialTravelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2406,6 +2406,16 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("MemberFavoriteTravelers");
 
                     b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OfficialTravel", b =>
+                {
+                    b.Navigation("OfficialTravelDetails");
+                });
+
+            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OfficialTravelDetail", b =>
+                {
+                    b.Navigation("GroupTravels");
                 });
 
             modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Order", b =>
