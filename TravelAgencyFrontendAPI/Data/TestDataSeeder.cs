@@ -788,7 +788,10 @@ namespace TravelAgencyFrontendAPI.Data
                         Attraction4 = null,
                         Attraction5 = null,
                         Note1 = "這是郵輪旅行行程第二天的備註1",
-                        Note2 = "這是郵輪旅行行程第二天的備註2"
+                        Note2 = "這是郵輪旅行行程第二天的備註2",
+                    });
+            }
+        }
         private async Task SeedCustomTravelContentAsync()
         {
             if (!_context.CustomTravelContents.Any())
