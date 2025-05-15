@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TravelAgencyFrontendAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class InitSQL1 : Migration
+    public partial class InitSQL : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
