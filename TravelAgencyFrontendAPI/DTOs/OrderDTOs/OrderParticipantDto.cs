@@ -1,7 +1,7 @@
 // In file: DTOs/OrderDTOs/OrderParticipantDto.cs
 using System;
 using System.ComponentModel.DataAnnotations;
-using TravelAgencyFrontendAPI.Models; // For GenderType, DocumentType enums
+using TravelAgency.Shared.Models; // For GenderType, DocumentType enums
 
 namespace TravelAgencyFrontendAPI.DTOs.OrderDTOs
 {

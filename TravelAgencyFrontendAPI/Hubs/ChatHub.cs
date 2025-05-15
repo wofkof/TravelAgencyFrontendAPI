@@ -1,13 +1,8 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using TravelAgencyFrontendAPI.DTOs.ChatRoomDTOs;
-<<<<<<< HEAD
 using TravelAgency.Shared.Data;
 using TravelAgency.Shared.Models;
-
-=======
-using TravelAgencyFrontendAPI.Models;
 using System.Collections.Concurrent;
->>>>>>> 094a9b7f351117c935d91d1dfa7e02d313bb8bf9
 
 namespace TravelAgencyFrontendAPI.Hubs
 {

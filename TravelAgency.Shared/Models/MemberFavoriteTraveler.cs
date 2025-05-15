@@ -20,7 +20,7 @@ namespace TravelAgency.Shared.Models
         public string? Email { get; set; } 
         public DocumentType? DocumentType { get; set; } 
         public string? DocumentNumber { get; set; }
-        public string? PassportSurName { get; set; }
+        public string? PassportSurname { get; set; }
         public string? PassportGivenName { get; set; }
         public DateTime? PassportExpireDate { get; set; }
         public string? Nationality { get; set; }

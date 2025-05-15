@@ -3,14 +3,8 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using TravelAgencyFrontendAPI.DTOs.ChatRoomDTOs;
 using TravelAgencyFrontendAPI.Hubs;
-<<<<<<< HEAD
 using TravelAgency.Shared.Data;
 using TravelAgency.Shared.Models;
-
-=======
-using TravelAgencyFrontendAPI.Models;
-using static TravelAgencyFrontendAPI.Hubs.ChatHub;
->>>>>>> 094a9b7f351117c935d91d1dfa7e02d313bb8bf9
 
 namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
 {

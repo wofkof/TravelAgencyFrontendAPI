@@ -22,7 +22,7 @@ namespace TravelAgency.Shared.Data.Configurations
 
 
             entity.HasOne(m => m.ChatRoom)
-                  .WithMany()
+                  .WithMany(c => c.Messages)
                   .HasForeignKey(m => m.ChatRoomId);
         }
     }

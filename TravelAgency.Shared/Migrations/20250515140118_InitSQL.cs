@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace TravelAgencyFrontendAPI.Migrations
+namespace TravelAgency.Shared.Migrations
 {
     /// <inheritdoc />
     public partial class InitSQL : Migration
@@ -98,7 +98,12 @@ namespace TravelAgencyFrontendAPI.Migrations
                     IsBlacklisted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     Note = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "GETDATE()"),
-                    DeletedAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "GETDATE()")
+                    DeletedAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "GETDATE()"),
+                    ProfileImage = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    IsCustomAvatar = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    EmailVerificationCode = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    EmailVerificationExpireTime = table.Column<DateTime>(type: "datetime", nullable: true),
+                    IsEmailVerified = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
                 },
                 constraints: table =>
                 {
@@ -111,7 +116,8 @@ namespace TravelAgencyFrontendAPI.Migrations
                 {
                     PermissionId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    PermissionName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                    PermissionName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Caption = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -281,11 +287,11 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .Annotation("SqlServer:Identity", "20000, 1"),
                     MemberId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     IdNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     BirthDate = table.Column<DateTime>(type: "date", nullable: false),
                     Gender = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true, defaultValue: "Other"),
-                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     DocumentType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true, defaultValue: "Passport"),
                     DocumentNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     PassportSurname = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
@@ -295,7 +301,8 @@ namespace TravelAgencyFrontendAPI.Migrations
                     CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETDATE()"),
                     UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "GETDATE()"),
                     Note = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Active")
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Active"),
+                    IssuedPlace = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -326,7 +333,10 @@ namespace TravelAgencyFrontendAPI.Migrations
                     InvoiceTitle = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     InvoiceAddBillingAddr = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     InvoiceBillingAddress = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    Note = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
+                    Note = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    OrdererName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    OrdererPhone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    OrdererEmail = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -434,7 +444,10 @@ namespace TravelAgencyFrontendAPI.Migrations
                     BirthDate = table.Column<DateTime>(type: "date", nullable: true),
                     HireDate = table.Column<DateTime>(type: "date", nullable: false, defaultValueSql: "GETDATE()"),
                     Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Active"),
-                    Note = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
+                    Note = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Gender = table.Column<string>(type: "nvarchar(max)", nullable: false, defaultValue: "Other"),
+                    Address = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    ImagePath = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -672,11 +685,18 @@ namespace TravelAgencyFrontendAPI.Migrations
                     PassportGivenName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     PassportExpireDate = table.Column<DateTime>(type: "date", nullable: true),
                     Nationality = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    Note = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
+                    Note = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    MemberId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_T_OrderParticipant", x => x.OrderParticipantId);
+                    table.ForeignKey(
+                        name: "FK_T_OrderParticipant_T_Member_MemberId",
+                        column: x => x.MemberId,
+                        principalTable: "T_Member",
+                        principalColumn: "MemberId",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_T_OrderParticipant_T_Order_OrderId",
                         column: x => x.OrderId,
@@ -769,7 +789,8 @@ namespace TravelAgencyFrontendAPI.Migrations
                     MemberId = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETDATE()"),
                     IsBlocked = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
-                    LastMessageAt = table.Column<DateTime>(type: "datetime", nullable: true)
+                    LastMessageAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -779,13 +800,13 @@ namespace TravelAgencyFrontendAPI.Migrations
                         column: x => x.EmployeeId,
                         principalTable: "T_Employee",
                         principalColumn: "EmployeeId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_T_ChatRoom_T_Member_MemberId",
                         column: x => x.MemberId,
                         principalTable: "T_Member",
                         principalColumn: "MemberId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -1135,7 +1156,8 @@ namespace TravelAgencyFrontendAPI.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_T_ChatRoom_MemberId",
                 table: "T_ChatRoom",
-                column: "MemberId");
+                column: "MemberId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_T_Collect_MemberId_TravelType_TravelId",
@@ -1231,7 +1253,8 @@ namespace TravelAgencyFrontendAPI.Migrations
                 name: "IX_T_MemberFavoriteTraveler_Email",
                 table: "T_MemberFavoriteTraveler",
                 column: "Email",
-                unique: true);
+                unique: true,
+                filter: "[Email] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_T_MemberFavoriteTraveler_IdNumber",
@@ -1248,7 +1271,8 @@ namespace TravelAgencyFrontendAPI.Migrations
                 name: "IX_T_MemberFavoriteTraveler_Phone",
                 table: "T_MemberFavoriteTraveler",
                 column: "Phone",
-                unique: true);
+                unique: true,
+                filter: "[Phone] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_T_Message_ChatRoomId",
@@ -1343,6 +1367,11 @@ namespace TravelAgencyFrontendAPI.Migrations
                 table: "T_OrderParticipant",
                 column: "IdNumber",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_OrderParticipant_MemberId",
+                table: "T_OrderParticipant",
+                column: "MemberId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_T_OrderParticipant_OrderId",

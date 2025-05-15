@@ -19,14 +19,14 @@ namespace TravelAgency.Shared.Data.Configurations
 
             entity.Property(p => p.Phone).HasMaxLength(20).IsRequired(false);
             entity.HasIndex(p => p.Phone).IsUnique();
-
+            
             entity.Property(p => p.Email).HasMaxLength(100).IsRequired(false);
             entity.HasIndex(p => p.Email).IsUnique();
 
             entity.Property(p => p.DocumentType).HasMaxLength(20).HasConversion<string>().HasDefaultValue(DocumentType.Passport).IsRequired(false);
             entity.Property(p => p.DocumentNumber).HasMaxLength(50).IsRequired(false);
 
-            entity.Property(p => p.PassportSurName).HasMaxLength(50).IsRequired(false);
+            entity.Property(p => p.PassportSurname).HasMaxLength(50).IsRequired(false);
             entity.Property(p => p.PassportGivenName).HasMaxLength(50).IsRequired(false);
             entity.Property(p => p.PassportExpireDate).HasColumnType("date").IsRequired(false);
 

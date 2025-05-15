@@ -20,7 +20,7 @@
         public EmployeeStatus Status { get; set; }
         public string? Note { get; set; }
 
-        public GenderType Gender { get; set; } = GenderType.Male;
+        public GenderType? Gender { get; set; }
         public string Address { get; set; }
         public string? ImagePath { get; set; }
 

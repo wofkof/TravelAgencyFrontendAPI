@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TravelAgencyFrontendAPI.Data;
+using TravelAgency.Shared.Data;
 
 #nullable disable
 
-namespace TravelAgencyFrontendAPI.Migrations
+namespace TravelAgency.Shared.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250515140118_InitSQL")]
+    partial class InitSQL
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +25,7 @@ namespace TravelAgencyFrontendAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Accommodation", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Accommodation", b =>
                 {
                     b.Property<int>("AccommodationId")
                         .ValueGeneratedOnAdd()
@@ -45,7 +48,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Accommodation", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Agency", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Agency", b =>
                 {
                     b.Property<int>("AgencyCode")
                         .ValueGeneratedOnAdd()
@@ -87,7 +90,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Agency", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Announcement", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Announcement", b =>
                 {
                     b.Property<int>("AnnouncementId")
                         .ValueGeneratedOnAdd()
@@ -125,7 +128,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Announcement", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Attraction", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Attraction", b =>
                 {
                     b.Property<int>("AttractionId")
                         .ValueGeneratedOnAdd()
@@ -148,7 +151,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Attraction", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.CallLog", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.CallLog", b =>
                 {
                     b.Property<int>("CallId")
                         .ValueGeneratedOnAdd()
@@ -201,7 +204,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_CallLog", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.ChatRoom", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.ChatRoom", b =>
                 {
                     b.Property<int>("ChatRoomId")
                         .ValueGeneratedOnAdd()
@@ -228,16 +231,20 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Property<int>("MemberId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.HasKey("ChatRoomId");
 
                     b.HasIndex("EmployeeId");
 
-                    b.HasIndex("MemberId");
+                    b.HasIndex("MemberId")
+                        .IsUnique();
 
                     b.ToTable("T_ChatRoom", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.City", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.City", b =>
                 {
                     b.Property<int>("CityId")
                         .ValueGeneratedOnAdd()
@@ -255,7 +262,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("S_City", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Collect", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Collect", b =>
                 {
                     b.Property<int>("CollectId")
                         .ValueGeneratedOnAdd()
@@ -287,7 +294,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Collect", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Comment", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Comment", b =>
                 {
                     b.Property<int>("CommentId")
                         .ValueGeneratedOnAdd()
@@ -335,7 +342,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                         });
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Country", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Country", b =>
                 {
                     b.Property<int>("CountryId")
                         .ValueGeneratedOnAdd()
@@ -358,7 +365,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Countries", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.CustomTravel", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.CustomTravel", b =>
                 {
                     b.Property<int>("CustomTravelId")
                         .ValueGeneratedOnAdd()
@@ -415,7 +422,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_CustomTravel", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.CustomTravelContent", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.CustomTravelContent", b =>
                 {
                     b.Property<int>("ContentId")
                         .ValueGeneratedOnAdd()
@@ -453,7 +460,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_CustomTravelContent", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.District", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.District", b =>
                 {
                     b.Property<int>("DistrictId")
                         .ValueGeneratedOnAdd()
@@ -476,7 +483,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("S_District", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.DocumentApplicationForm", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.DocumentApplicationForm", b =>
                 {
                     b.Property<int>("ApplicationId")
                         .ValueGeneratedOnAdd()
@@ -528,7 +535,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_DocumentApplicationForm", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.DocumentOrderDetails", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.DocumentOrderDetails", b =>
                 {
                     b.Property<int>("DocumentOrderId")
                         .ValueGeneratedOnAdd()
@@ -608,13 +615,17 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_DocumentOrderDetails", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Employee", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Employee", b =>
                 {
                     b.Property<int>("EmployeeId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmployeeId"));
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("date");
@@ -624,10 +635,20 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValue("Other");
+
                     b.Property<DateTime>("HireDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("date")
                         .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("ImagePath")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -671,7 +692,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Employee", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.GroupTravel", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.GroupTravel", b =>
                 {
                     b.Property<int>("GroupTravelId")
                         .ValueGeneratedOnAdd()
@@ -723,7 +744,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_GroupTravel", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Member", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Member", b =>
                 {
                     b.Property<int>("MemberId")
                         .ValueGeneratedOnAdd()
@@ -758,6 +779,14 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("EmailVerificationCode")
+                        .HasMaxLength(20)
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("EmailVerificationExpireTime")
+                        .HasColumnType("datetime");
+
                     b.Property<string>("Gender")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(10)
@@ -773,6 +802,16 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.Property<bool>("IsBlacklisted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsCustomAvatar")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsEmailVerified")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
@@ -816,6 +855,11 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("ProfileImage")
+                        .HasMaxLength(100)
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTime>("RegisterDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -851,7 +895,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Member", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.MemberFavoriteTraveler", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.MemberFavoriteTraveler", b =>
                 {
                     b.Property<int>("FavoriteTravelerId")
                         .ValueGeneratedOnAdd()
@@ -879,7 +923,6 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .HasDefaultValue("Passport");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -893,6 +936,10 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("IssuedPlace")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("MemberId")
                         .HasColumnType("int");
@@ -922,7 +969,6 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Phone")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -941,7 +987,8 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.HasKey("FavoriteTravelerId");
 
                     b.HasIndex("Email")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[Email] IS NOT NULL");
 
                     b.HasIndex("IdNumber")
                         .IsUnique();
@@ -949,12 +996,13 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.HasIndex("MemberId");
 
                     b.HasIndex("Phone")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[Phone] IS NOT NULL");
 
                     b.ToTable("T_MemberFavoriteTraveler", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Message", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Message", b =>
                 {
                     b.Property<int>("MessageId")
                         .ValueGeneratedOnAdd()
@@ -1004,7 +1052,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Message", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.MessageMedia", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.MessageMedia", b =>
                 {
                     b.Property<int>("MediaId")
                         .ValueGeneratedOnAdd()
@@ -1035,7 +1083,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_MessageMedia", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OfficialAccommodation", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OfficialAccommodation", b =>
                 {
                     b.Property<int>("AccommodationId")
                         .ValueGeneratedOnAdd()
@@ -1073,7 +1121,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Official_Accommodation", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OfficialAttraction", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OfficialAttraction", b =>
                 {
                     b.Property<int>("AttractionId")
                         .ValueGeneratedOnAdd()
@@ -1111,7 +1159,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Official_Attraction", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OfficialRestaurant", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OfficialRestaurant", b =>
                 {
                     b.Property<int>("RestaurantId")
                         .ValueGeneratedOnAdd()
@@ -1149,7 +1197,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Official_Restaurant", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OfficialTravel", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OfficialTravel", b =>
                 {
                     b.Property<int>("OfficialTravelId")
                         .ValueGeneratedOnAdd()
@@ -1220,7 +1268,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_OfficialTravel", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OfficialTravelDetail", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OfficialTravelDetail", b =>
                 {
                     b.Property<int>("OfficialTravelDetailId")
                         .ValueGeneratedOnAdd()
@@ -1257,7 +1305,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_OfficialTravelDetail", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OfficialTravelSchedule", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OfficialTravelSchedule", b =>
                 {
                     b.Property<int>("OfficialTravelScheduleId")
                         .ValueGeneratedOnAdd()
@@ -1321,7 +1369,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_OfficialTravelSchedule", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Order", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Order", b =>
                 {
                     b.Property<int>("OrderId")
                         .ValueGeneratedOnAdd()
@@ -1369,6 +1417,21 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<string>("OrdererEmail")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("OrdererName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("OrdererPhone")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<DateTime?>("PaymentDate")
                         .HasColumnType("datetime");
 
@@ -1396,7 +1459,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Order", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OrderDetail", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OrderDetail", b =>
                 {
                     b.Property<int>("OrderDetailId")
                         .ValueGeneratedOnAdd()
@@ -1462,7 +1525,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                         });
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OrderInvoice", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OrderInvoice", b =>
                 {
                     b.Property<int>("InvoiceId")
                         .ValueGeneratedOnAdd()
@@ -1537,7 +1600,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                         });
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OrderParticipant", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OrderParticipant", b =>
                 {
                     b.Property<int>("OrderParticipantId")
                         .ValueGeneratedOnAdd()
@@ -1571,6 +1634,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("MemberId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1612,6 +1678,8 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.HasIndex("IdNumber")
                         .IsUnique();
 
+                    b.HasIndex("MemberId");
+
                     b.HasIndex("OrderId");
 
                     b.HasIndex("Phone")
@@ -1620,7 +1688,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_OrderParticipant", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Payment", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Payment", b =>
                 {
                     b.Property<int>("PaymentId")
                         .ValueGeneratedOnAdd()
@@ -1646,13 +1714,16 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Payment", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Permission", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Permission", b =>
                 {
                     b.Property<int>("PermissionId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PermissionId"));
+
+                    b.Property<string>("Caption")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PermissionName")
                         .IsRequired()
@@ -1664,7 +1735,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Permission", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.PickupInformation", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.PickupInformation", b =>
                 {
                     b.Property<int>("PickupInfoId")
                         .ValueGeneratedOnAdd()
@@ -1697,7 +1768,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_PickupInformation", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.PickupMethod", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.PickupMethod", b =>
                 {
                     b.Property<byte>("PickupMethodId")
                         .HasColumnType("tinyint");
@@ -1712,7 +1783,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_PickupMethod", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Region", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Region", b =>
                 {
                     b.Property<int>("RegionId")
                         .ValueGeneratedOnAdd()
@@ -1735,7 +1806,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Region", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.ResetPassword", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.ResetPassword", b =>
                 {
                     b.Property<int>("TokenId")
                         .ValueGeneratedOnAdd()
@@ -1771,7 +1842,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_ResetPassword", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Restaurant", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Restaurant", b =>
                 {
                     b.Property<int>("RestaurantId")
                         .ValueGeneratedOnAdd()
@@ -1794,7 +1865,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Restaurant", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Role", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Role", b =>
                 {
                     b.Property<int>("RoleId")
                         .ValueGeneratedOnAdd()
@@ -1812,7 +1883,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Role", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.RolePermission", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.RolePermission", b =>
                 {
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
@@ -1832,7 +1903,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("M_RolePermission", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Sticker", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Sticker", b =>
                 {
                     b.Property<int>("StickerId")
                         .ValueGeneratedOnAdd()
@@ -1855,7 +1926,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_Sticker", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Transport", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Transport", b =>
                 {
                     b.Property<int>("TransportId")
                         .ValueGeneratedOnAdd()
@@ -1873,7 +1944,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("S_Transport", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.TravelRecord", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.TravelRecord", b =>
                 {
                     b.Property<int>("TravelRecordId")
                         .ValueGeneratedOnAdd()
@@ -1928,7 +1999,7 @@ namespace TravelAgencyFrontendAPI.Migrations
                         });
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.TravelSupplier", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.TravelSupplier", b =>
                 {
                     b.Property<int>("TravelSupplierId")
                         .ValueGeneratedOnAdd()
@@ -1967,9 +2038,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.ToTable("T_TravelSupplier", (string)null);
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Accommodation", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Accommodation", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.District", "District")
+                    b.HasOne("TravelAgency.Shared.Models.District", "District")
                         .WithMany()
                         .HasForeignKey("DistrictId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1978,9 +2049,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("District");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Announcement", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Announcement", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Employee", "Employee")
+                    b.HasOne("TravelAgency.Shared.Models.Employee", "Employee")
                         .WithMany()
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1989,9 +2060,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("Employee");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Attraction", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Attraction", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.District", "District")
+                    b.HasOne("TravelAgency.Shared.Models.District", "District")
                         .WithMany()
                         .HasForeignKey("DistrictId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2000,9 +2071,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("District");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.CallLog", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.CallLog", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.ChatRoom", "ChatRoom")
+                    b.HasOne("TravelAgency.Shared.Models.ChatRoom", "ChatRoom")
                         .WithMany()
                         .HasForeignKey("ChatRoomId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2011,18 +2082,18 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("ChatRoom");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.ChatRoom", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.ChatRoom", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Employee", "Employee")
-                        .WithMany()
+                    b.HasOne("TravelAgency.Shared.Models.Employee", "Employee")
+                        .WithMany("ChatRooms")
                         .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Member", "Member")
-                        .WithMany()
-                        .HasForeignKey("MemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("TravelAgency.Shared.Models.Member", "Member")
+                        .WithOne("ChatRoom")
+                        .HasForeignKey("TravelAgency.Shared.Models.ChatRoom", "MemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Employee");
@@ -2030,9 +2101,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("Member");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Collect", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Collect", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Member", "Member")
+                    b.HasOne("TravelAgency.Shared.Models.Member", "Member")
                         .WithMany()
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2041,9 +2112,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("Member");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Comment", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Comment", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Member", "Member")
+                    b.HasOne("TravelAgency.Shared.Models.Member", "Member")
                         .WithMany()
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2052,15 +2123,15 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("Member");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.CustomTravel", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.CustomTravel", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Member", "Member")
+                    b.HasOne("TravelAgency.Shared.Models.Member", "Member")
                         .WithMany()
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Employee", "ReviewEmployee")
+                    b.HasOne("TravelAgency.Shared.Models.Employee", "ReviewEmployee")
                         .WithMany()
                         .HasForeignKey("ReviewEmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2071,9 +2142,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("ReviewEmployee");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.CustomTravelContent", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.CustomTravelContent", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.CustomTravel", "CustomTravel")
+                    b.HasOne("TravelAgency.Shared.Models.CustomTravel", "CustomTravel")
                         .WithMany()
                         .HasForeignKey("CustomTravelId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2082,9 +2153,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("CustomTravel");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.District", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.District", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.City", "City")
+                    b.HasOne("TravelAgency.Shared.Models.City", "City")
                         .WithMany()
                         .HasForeignKey("CityId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2093,15 +2164,15 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("City");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.DocumentApplicationForm", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.DocumentApplicationForm", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Member", "Member")
+                    b.HasOne("TravelAgency.Shared.Models.Member", "Member")
                         .WithMany()
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Region", "Region")
+                    b.HasOne("TravelAgency.Shared.Models.Region", "Region")
                         .WithMany()
                         .HasForeignKey("RegionId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -2111,26 +2182,26 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("Region");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.DocumentOrderDetails", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.DocumentOrderDetails", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Agency", "Agency")
+                    b.HasOne("TravelAgency.Shared.Models.Agency", "Agency")
                         .WithMany()
                         .HasForeignKey("AgencyCode")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("TravelAgencyFrontendAPI.Models.DocumentApplicationForm", "DocumentApplicationForm")
+                    b.HasOne("TravelAgency.Shared.Models.DocumentApplicationForm", "DocumentApplicationForm")
                         .WithMany()
                         .HasForeignKey("ApplicationId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("TravelAgencyFrontendAPI.Models.PickupInformation", "PickupInformation")
+                    b.HasOne("TravelAgency.Shared.Models.PickupInformation", "PickupInformation")
                         .WithMany()
                         .HasForeignKey("PickupInfoId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("TravelAgencyFrontendAPI.Models.PickupMethod", "PickupMethod")
+                    b.HasOne("TravelAgency.Shared.Models.PickupMethod", "PickupMethod")
                         .WithMany()
                         .HasForeignKey("PickupMethodId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -2145,9 +2216,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("PickupMethod");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Employee", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Employee", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Role", "Role")
+                    b.HasOne("TravelAgency.Shared.Models.Role", "Role")
                         .WithMany("Employees")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2156,9 +2227,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.GroupTravel", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.GroupTravel", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.OfficialTravelDetail", "OfficialTravelDetail")
+                    b.HasOne("TravelAgency.Shared.Models.OfficialTravelDetail", "OfficialTravelDetail")
                         .WithMany("GroupTravels")
                         .HasForeignKey("OfficialTravelDetailId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2167,9 +2238,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("OfficialTravelDetail");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.MemberFavoriteTraveler", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.MemberFavoriteTraveler", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Member", "Member")
+                    b.HasOne("TravelAgency.Shared.Models.Member", "Member")
                         .WithMany("MemberFavoriteTravelers")
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2178,10 +2249,10 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("Member");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Message", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Message", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.ChatRoom", "ChatRoom")
-                        .WithMany()
+                    b.HasOne("TravelAgency.Shared.Models.ChatRoom", "ChatRoom")
+                        .WithMany("Messages")
                         .HasForeignKey("ChatRoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2189,9 +2260,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("ChatRoom");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.MessageMedia", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.MessageMedia", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Message", "Message")
+                    b.HasOne("TravelAgency.Shared.Models.Message", "Message")
                         .WithMany()
                         .HasForeignKey("MessageId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2200,13 +2271,13 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("Message");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OfficialAccommodation", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OfficialAccommodation", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Region", "Region")
+                    b.HasOne("TravelAgency.Shared.Models.Region", "Region")
                         .WithMany()
                         .HasForeignKey("RegionId");
 
-                    b.HasOne("TravelAgencyFrontendAPI.Models.TravelSupplier", "TravelSupplier")
+                    b.HasOne("TravelAgency.Shared.Models.TravelSupplier", "TravelSupplier")
                         .WithMany()
                         .HasForeignKey("TravelSupplierId");
 
@@ -2215,13 +2286,13 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("TravelSupplier");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OfficialAttraction", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OfficialAttraction", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Region", "Region")
+                    b.HasOne("TravelAgency.Shared.Models.Region", "Region")
                         .WithMany()
                         .HasForeignKey("RegionId");
 
-                    b.HasOne("TravelAgencyFrontendAPI.Models.TravelSupplier", "TravelSupplier")
+                    b.HasOne("TravelAgency.Shared.Models.TravelSupplier", "TravelSupplier")
                         .WithMany()
                         .HasForeignKey("TravelSupplierId");
 
@@ -2230,13 +2301,13 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("TravelSupplier");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OfficialRestaurant", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OfficialRestaurant", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Region", "Region")
+                    b.HasOne("TravelAgency.Shared.Models.Region", "Region")
                         .WithMany()
                         .HasForeignKey("RegionId");
 
-                    b.HasOne("TravelAgencyFrontendAPI.Models.TravelSupplier", "TravelSupplier")
+                    b.HasOne("TravelAgency.Shared.Models.TravelSupplier", "TravelSupplier")
                         .WithMany()
                         .HasForeignKey("TravelSupplierId");
 
@@ -2245,15 +2316,15 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("TravelSupplier");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OfficialTravel", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OfficialTravel", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Employee", "CreatedByEmployee")
+                    b.HasOne("TravelAgency.Shared.Models.Employee", "CreatedByEmployee")
                         .WithMany()
                         .HasForeignKey("CreatedByEmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Region", "Region")
+                    b.HasOne("TravelAgency.Shared.Models.Region", "Region")
                         .WithMany()
                         .HasForeignKey("RegionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2264,9 +2335,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("Region");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OfficialTravelDetail", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OfficialTravelDetail", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.OfficialTravel", "OfficialTravel")
+                    b.HasOne("TravelAgency.Shared.Models.OfficialTravel", "OfficialTravel")
                         .WithMany("OfficialTravelDetails")
                         .HasForeignKey("OfficialTravelId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2275,9 +2346,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("OfficialTravel");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OfficialTravelSchedule", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OfficialTravelSchedule", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.OfficialTravelDetail", "OfficialTravelDetail")
+                    b.HasOne("TravelAgency.Shared.Models.OfficialTravelDetail", "OfficialTravelDetail")
                         .WithMany()
                         .HasForeignKey("OfficialTravelDetailId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2286,9 +2357,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("OfficialTravelDetail");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Order", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Order", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Member", "Member")
+                    b.HasOne("TravelAgency.Shared.Models.Member", "Member")
                         .WithMany("Orders")
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -2297,9 +2368,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("Member");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OrderDetail", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OrderDetail", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Order", "Order")
+                    b.HasOne("TravelAgency.Shared.Models.Order", "Order")
                         .WithMany("OrderDetails")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2308,9 +2379,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("Order");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OrderInvoice", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OrderInvoice", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Order", "Order")
+                    b.HasOne("TravelAgency.Shared.Models.Order", "Order")
                         .WithMany("OrderInvoices")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -2319,20 +2390,28 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("Order");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OrderParticipant", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OrderParticipant", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Order", "Order")
+                    b.HasOne("TravelAgency.Shared.Models.Member", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgency.Shared.Models.Order", "Order")
                         .WithMany("OrderParticipants")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Member");
+
                     b.Navigation("Order");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Payment", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Payment", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.DocumentOrderDetails", "DocumentOrderDetails")
+                    b.HasOne("TravelAgency.Shared.Models.DocumentOrderDetails", "DocumentOrderDetails")
                         .WithMany()
                         .HasForeignKey("DocumentOrderId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -2341,9 +2420,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("DocumentOrderDetails");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.ResetPassword", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.ResetPassword", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Member", "Member")
+                    b.HasOne("TravelAgency.Shared.Models.Member", "Member")
                         .WithMany()
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2352,9 +2431,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("Member");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Restaurant", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Restaurant", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.District", "District")
+                    b.HasOne("TravelAgency.Shared.Models.District", "District")
                         .WithMany()
                         .HasForeignKey("DistrictId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2363,16 +2442,16 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("District");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.RolePermission", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.RolePermission", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Permission", "Permission")
-                        .WithMany()
+                    b.HasOne("TravelAgency.Shared.Models.Permission", "Permission")
+                        .WithMany("RolePermissions")
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TravelAgencyFrontendAPI.Models.Role", "Role")
-                        .WithMany()
+                    b.HasOne("TravelAgency.Shared.Models.Role", "Role")
+                        .WithMany("RolePermissions")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2382,9 +2461,9 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.TravelRecord", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.TravelRecord", b =>
                 {
-                    b.HasOne("TravelAgencyFrontendAPI.Models.GroupTravel", "GroupTravel")
+                    b.HasOne("TravelAgency.Shared.Models.GroupTravel", "GroupTravel")
                         .WithMany("TravelRecords")
                         .HasForeignKey("GroupTravelId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -2393,29 +2472,41 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("GroupTravel");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.GroupTravel", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.ChatRoom", b =>
+                {
+                    b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("TravelAgency.Shared.Models.Employee", b =>
+                {
+                    b.Navigation("ChatRooms");
+                });
+
+            modelBuilder.Entity("TravelAgency.Shared.Models.GroupTravel", b =>
                 {
                     b.Navigation("TravelRecords");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Member", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Member", b =>
                 {
+                    b.Navigation("ChatRoom");
+
                     b.Navigation("MemberFavoriteTravelers");
 
                     b.Navigation("Orders");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OfficialTravel", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OfficialTravel", b =>
                 {
                     b.Navigation("OfficialTravelDetails");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.OfficialTravelDetail", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.OfficialTravelDetail", b =>
                 {
                     b.Navigation("GroupTravels");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Order", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Order", b =>
                 {
                     b.Navigation("OrderDetails");
 
@@ -2424,9 +2515,16 @@ namespace TravelAgencyFrontendAPI.Migrations
                     b.Navigation("OrderParticipants");
                 });
 
-            modelBuilder.Entity("TravelAgencyFrontendAPI.Models.Role", b =>
+            modelBuilder.Entity("TravelAgency.Shared.Models.Permission", b =>
+                {
+                    b.Navigation("RolePermissions");
+                });
+
+            modelBuilder.Entity("TravelAgency.Shared.Models.Role", b =>
                 {
                     b.Navigation("Employees");
+
+                    b.Navigation("RolePermissions");
                 });
 #pragma warning restore 612, 618
         }

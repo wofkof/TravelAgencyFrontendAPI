@@ -128,7 +128,7 @@ namespace TravelAgencyBackend.Controllers
             {
                 EmployeeId = e.EmployeeId,
                 Name = e.Name,
-                Gender = e.Gender,
+                Gender = (GenderType)e.Gender,
                 BirthDate = (DateTime)e.BirthDate,
                 Phone = e.Phone,
                 Email = e.Email,
@@ -306,7 +306,7 @@ namespace TravelAgencyBackend.Controllers
                 Phone = emp.Phone,
                 BirthDate = (DateTime)emp.BirthDate,
                 HireDate = emp.HireDate,
-                Gender = emp.Gender,
+                Gender = (GenderType)emp.Gender,
                 Status = emp.Status,
                 Address = emp.Address,
                 Note = emp.Note,

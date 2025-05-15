@@ -4,12 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using TravelAgencyFrontendAPI.DTOs.MemberDTOs;
 using TravelAgencyFrontendAPI.Helpers;
 using System.Text.RegularExpressions;
-<<<<<<< HEAD
 using TravelAgency.Shared.Data;
 using TravelAgency.Shared.Models;
-=======
 using Newtonsoft.Json.Linq;
->>>>>>> 094a9b7f351117c935d91d1dfa7e02d313bb8bf9
 
 
 

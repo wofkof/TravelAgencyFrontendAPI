@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using TravelAgencyFrontendAPI.Models; 
+using TravelAgency.Shared.Models; 
 
 namespace TravelAgencyFrontendAPI.Extensions
 {

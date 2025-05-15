@@ -1,15 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-<<<<<<< HEAD
 using TravelAgencyFrontendAPI.DTOs.ChatRoomDTOs;
 using TravelAgency.Shared.Data;
 using TravelAgency.Shared.Models;
-=======
-using TravelAgencyFrontendAPI.Data;
-using TravelAgencyFrontendAPI.DTOs;
 using TravelAgencyFrontendAPI.Hubs;
-using TravelAgencyFrontendAPI.Models;
->>>>>>> 094a9b7f351117c935d91d1dfa7e02d313bb8bf9
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 

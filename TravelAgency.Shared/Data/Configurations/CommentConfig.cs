@@ -35,7 +35,7 @@ namespace TravelAgency.Shared.Data.Configurations
             entity.Property(e => e.CreatedAt)
                   .HasColumnType("datetime")
                   .HasDefaultValueSql("GETDATE()");
-
+            
             entity.HasCheckConstraint("CK_Comment_Rating", "[Rating] BETWEEN 1 AND 5");
 
             entity.HasOne(e => e.Member)

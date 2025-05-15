@@ -1,4 +1,4 @@
-﻿using TravelAgencyFrontendAPI.Models;
+﻿using TravelAgency.Shared.Models;
 
 namespace TravelAgencyFrontendAPI.DTOs.FavoriteTravelerDTOs
 {
