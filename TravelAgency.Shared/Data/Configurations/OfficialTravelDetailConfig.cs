@@ -24,7 +24,7 @@ namespace TravelAgency.Shared.Data.Configurations
                   .IsRequired(false);
 
             entity.HasOne(d => d.OfficialTravel)
-                  .WithMany()
+                  .WithMany(o => o.OfficialTravelDetails)
                   .HasForeignKey(d => d.OfficialTravelId);
         }
     }

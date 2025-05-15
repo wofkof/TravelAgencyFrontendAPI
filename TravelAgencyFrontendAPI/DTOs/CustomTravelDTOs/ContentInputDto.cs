@@ -1,21 +1,13 @@
-<<<<<<< HEAD
-﻿using TravelAgency.Shared.Data;
-using TravelAgency.Shared.Models;
-=======
 ﻿using TravelAgencyFrontendAPI.Models;
-using TravelAgencyFrontendAPI.Extensions;
->>>>>>> 094a9b7f351117c935d91d1dfa7e02d313bb8bf9
 
 namespace TravelAgencyFrontendAPI.DTOs.CustomTravelDTOs
-{    
-    public class CustomTravelContentDto
+{
+    public class ContentInputDto
     {
         public int CustomTravelId { get; set; }
 
         public int ItemId { get; set; }
-        public string ItemName { get; set; }
         public TravelItemCategory Category { get; set; }
-        public string CategoryText => Category.TurnChinese();
 
         public int Day { get; set; }
         public string Time { get; set; }

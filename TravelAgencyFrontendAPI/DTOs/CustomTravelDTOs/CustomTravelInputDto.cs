@@ -1,14 +1,8 @@
-<<<<<<< HEAD
-﻿using TravelAgency.Shared.Data;
-using TravelAgency.Shared.Models;
-
-=======
 ﻿using TravelAgencyFrontendAPI.Models;
-using TravelAgencyFrontendAPI.Extensions;
->>>>>>> 094a9b7f351117c935d91d1dfa7e02d313bb8bf9
+
 namespace TravelAgencyFrontendAPI.DTOs.CustomTravelDTOs
-{   
-    public class CustomTravelDto
+{
+    public class CustomTravelInputDto
     {
         public int CustomTravelId { get; set; }
         public int MemberId { get; set; }
@@ -24,8 +18,7 @@ namespace TravelAgencyFrontendAPI.DTOs.CustomTravelDTOs
         public decimal TotalAmount { get; set; }
 
         public CustomTravelStatus Status { get; set; }
-        public string StatusText => Status.ToChinese();
         public string? Note { get; set; }
-        public List<CustomTravelContentDto> Contents { get; set; } = new();
+        public List<ContentInputDto> Contents { get; set; } = new();
     }
 }

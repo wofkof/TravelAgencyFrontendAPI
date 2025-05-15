@@ -36,6 +36,8 @@
 
         public Employee CreatedByEmployee { get; set; }
         public Region Region { get; set; }
+
+        public ICollection<OfficialTravelDetail> OfficialTravelDetails { get; set; } = new List<OfficialTravelDetail>();
     }
 
 }

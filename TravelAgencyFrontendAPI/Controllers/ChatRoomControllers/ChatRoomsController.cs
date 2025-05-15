@@ -1,8 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+<<<<<<< HEAD
 using TravelAgencyFrontendAPI.DTOs.ChatRoomDTOs;
 using TravelAgency.Shared.Data;
 using TravelAgency.Shared.Models;
+=======
+using TravelAgencyFrontendAPI.Data;
+using TravelAgencyFrontendAPI.DTOs;
+using TravelAgencyFrontendAPI.Hubs;
+using TravelAgencyFrontendAPI.Models;
+>>>>>>> 094a9b7f351117c935d91d1dfa7e02d313bb8bf9
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -76,5 +83,16 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
             return CreatedAtAction(nameof(GetChatRooms), new { memberId = dto.MemberId }, dto);
         }
 
+        [HttpGet("connection-id")]
+        public ActionResult<string> GetConnectionId([FromQuery] string userType, [FromQuery] int userId)
+        {
+            var key = $"{userType}:{userId}";
+            ChatHub.ConnectedUsers.UserToConnectionMap.TryGetValue(key, out var connId);
+
+            if (string.IsNullOrEmpty(connId))
+                return NotFound("對方未上線");
+
+            return Ok(connId);
+        }
     }
 }
