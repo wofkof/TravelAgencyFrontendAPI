@@ -18,6 +18,10 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
         [HttpPost("search")]
         public async Task<ActionResult> Search([FromBody] SearchBoxInputDTO dto)
         {
+            if (dto.Destination == "") 
+            {
+                return BadRequest(new { message = "請輸入關鍵字" });
+            }
             try
             {
                 var result = await _context.OfficialTravels
