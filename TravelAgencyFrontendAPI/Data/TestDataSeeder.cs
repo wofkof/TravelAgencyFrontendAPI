@@ -25,7 +25,6 @@ namespace TravelAgencyFrontendAPI.Data
             await SeedAccommodationAsync();
             await SeedTransportAsync();
             await SeedRegionAsync();
-<<<<<<< HEAD
             await SeedTravelSupplierAsync();
             await SeedOfficialAccommodationAsync();
             await SeedOfficialRestaurantAsync();
@@ -34,10 +33,8 @@ namespace TravelAgencyFrontendAPI.Data
             await SeedOfficialTravelDetailAsync();
             await SeedOfficialTravelScheduleAsync();
             await SeedGroupTravelAsync();
-=======
             await SeedCustomTravelAsync();
             await SeedCustomTravelContentAsync();
->>>>>>> 51d653704506939844835859078ecdd13aac146a
         }
 
         private async Task SeedRolesAsync()
@@ -293,11 +290,7 @@ namespace TravelAgencyFrontendAPI.Data
             if (!_context.Regions.Any())
             {
                 _context.Regions.AddRange(
-<<<<<<< HEAD
-                    new Region { Country = "日本", Name = "北海道" },
-=======
                     new Region { Country = "日本",Name = "北海道" },
->>>>>>> 51d653704506939844835859078ecdd13aac146a
                     new Region { Country = "日本", Name = "東北" },
                     new Region { Country = "日本", Name = "關東" },
                     new Region { Country = "日本", Name = "沖繩" },
@@ -376,7 +369,6 @@ namespace TravelAgencyFrontendAPI.Data
             }
         }
 
-<<<<<<< HEAD
         private async Task SeedTravelSupplierAsync()
         {
             if (!_context.TravelSuppliers.Any())
@@ -825,7 +817,11 @@ namespace TravelAgencyFrontendAPI.Data
                         Attraction5 = null,
                         Note1 = "這是郵輪旅行行程第二天的備註1",
                         Note2 = "這是郵輪旅行行程第二天的備註2"
-=======
+                    });
+                     await _context.SaveChangesAsync();
+            }
+        }
+
         private async Task SeedCustomTravelContentAsync()
         {
             if (!_context.CustomTravelContents.Any())
@@ -893,13 +889,11 @@ namespace TravelAgencyFrontendAPI.Data
                         Day = 1,
                         Time = "12:00",
                         AccommodationName = "3測試"
->>>>>>> 51d653704506939844835859078ecdd13aac146a
                     }
                     );
                 await _context.SaveChangesAsync();
             }
         }
-<<<<<<< HEAD
 
         private async Task SeedGroupTravelAsync()
         {
@@ -956,7 +950,5 @@ namespace TravelAgencyFrontendAPI.Data
                 await _context.SaveChangesAsync();
             }
         }
-=======
->>>>>>> 51d653704506939844835859078ecdd13aac146a
     }
 }
