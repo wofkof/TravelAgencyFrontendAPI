@@ -1,4 +1,6 @@
-﻿namespace TravelAgencyFrontendAPI.Models
+﻿using System.Security.Cryptography.X509Certificates;
+
+namespace TravelAgencyFrontendAPI.Models
 {
     public enum DetailState
     {
@@ -22,6 +24,7 @@
 
         public ICollection<GroupTravel> GroupTravels { get; set; } = new List<GroupTravel>();
 
+        public ICollection<OfficialTravelSchedule> officialTravelSchedules { get; set; } = new List<OfficialTravelSchedule>();
     }
 
 }

@@ -26,7 +26,7 @@ namespace TravelAgencyFrontendAPI.Data.Configurations
             entity.Property(e => e.Note2).HasMaxLength(50).IsRequired(false);
 
             entity.HasOne(e => e.OfficialTravelDetail)
-                  .WithMany()
+                  .WithMany(o => o.officialTravelSchedules)
                   .HasForeignKey(e => e.OfficialTravelDetailId);
         }
     }
