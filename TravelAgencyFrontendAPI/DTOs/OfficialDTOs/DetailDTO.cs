@@ -17,6 +17,8 @@
 
 
         //行程id
+
+        public int? Number { get; set; }
         //行程編號
         //行程成人價格
         //

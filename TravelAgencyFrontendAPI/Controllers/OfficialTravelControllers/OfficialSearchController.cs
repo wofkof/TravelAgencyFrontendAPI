@@ -20,17 +20,27 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
         {
             try
             {
-                var travel = await _context.OfficialTravels
-                     .Where(o =>o.OfficialTravelId == id && o.Status == TravelStatus.Active)
-                     .Select(o =>new DetailDTO
-                     {
-                         ProjectId = o.OfficialTravelId,
-                         Title = o.Title,
-                         Description = o.Description,
-                         Cover = o.CoverPath
-                     }).FirstOrDefaultAsync();
+                var travel = await (
+                                from t in _context.OfficialTravels
+                                where t.OfficialTravelId == id && t.Status == TravelStatus.Active
+                                from d in t.OfficialTravelDetails
+                                where d.TravelNumber == 1
+                                from g in d.GroupTravels
+                                where g.DepartureDate >= new DateTime(2025, 4, 1)
+                                orderby g.DepartureDate // 建議加上排序才會是最近的
+                                select new DetailDTO
+                                {
+                                    ProjectId = t.OfficialTravelId,
+                                    Title = t.Title,
+                                    Description = t.Description,
+                                    Cover = t.CoverPath,
+                                    Number = d.TravelNumber
+                                }
+                                  ).ToListAsync();
 
-                if(travel == null)
+                // 第一次載入畫面取最近出團日GroupTravel資料顯示
+
+                if (travel == null)
                 {
                     return NotFound(new { message = "找不到對應專案" });
                 }
