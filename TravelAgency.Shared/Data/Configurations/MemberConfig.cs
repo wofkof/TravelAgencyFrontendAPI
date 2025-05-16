@@ -86,6 +86,7 @@ namespace TravelAgency.Shared.Data.Configurations
                    .IsRequired(false);
 
             builder.Property(m => m.RegisterDate)
+                   .HasColumnType("datetime")
                    .HasDefaultValueSql("GETDATE()")
                    .IsRequired();
 
@@ -112,12 +113,10 @@ namespace TravelAgency.Shared.Data.Configurations
 
             builder.Property(m => m.UpdatedAt)
                    .HasColumnType("datetime")
-                   .HasDefaultValueSql("GETDATE()")
                    .IsRequired(false);
 
             builder.Property(m => m.DeletedAt)
                    .HasColumnType("datetime")
-                   .HasDefaultValueSql("GETDATE()")
                    .IsRequired(false);
 
             builder.Property(m => m.ProfileImage)
