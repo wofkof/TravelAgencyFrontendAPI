@@ -34,10 +34,16 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                                     Title = t.Title,
                                     Description = t.Description,
                                     Cover = t.CoverPath,
-                                    Number = d.TravelNumber
+                                    DetailId = d.OfficialTravelDetailId,
+                                    Number = d.TravelNumber,
+                                    AdultPrice = d.AdultPrice,
+                                    GroupTravelId = g.GroupTravelId,
+                                    DepartureDate = g.DepartureDate,
+                                    AvailableSeats = g.TotalSeats - g.SoldSeats,
+                                    TotalSeats = g.TotalSeats
                                 }
                                   ).ToListAsync();
-
+                //日期轉型
                 // 第一次載入畫面取最近出團日GroupTravel資料顯示
 
                 if (travel == null)
