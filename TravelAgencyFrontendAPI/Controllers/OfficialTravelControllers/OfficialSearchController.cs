@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TravelAgencyFrontendAPI.Data;
+using TravelAgency.Shared.Data;
 using TravelAgencyFrontendAPI.DTOs.OfficialDTOs;
 using TravelAgencyFrontendAPI.DTOs.OfficialDTOs.Search;
-using TravelAgencyFrontendAPI.Models;
+using TravelAgency.Shared.Models;
 
 namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
 {
@@ -18,14 +18,13 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
         [HttpPost("search")]
         public async Task<ActionResult> Search([FromBody] SearchBoxInputDTO dto)
         {
-            if (dto.Destination == "") 
+            if (dto.Destination == "")
             {
                 return BadRequest(new { message = "請輸入關鍵字" });
             }
             try
             {
                 var result = await _context.OfficialTravels
-                    .Include(t => t.OfficialTravelDetails)
                     .Include(t => t.Region)
                     .Where(t =>
                         (t.Title.Contains(dto.Destination) ||
@@ -39,9 +38,10 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                         Id = t.OfficialTravelId,
                         Title = t.Title,
                         Description = t.Description
-                            
+
                     })
                     .ToListAsync();
+
 
                 return Ok(result);
             }
@@ -59,7 +59,7 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
             try
             {
                 var travel = await _context.OfficialTravels
-                     .Where(o =>o.OfficialTravelId == id)
+                     .Where(o =>o.OfficialTravelId == id && o.Status == TravelStatus.Active)
                      .Select(o =>new DetailDTO
                      {
                          ProjectId = o.OfficialTravelId,
@@ -72,6 +72,8 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                     return NotFound(new { message = "找不到對應專案" });
                 }
 
+
+
                 return Ok(travel);
             }
             catch(Exception ex) 
@@ -80,6 +82,68 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+        [HttpGet("search")]
+        public async Task<ActionResult> SearchBox([FromQuery] SearchInput dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Destination))
+            {
+                return BadRequest(new { message = "請輸入關鍵字" });
+            }
+
+            try
+            {
+                // 先展開 GroupTravel 為主體
+                var query = from t in _context.OfficialTravels
+                            where t.Status == TravelStatus.Active &&
+                                  (t.Title.Contains(dto.Destination) ||
+                                   t.Description.Contains(dto.Destination) ||
+                                   t.Region.Country.Contains(dto.Destination) ||
+                                   t.Region.Name.Contains(dto.Destination))
+                            from d in t.OfficialTravelDetails
+                            from g in d.GroupTravels
+                            where g.TotalSeats - g.SoldSeats >= dto.PeopleCount
+                            select new
+                            {
+                                t.OfficialTravelId,
+                                t.Title,
+                                t.Description,
+                                d.AdultPrice,
+                                g.DepartureDate
+                            };
+
+                // 加上動態條件
+                if (dto.StartDate.HasValue)
+                {
+                    query = query.Where(x => x.DepartureDate >= dto.StartDate.Value);
+                }
+
+                if (dto.EndDate.HasValue)
+                {
+                    query = query.Where(x => x.DepartureDate <= dto.EndDate.Value);
+                }
+
+                // 最後 GroupBy 移除重複行程
+                var result = await query
+                    .GroupBy(x => new { x.OfficialTravelId, x.Title, x.Description,x.AdultPrice })
+                    .Select(g => new SearchOutput
+                    {
+                        ProjectId = g.Key.OfficialTravelId,
+                        Title = g.Key.Title,
+                        Description = g.Key.Description,
+                        Price = g.Key.AdultPrice,
+                    })
+                    .ToListAsync();
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("SearchBox API Error: " + ex.ToString());
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
 
     }
 }

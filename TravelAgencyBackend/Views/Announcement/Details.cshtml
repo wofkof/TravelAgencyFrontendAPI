@@ -1,0 +1,42 @@
+﻿@model TravelAgencyBackend.ViewModels.Announcement.AnnouncementViewModel
+
+@{
+    ViewData["Title"] = "公告詳細內容";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<table class="table table-striped">
+    <tr>
+        <th>標題</th>
+        <td>@Model.Title</td>
+    </tr>
+    <tr>
+        <th>內容</th>
+        <td>@Html.Raw(Model.Content.Replace("\n", "<br />"))</td>
+    </tr>
+    <tr>
+        <th>發佈人員</th>
+        <td>@Model.EmployeeName</td>
+    </tr>
+    <tr>
+        <th>發佈時間</th>
+        <td>@Model.SentAt.ToString("yyyy-MM-dd HH:mm")</td>
+    </tr>
+    <tr>
+        <th>狀態</th>
+        <td>@(Model.Status == AnnouncementStatus.Published ? "已公佈" : "未公佈")</td>
+    </tr>
+</table>
+@if (PermissionChecker.CanViewAnnouncements)
+{
+    <a asp-action="List" class="btn btn-secondary">返回列表</a>
+}
+else
+{
+    <a asp-action="List" class="btn btn-secondary disabled"
+       tabindex="-1" aria-disabled="true" onclick="return false;">
+    返回列表
+    </a>
+}
+

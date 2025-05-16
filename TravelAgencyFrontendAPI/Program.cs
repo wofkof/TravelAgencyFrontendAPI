@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TravelAgencyFrontendAPI.Data;
 using TravelAgencyFrontendAPI.Hubs;
+using TravelAgency.Shared.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 //新增 Swagger 設定

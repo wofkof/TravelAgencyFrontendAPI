@@ -1,0 +1,86 @@
+﻿@* @inject TravelAgencyBackend.ViewComponent.DashboardService DashboardService
+@{
+    int employeeId = 1; // ⚠️ 實際上應該是從登入的使用者抓
+    int unreadCount = DashboardService.GetUnreadMessageCountForEmployee(employeeId);
+} *@
+@inject IHttpContextAccessor HttpContextAccessor
+@inject TravelAgencyBackend.ViewComponent.DashboardService DashboardService
+
+@{
+    var employeeName = HttpContextAccessor.HttpContext.Session.GetString("EmployeeName");
+    var employeeId = HttpContextAccessor.HttpContext.Session.GetInt32("EmployeeId") ?? 0;
+    int unreadCount = DashboardService.GetUnreadMessageCountForEmployee(employeeId);
+}
+
+
+<div class="app-header header-shadow">
+    <!-- Logo + 關閉側邊欄按鈕（桌機用） -->
+    <div class="app-header__logo">
+        <div class="logo-src">
+            <a href="@Url.Action("Index", "Home")" class="logo-link">
+                 <img src="@Url.Content("~/logo/Logo.png")" alt="Logo"
+                 style="height: 50px; display: block; align-items: center; justify-content: flex-start; padding-left: 50px;  margin-top: -15px;" />
+            </a>
+        </div>
+        <div class="header__pane ms-auto">
+            <div>
+                <button type="button" class="hamburger close-sidebar-btn hamburger--elastic" data-class="closed-sidebar">
+                    <span class="hamburger-box">
+                        <span class="hamburger-inner"></span>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @* <div> *@
+    @*     <a asp-controller="Account" asp-action="Login"> *@
+    @*         <i class="metismenu-icon pe-7s-user"></i>登入 *@
+    @*     </a> *@
+    @*     <a asp-controller="Account" asp-action="Login"> *@
+    @*         登出 *@
+    @*     </a> *@
+    @* </div> *@
+    <div>
+        @if (!string.IsNullOrEmpty(employeeName))
+        {
+            <span>
+                <i class="metismenu-icon pe-7s-user"></i> 歡迎 @employeeName
+            </span>
+            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                <button type="submit" class="btn btn-link">登出</button>
+            </form>
+        }
+        else
+        {
+            <a asp-controller="Account" asp-action="Login">
+                <i class="metismenu-icon pe-7s-user"></i>登入
+            </a>
+        }
+    </div>
+
+
+
+        <a class="nav-link" asp-controller="ChatRoom" asp-action="Index">
+            @if (unreadCount > 0)
+            {
+                <span class="badge bg-danger">@unreadCount 筆未讀訊息</span>
+            }
+            else
+            {
+                <span class="text-muted">無新訊息</span>
+            }
+        </a>
+
+    <!-- 手機版的 sidebar toggle（行動裝置） -->
+    <div class="app-header__mobile-menu">
+        <div>
+            <button type="button" class="hamburger hamburger--elastic mobile-toggle-nav">
+                <span class="hamburger-box">
+                    <span class="hamburger-inner"></span>
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+

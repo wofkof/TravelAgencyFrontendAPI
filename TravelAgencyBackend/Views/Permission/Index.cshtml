@@ -1,0 +1,55 @@
+﻿@model IEnumerable<TravelAgencyBackend.ViewModels.PermissionViewModel>
+
+@{
+    ViewData["Title"] = "權限列表";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="mb-3">
+    <a asp-action="Create" class="btn btn-primary">新增權限</a>
+</div>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>編號</th>
+            <th>權限名稱</th>
+            <th>說明</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.PermissionId</td>
+                <td>@item.PermissionName</td>
+                <td>@item.Caption</td>
+                <td>
+                    @if (PermissionChecker.CanManagePermissions)
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.PermissionId" class="btn btn-sm btn-outline-secondary">編輯</a>
+                    }
+                    else
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.PermissionId" class="btn btn-sm btn-outline-secondary disabled"
+                        tabindex="-1" aria-disabled="true" onclick="return false;">
+                            編輯
+                        </a>
+                    }
+                    @if (PermissionChecker.CanManagePermissions)
+                    {
+                        <a asp-action="Delete" asp-route-id="@item.PermissionId" class="btn btn-sm btn-outline-danger" onclick="return confirm('確定要刪除嗎？')">刪除</a>
+                    }
+                    else
+                    {
+                        <a asp-action="Delete" asp-route-id="@item.PermissionId" class="btn btn-sm btn-outline-danger disabled"
+                           tabindex="-1" aria-disabled="true" onclick="return false;"
+                        onclick="return confirm('確定要刪除嗎？')">刪除</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

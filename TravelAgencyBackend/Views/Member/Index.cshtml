@@ -1,0 +1,171 @@
+﻿@model TravelAgencyBackend.ViewModels.MemberIndexViewModel
+
+@{
+    ViewData["Title"] = "會員列表";
+}
+
+@{
+    int totalPages = (int)Math.Ceiling((double)Model.TotalCount / Model.PageSize);
+    int currentPage = Model.Page;
+    int maxPagesToShow = 5; // 最多顯示幾個頁碼（你可改成 7 或其他數）
+    int startPage = Math.Max(1, currentPage - 2);
+    int endPage = Math.Min(totalPages, currentPage + 2);
+
+    if (endPage - startPage + 1 < maxPagesToShow)
+    {
+        if (startPage == 1)
+            endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
+        else if (endPage == totalPages)
+            startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+    }
+}
+
+<h1>會員列表</h1>
+<form asp-action="Index" method="get" class="mb-3">
+    <input type="text" name="SearchText" value="@Model.SearchText" class="form-control d-inline w-auto" placeholder="搜尋姓名/電話/信箱" />
+
+    <select asp-for="FilterStatus"
+    asp-items="Html.GetEnumSelectList<MemberStatus>()"
+    class="form-select d-inline w-auto mx-2">
+        <option value="">全部狀態</option>
+    </select>
+
+    <select name="PageSize" class="form-select d-inline w-auto mx-2" onchange="this.form.submit()">
+        @foreach (var size in new[] { 10, 25, 50, 100 })
+        {
+            <option value="@size" selected="@(Model.PageSize == size)">
+                每頁 @size 筆
+            </option>
+        }
+    </select>
+
+    <button type="submit" class="btn btn-outline-primary">搜尋</button>
+
+    @* 管理參與人 *@
+    @if (PermissionChecker.CanManageMembers)
+    {
+        <a asp-action="Create" class="btn btn-outline-success">新增會員</a>
+    }
+    else
+    {
+        <a class="btn btn-success disabled"
+        tabindex="-1" aria-disabled="true" onclick="return false;">
+            新增會員
+        </a>
+    }
+
+</form>
+
+<p class="text-muted">
+    第 @Model.Page 頁 / 共 @totalPages 頁，總筆數：@Model.TotalCount 筆
+</p>
+
+<nav>
+    <ul class="pagination">
+        @if (startPage > 1)
+        {
+            <li class="page-item">
+                <form method="get" asp-action="Index" class="d-inline">
+                    @* 傳遞搜尋條件 *@
+                    <input type="hidden" name="SearchText" value="@Model.SearchText" />
+                    <input type="hidden" name="FilterMemberId" value="@Model.FilterStatus" />
+                    <input type="hidden" name="PageSize" value="@Model.PageSize" />
+                    <input type="hidden" name="Page" value="1" />
+                    <button type="submit" class="page-link">1</button>
+                </form>
+            </li>
+            <li class="page-item disabled"><span class="page-link">…</span></li>
+        }
+
+        @for (int i = startPage; i <= endPage; i++)
+        {
+            <li class="page-item @(i == currentPage ? "active" : "")">
+                <form method="get" asp-action="Index" class="d-inline">
+                    <input type="hidden" name="SearchText" value="@Model.SearchText" />
+                    <input type="hidden" name="FilterMemberId" value="@Model.FilterStatus" />
+                    <input type="hidden" name="PageSize" value="@Model.PageSize" />
+                    <input type="hidden" name="Page" value="@i" />
+                    <button type="submit" class="page-link">@i</button>
+                </form>
+            </li>
+        }
+
+        @if (endPage < totalPages)
+        {
+            <li class="page-item disabled"><span class="page-link">…</span></li>
+            <li class="page-item">
+                <form method="get" asp-action="Index" class="d-inline">
+                    <input type="hidden" name="SearchText" value="@Model.SearchText" />
+                    <input type="hidden" name="FilterMemberId" value="@Model.FilterStatus" />
+                    <input type="hidden" name="PageSize" value="@Model.PageSize" />
+                    <input type="hidden" name="Page" value="@totalPages" />
+                    <button type="submit" class="page-link">@totalPages</button>
+                </form>
+            </li>
+        }
+    </ul>
+</nav>
+
+
+<table class="table table-bordered table-striped table-hover">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Members.First().MemberId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Members.First().Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Members.First().Phone)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Members.First().Email)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Members.First().Status)
+            </th>
+            <th>
+                操作
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Members) {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MemberId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Phone)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+                <td>
+                    <span class="badge @(item.Status == MemberStatus.Active ? "bg-success" :
+                         item.Status == MemberStatus.Suspended ? "bg-danger" : "bg-secondary")">
+                        @Html.DisplayFor(modelItem => item.Status)
+                    </span>
+                </td>
+                <td>
+					@* 查看參與人 *@
+                    @if (PermissionChecker.CanViewMembers)
+                    {
+                        @Html.ActionLink("查看", "Details", new { id = item.MemberId }, new { @class = "btn btn-outline-warning" })
+                    }
+                    else
+                    {
+                        <a asp-action="Details" class="btn btn-outline-warning disabled"
+                           tabindex="-1" aria-disabled="true" onclick="return false;">
+                        查看
+                        </a>
+                    }
+                </td>
+            </tr>
+}
+    </tbody>
+</table>

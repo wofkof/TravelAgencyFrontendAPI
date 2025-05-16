@@ -1,0 +1,33 @@
+﻿@model IEnumerable<TravelAgencyBackend.ViewModels.RoleViewModel>
+
+@{
+    ViewData["Title"] = "角色管理";
+}
+
+<h1>角色管理</h1>
+
+<a asp-action="Create" class="btn btn-primary mb-3">新增角色</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>角色編號</th>
+            <th>角色名稱</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var role in Model)
+        {
+            <tr>
+                <td>@role.RoleId</td>
+                <td>@role.RoleName</td>
+                <td>
+                    <a asp-action="Permissions" asp-route-id="@role.RoleId" class="btn btn-sm btn-info">設定權限</a>
+                    <a asp-action="Edit" asp-route-id="@role.RoleId" class="btn btn-sm btn-warning">編輯</a>
+                    <a asp-action="Delete" asp-route-id="@role.RoleId" class="btn btn-sm btn-danger" onclick="return confirm('確定要刪除嗎？')">刪除</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

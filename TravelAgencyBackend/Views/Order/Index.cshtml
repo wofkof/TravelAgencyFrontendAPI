@@ -1,0 +1,278 @@
+﻿@model TravelAgencyBackend.ViewModels.Order.OrderIndexViewModel
+@using TravelAgency.Shared.Models
+
+@{
+    ViewData["Title"] = "訂單列表";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+<style>
+    /* --- 樣式 (Layout & AJAX Loading & Pagination & Styling) --- */
+    .sort-link i {
+    margin-left: 5px;
+    color: #6c757d;
+    }
+
+    .sort-link.active i {
+    color: #0d6efd;
+    }
+
+    .search-form .form-control,
+    .search-form .form-select {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    }
+
+    .search-form .btn {
+    margin-bottom: 0.5rem;
+    }
+
+    .truncate-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+    display: inline-block;
+    vertical-align: middle;
+    }
+    /* 欄寬建議 */
+    .order-table th:nth-child(1), .order-table td:nth-child(1) {
+    width: 8%;
+    }
+    /* ID */
+    .order-table th:nth-child(3), .order-table td:nth-child(3) {
+    width: 18%;
+    }
+    /* 行程名稱 */
+    .order-table th:nth-child(4), .order-table td:nth-child(4) {
+    width: 8%;
+    text-align: center;
+    }
+    /* 人數 */
+    .order-table th:nth-child(5), .order-table td:nth-child(5) {
+    width: 10%;
+    text-align: right;
+    }
+    /* 金額 */
+    .order-table th:nth-child(7), .order-table td:nth-child(7) {
+    width: 12%;
+    }
+    /* 建立日期 */
+    .order-table th:last-child, .order-table td:last-child {
+    width: 18%;
+    }
+    /* 操作 */
+
+    /* AJAX Loading */
+    .list-container {
+    position: relative;
+    min-height: 150px;
+    }
+
+    .table-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    }
+
+    .table-loading-overlay.is-loading {
+    visibility: visible;
+    opacity: 1;
+    }
+
+    /* 分頁樣式 */
+    .pagination-info {
+    font-size: 0.9em;
+    color: #6c757d;
+    }
+
+    .page-size-select {
+    max-width: 150px;
+    }
+
+    .order-table tfoot td {
+    border: none;
+    padding-top: 1rem;
+    }
+
+    /* --- 新增樣式 --- */
+    /* 表頭文字置中 */
+    /* .order-table thead th { */
+    /*     text-align: center; */
+    /*     vertical-align: middle; /* 垂直置中 (可選) */ */
+    /* } */
+    /* 狀態文字置中 (可選) */
+    .order-table td.status-cell {
+    text-align: center;
+    vertical-align: middle;
+    }
+    /* 讓 Badge 稍微有點上下邊距，更好看 */
+    .badge {
+    padding-top: 0.4em;
+    padding-bottom: 0.4em;
+    font-size: 0.85em;
+    }
+
+</style>
+
+@* --- 其他 HTML 內容 (搜尋表單, 列表容器等) --- *@
+<h1 class="text-center mb-4">@ViewData["Title"]</h1>
+
+@* 訊息顯示 *@
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">@TempData["SuccessMessage"]<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">@TempData["ErrorMessage"]<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>
+}
+
+<p>
+    @if (PermissionChecker.CanManageOrders)
+    {
+        <a asp-action="Create" class="btn btn-success"><i class="fas fa-plus me-1"></i> 新增訂單</a>
+    }
+    else
+    {
+        <a asp-action="Create" class="btn btn-success disabled"
+           tabindex="-1" aria-disabled="true" onclick="return false;">
+        <i class="fas fa-plus me-1"></i> 新增訂單</a>
+    }
+</p>
+
+@* 搜尋表單 *@
+<form asp-action="Index" method="get" class="mb-4 p-3 border rounded bg-light search-form" id="searchForm">
+    <div class="row g-2 align-items-center">
+        <div class="col-md-auto">
+            <label asp-for="SearchMemberName" class="visually-hidden">會員名稱</label>
+            <input asp-for="SearchMemberName" class="form-control form-control-sm" placeholder="輸入會員名稱搜尋..." />
+        </div>
+        <div class="col-md-auto">
+            <label asp-for="SearchCategory" class="visually-hidden">行程類別</label>
+            <select asp-for="SearchCategory" class="form-select form-select-sm" asp-items="Model.Categories">
+                <option value="">-- 所有類別 --</option>
+            </select>
+        </div>
+        <div class="col-md-auto">
+            <label asp-for="PageSize" class="visually-hidden">每頁筆數</label>
+            <select asp-for="PageSize" class="form-select form-select-sm page-size-select" asp-items="Model.PageSizeOptions" id="pageSizeSelect"></select>
+        </div>
+        <div class="col-md-auto">
+            <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search me-1"></i> 搜尋</button>
+            <a asp-action="Index" class="btn btn-secondary btn-sm"><i class="fas fa-undo me-1"></i> 清除</a>
+        </div>
+    </div>
+    @* 隱藏欄位 *@
+    <input type="hidden" name="sortField" value="@Model.SortField" id="currentSortField" />
+    <input type="hidden" name="sortDirection" value="@Model.SortDirection" id="currentSortDirection" />
+    <input type="hidden" name="pageNumber" value="@Model.PageIndex" id="currentPageNumber" />
+</form>
+
+@* 列表容器 *@
+<div class="list-container" id="orderListContainer">
+    <div class="table-loading-overlay" id="tableLoadingOverlay">
+        <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+    </div>
+    @await Html.PartialAsync("_OrderListPartial", Model)
+</div>
+
+
+@section Scripts {
+@* --- JavaScript (同之前) --- *@
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const listContainer = document.getElementById('orderListContainer');
+            const loadingOverlay = document.getElementById('tableLoadingOverlay');
+            const searchForm = document.getElementById('searchForm');
+            const currentSortFieldInput = document.getElementById('currentSortField');
+            const currentSortDirectionInput = document.getElementById('currentSortDirection');
+            const currentPageNumberInput = document.getElementById('currentPageNumber');
+            const pageSizeSelect = document.getElementById('pageSizeSelect');
+
+            async function loadListData(url) {
+                if(loadingOverlay) loadingOverlay.classList.add('is-loading');
+                try {
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const html = await response.text();
+                    listContainer.innerHTML = html;
+                    history.pushState(null, '', url);
+                    const urlParams = new URLSearchParams(url.split('?')[1] || '');
+                    currentSortFieldInput.value = urlParams.get('sortField') || 'CreatedAt';
+                    currentSortDirectionInput.value = urlParams.get('sortDirection') || 'desc';
+                    currentPageNumberInput.value = urlParams.get('pageNumber') || '1';
+                    pageSizeSelect.value = urlParams.get('pageSize') || '10';
+                } catch (error) {
+                    console.error('Error loading list data:', error);
+                    listContainer.innerHTML = `<div class="alert alert-danger">載入資料時發生錯誤。</div>`;
+                } finally {
+                     if(loadingOverlay) {
+                         setTimeout(() => loadingOverlay.classList.remove('is-loading'), 100);
+                     }
+                }
+            }
+
+            listContainer.addEventListener('click', function(event) {
+                const target = event.target;
+                const sortLink = target.closest('.sort-link');
+                if (sortLink) {
+                    event.preventDefault();
+                    const field = sortLink.dataset.sortField;
+                    const direction = sortLink.dataset.sortDirection;
+                    currentPageNumberInput.value = '1';
+                    currentSortFieldInput.value = field;
+                    currentSortDirectionInput.value = direction;
+                    submitSearchForm();
+                    return;
+                }
+                const pageLink = target.closest('.page-link');
+                if (pageLink && !pageLink.closest('.disabled') && !pageLink.closest('.active')) {
+                    event.preventDefault();
+                    const page = pageLink.dataset.page;
+                    if (page) {
+                        currentPageNumberInput.value = page;
+                         submitSearchForm();
+                    }
+                     return;
+                }
+            });
+
+             searchForm.addEventListener('submit', function(event) {
+                 event.preventDefault();
+                 currentPageNumberInput.value = '1';
+                 submitSearchForm();
+             });
+
+             pageSizeSelect.addEventListener('change', function() {
+                 currentPageNumberInput.value = '1';
+                 submitSearchForm();
+             });
+
+             function submitSearchForm() {
+                 const formData = new FormData(searchForm);
+                 const searchParams = new URLSearchParams(formData);
+                 searchParams.set('sortField', currentSortFieldInput.value);
+                 searchParams.set('sortDirection', currentSortDirectionInput.value);
+                 searchParams.set('pageNumber', currentPageNumberInput.value);
+                 searchParams.set('pageSize', pageSizeSelect.value);
+                 const url = `${searchForm.action}?${searchParams.toString()}`;
+                 loadListData(url);
+             }
+        });
+    </script>
+}

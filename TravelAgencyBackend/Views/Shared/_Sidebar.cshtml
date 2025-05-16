@@ -1,0 +1,430 @@
+﻿@{
+    var employeeId = Context.Session.GetInt32("EmployeeId") ?? 0;
+    var isLoggedIn = employeeId != 0;
+}
+
+<div class="app-sidebar sidebar-shadow">
+    <div class="scrollbar-sidebar">
+        <div class="app-sidebar__inner">
+            <ul class="vertical-nav-menu">
+                <li class="app-sidebar__heading">功能選單</li>
+                @* 首頁 *@
+                <li>
+
+                    @* 需要登入 *@
+                    @if (isLoggedIn && PermissionChecker.CanViewHome)
+                    {
+                        <a asp-controller="Home" asp-action="Index">
+                            <i class="metismenu-icon pe-7s-home"></i>首頁
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Home" asp-action="Index"
+                        class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false;">
+                            <i class="metismenu-icon pe-7s-home"></i>首頁
+                        </a>
+                    }
+                </li>
+                @* 員工 *@
+                <li>
+                    <a href="#">
+                        <i class="metismenu-icon pe-7s-id"></i>員工功能
+                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                    </a>
+                    <ul>
+                        <li>
+                            @if (PermissionChecker.CanViewEmployees)
+                            {
+                                <a asp-controller="Employee" asp-action="List">
+                                    <i class="metismenu-icon"></i>員工列表
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Employee" asp-action="List"
+                                class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false;">
+                                    <i class="metismenu-icon"></i>員工列表
+                                </a>
+                            }
+                        </li>
+                        <li>
+                            @if (PermissionChecker.CanManageEmployees)
+                            {
+                                <a asp-controller="Employee" asp-action="Create">
+                                    <i class="metismenu-icon"></i>新增員工
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Employee" asp-action="Create"
+                                class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false;">
+                                    <i class="metismenu-icon"></i>新增員工
+                                </a>
+                            }
+                        </li>                      
+                    </ul>
+                </li>
+                @* 會員 *@
+                <li>
+                    <a href="#">
+                        <i class="metismenu-icon pe-7s-users"></i>會員功能
+                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                    </a>
+                    <ul>
+                        <li>
+                            @* 查看會員 *@
+                            @if (PermissionChecker.CanViewMembers)
+                            {
+                                <a asp-controller="Member" asp-action="Index">
+                                    <i class="metismenu-icon"></i>會員列表
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Member" asp-action="Index"
+                                class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false;">
+                                    <i class="metismenu-icon"></i>會員列表
+                                </a>
+                            }
+                        </li>  
+                        <li>
+                            @* 管理會員 *@
+                            @if (PermissionChecker.CanManageMembers)
+                            {
+                                <a asp-controller="Member" asp-action="Create">
+                                    <i class="metismenu-icon"></i>新增會員
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Member" asp-action="Create"
+                                class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false;">
+                                    <i class="metismenu-icon"></i>新增會員
+                                </a>
+                            }
+                        </li>
+                    </ul>
+                </li>
+                @* 參與人功能 *@
+                <li>
+                    <a href="#">
+                        <i class="metismenu-icon pe-7s-add-user"></i>參與人功能
+                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                    </a>
+                    <ul>
+                        <li>
+                            @* 查看參與人 *@
+                            @if (PermissionChecker.CanViewParticipants)
+                            {
+                                <a asp-controller="Participants" asp-action="Index">
+                                    <i class="metismenu-icon"></i>參與人列表
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Participants" asp-action="Index"
+                                class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false;">
+                                    <i class="metismenu-icon"></i>參與人列表
+                                </a>
+                            }
+                        </li>
+                    </ul>
+                </li>
+                @* 聊天室 *@
+                <li>
+                    <a href="#">
+                        <i class="metismenu-icon  pe-7s-comment"></i>聊天室
+                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                    </a>
+                    <ul>
+                        <li>
+                            @* 管理聊天室 *@
+                            @if (PermissionChecker.CanManageChatRooms)
+                            {
+                                <a asp-controller="ChatRoom" asp-action="Index">
+                                    <i class="metismenu-icon"></i>聊天室列表
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="ChatRoom" asp-action="Index"
+                                class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false">
+                                    <i class="metismenu-icon"></i>聊天室列表
+                                </a>
+                            }
+                        </li>
+                        <li>
+                            @* 管理聊天室 *@
+                            @if (PermissionChecker.CanManageChatRooms)
+                            {
+                                <a asp-controller="ChatRoom" asp-action="Create">
+                                    <i class="metismenu-icon"></i>新增聊天室
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="ChatRoom" asp-action="Create"
+                                class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false">
+                                    <i class="metismenu-icon"></i>新增聊天室
+                                </a>
+                            }
+                        </li>
+                    </ul>
+                </li>
+                @* 購物車 *@
+                <li>
+                    <a href="#">
+                        <i class="metismenu-icon pe-7s-cart"></i>購物車
+                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                    </a>
+                    <ul>
+                        @if (PermissionChecker.CanViewCarts)
+                        {
+                            <li>
+                                <a asp-controller="Carts" asp-action="Index">
+                                    <i class="metismenu-icon"></i>檢視購物車
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li>
+                                <a asp-controller="Carts" asp-action="Index"
+                                class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false">
+                                    <i class="metismenu-icon"></i>檢視購物車
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </li>
+                @* 公告 *@
+                <li>
+                    <a href="#">
+                        <i class="metismenu-icon pe-7s-news-paper"></i>公告
+                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                    </a>
+                    <ul>
+                        <li>
+                            @if (PermissionChecker.CanViewAnnouncements)
+                            {
+                                <a asp-controller="Announcement" asp-action="List">
+                                    <i class="metismenu-icon"></i>查看公告
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Announcement" asp-action="List"
+                                class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false">
+                                    <i class="metismenu-icon"></i>查看公告
+                                </a>
+                            }
+                        </li>
+                        <li>
+                            @if (PermissionChecker.CanPushAnnouncements)
+                            {
+                                <a asp-controller="Announcement" asp-action="Create">
+                                    <i class="metismenu-icon"></i>新增公告
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Announcement" asp-action="Create"
+                                class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false">
+                                    <i class="metismenu-icon"></i>新增公告
+                                </a>
+                            }
+                        </li>
+                    </ul>
+                </li>
+                @* 官方行程 *@
+                <li>
+                    <a href="#">
+                        <i class="metismenu-icon pe-7s-global"></i>官方行程
+                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                    </a>
+                    <ul>
+                        @if (PermissionChecker.CanViewOfficialTravels)
+                        {
+                            <li>
+                                <a asp-controller="OfficialTravels" asp-action="Index">
+                                    <i class="metismenu-icon"></i>管理官方行程
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-controller="TravelSuppliers" asp-action="Index">
+                                    <i class="metismenu-icon"></i>供應商業務管理
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-controller="Regions" asp-action="Index">
+                                    <i class="metismenu-icon"></i>地區管理(測試)
+                                </a>
+                                <a asp-controller="Flights" asp-action="Index">
+                                    <i class="metismenu-icon"></i>航班一覽表(測試)
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li>
+                                <a asp-controller="OfficialTravels" asp-action="Index"
+                                class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false">
+                                    <i class="metismenu-icon"></i>管理官方行程
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-controller="TravelSuppliers" asp-action="Index"
+                                class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false">
+                                    <i class="metismenu-icon"></i>供應商業務管理
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-controller="Regions" asp-action="Index" 
+                                class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false">
+                                    <i class="metismenu-icon"></i>地區管理(測試)
+                                </a>
+                                <a asp-controller="Flights" asp-action="Index"
+                                class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false">
+                                    <i class="metismenu-icon"></i>航班一覽表(測試)
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </li>
+                @* 自訂行程 *@
+                <li>
+                    <a href="#">
+                        <i class="metismenu-icon pe-7s-map"></i>自訂行程
+                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                    </a>
+                    <ul>
+                        <li>
+                            @if (PermissionChecker.CanViewCustomTravels) 
+                            { 
+                            <a asp-controller="CustomTravelPending" asp-action="List">
+                                <i class="metismenu-icon"></i>查看自訂行程
+                            </a>
+                            }
+                            else
+                            {
+                               <a asp-controller="CustomTravelPending" asp-action="List" 
+                              class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false"> 
+                                  <i class="metismenu-icon"></i>查看自訂行程 
+                                </a> 
+                            } 
+                        </li>
+                        <li>
+                            @if (PermissionChecker.CanManageCustomTravels)
+                            {
+                                <a asp-controller="CustomTravelProducts" asp-action="List">
+                                    <i class="metismenu-icon"></i>新增自訂行程
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="CustomTravelProducts" asp-action="List"
+                                class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false">
+                                    <i class="metismenu-icon"></i>新增自訂行程
+                                </a>
+                            }
+                        </li>
+                    </ul>
+                </li>
+                @* 訂單 *@
+                <li>
+                    <a href="#">
+                        <i class="metismenu-icon pe-7s-note2"></i>訂單
+                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                    </a>
+                    <ul>
+                        <li>
+                            @if (PermissionChecker.CanViewOrders)
+                            {
+                                <a asp-controller="Order" asp-action="index">
+                                    <i class="metismenu-icon"></i>查看訂單
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Order" asp-action="index"
+                                class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false">
+                                    <i class="metismenu-icon"></i>查看訂單
+                                </a>
+                            }
+                        </li>
+                        <li>
+                            @if (PermissionChecker.CanViewOrders)
+                            {
+                                <a asp-controller="TravelRecord" asp-action="index">
+                                    <i class="metismenu-icon"></i>查看旅遊完成紀錄
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="TravelRecord" asp-action="index"
+                                class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false">
+                                    >
+                                    <i class="metismenu-icon"></i>查看旅遊完成紀錄
+                                </a>
+                            }
+                        </li>
+                    </ul>
+                </li>
+                @* 角色權限 *@
+                <li>
+                    <a href="#">
+                        <i class="metismenu-icon pe-7s-lock"></i>角色權限
+                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                    </a>
+                    <ul>
+                        <li>
+                            @if (PermissionChecker.CanManageRoles)
+                            {
+                                <a asp-controller="Role" asp-action="Index">
+                                    <i class="metismenu-icon"></i>角色
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Role" asp-action="Index"
+                                   class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false">
+                                    <i class="metismenu-icon"></i>角色
+                                </a>
+                            }
+                        </li>
+                        <li>
+                            @if (PermissionChecker.CanManagePermissions)
+                            {
+                                <a asp-controller="Permission" asp-action="Index">
+                                    <i class="metismenu-icon"></i>權限
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Permission" asp-action="Index"
+                                   class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false">
+                                    <i class="metismenu-icon"></i>權限
+                                </a>
+                            }
+                        </li>
+                    </ul>
+                </li>
+                @* 前端功能 *@
+                <li>
+                    <a href="#">
+                        <i class="metismenu-icon pe-7s-look"></i>前台功能
+                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                    </a>
+                    <ul>
+                        <li>
+                            <a asp-controller="MemberChat" asp-action="Index">
+                                <i class="metismenu-icon"></i>會員聊天室
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,49 @@
+﻿@model IEnumerable<TravelAgencyBackend.ViewModels.ChatRoomViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>聊天室</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>會員姓名</th>
+            <th>建立時間</th>
+            <th>狀態</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @item.MemberName
+                    @if (item.UnreadCount > 0)
+                    {
+                        <span class="badge bg-danger ms-2">未讀 @item.UnreadCount</span>
+                    }
+                </td>
+                <td>@item.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@Html.DisplayFor(modelItem => item.Status)</td>
+                <td>
+
+                    @* 管理聊天室 *@
+                    @if (PermissionChecker.CanManageChatRooms)
+                    {
+                        <a asp-action="Details" asp-route-id="@item.ChatRoomId" class="btn btn-sm btn-primary">查看訊息</a>
+                    }
+                    else
+                    {
+                        <a asp-action="Details" asp-route-id="@item.ChatRoomId" class="btn btn-sm btn-primary disabled"
+                        tabindex="-1" aria-disabled="true" onclick="return false">
+                        查看訊息
+                        </a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
