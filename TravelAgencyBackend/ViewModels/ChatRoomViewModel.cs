@@ -60,6 +60,7 @@ namespace TravelAgencyBackend.ViewModels
         public string Content { get; set; } = null!;
         public string SentAt { get; set; } = null!;
         public bool IsRead { get; set; }
+        public string MessageType { get; set; } = "text"; 
     }
 
     // 發送訊息用（如果你之後改成用 AJAX 發送）

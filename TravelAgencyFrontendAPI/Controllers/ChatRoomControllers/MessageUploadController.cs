@@ -45,7 +45,7 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
             }
 
             var relativePath = $"/Uploads/chat/{fileName}";
-
+            var absoluteUrl = $"{Request.Scheme}://{Request.Host}{relativePath}";
             // 儲存 Message 物件
             var message = new Message
             {
@@ -53,7 +53,7 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
                 SenderType = dto.SenderType,
                 SenderId = dto.SenderId,
                 MessageType = MessageType.image,
-                Content = relativePath,
+                Content = absoluteUrl,
                 SentAt = DateTime.Now,
                 IsRead = false
             };
