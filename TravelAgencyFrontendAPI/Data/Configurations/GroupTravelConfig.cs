@@ -24,8 +24,8 @@ namespace TravelAgencyFrontendAPI.Data.Configurations
             entity.Property(e => e.RecordStatus).HasMaxLength(10).IsRequired(false);
 
             entity.HasOne(e => e.OfficialTravelDetail)
-                  .WithMany(o => o.GroupTravels)
-                  .HasForeignKey(e => e.OfficialTravelDetailId);
+                    .WithMany(d => d.GroupTravels)
+                    .HasForeignKey(e => e.OfficialTravelDetailId);
         }
     }
 
