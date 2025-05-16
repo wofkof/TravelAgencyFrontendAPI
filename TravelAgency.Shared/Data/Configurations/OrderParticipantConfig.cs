@@ -24,7 +24,7 @@ namespace TravelAgency.Shared.Data.Configurations
                   .IsRequired();
 
             entity.Property(e => e.IdNumber)
-                  .IsRequired()
+                  .IsRequired(false)
                   .HasMaxLength(20);
             entity.HasIndex(e => e.IdNumber).IsUnique();
 
