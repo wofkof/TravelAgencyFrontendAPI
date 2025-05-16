@@ -12,7 +12,7 @@ namespace TravelAgencyFrontendAPI.Controllers.VisaControllers
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            return new string[] { "value1", "value2" };
+            return new string[] { "HI", "value2" };
         }
 
         // GET api/<ValuesController>/5
