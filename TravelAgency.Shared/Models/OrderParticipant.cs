@@ -21,8 +21,7 @@
         public string? Note { get; set; }
 
         public Order Order { get; set; }
-
-        public Member Member { get; set; } = null!;
+        
     }
 
 }
