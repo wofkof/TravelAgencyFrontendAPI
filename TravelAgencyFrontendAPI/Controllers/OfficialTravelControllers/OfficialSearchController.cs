@@ -15,44 +15,6 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
             _context = context;
         }
 
-        [HttpPost("search")]
-        public async Task<ActionResult> Search([FromBody] SearchBoxInputDTO dto)
-        {
-            if (dto.Destination == "")
-            {
-                return BadRequest(new { message = "請輸入關鍵字" });
-            }
-            try
-            {
-                var result = await _context.OfficialTravels
-                    .Include(t => t.Region)
-                    .Where(t =>
-                        (t.Title.Contains(dto.Destination) ||
-                         t.Description.Contains(dto.Destination) ||
-                         t.Region.Country.Contains(dto.Destination) ||
-                         t.Region.Name.Contains(dto.Destination)) &&
-                        t.Status == TravelStatus.Active
-                    )
-                    .Select(t => new SearchBoxResultDTO
-                    {
-                        Id = t.OfficialTravelId,
-                        Title = t.Title,
-                        Description = t.Description
-
-                    })
-                    .ToListAsync();
-
-
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                // 確保你看到錯誤
-                Console.WriteLine("Search API Error: " + ex.ToString());
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
         [HttpGet("detail/{id}")]
         public async Task<ActionResult> Detail(int id)
         {
@@ -64,7 +26,8 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                      {
                          ProjectId = o.OfficialTravelId,
                          Title = o.Title,
-                         Description = o.Description
+                         Description = o.Description,
+                         Cover = o.CoverPath
                      }).FirstOrDefaultAsync();
 
                 if(travel == null)
