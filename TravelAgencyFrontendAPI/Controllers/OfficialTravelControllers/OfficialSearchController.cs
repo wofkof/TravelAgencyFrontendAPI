@@ -108,6 +108,7 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                                 t.OfficialTravelId,
                                 t.Title,
                                 t.Description,
+                                t.CoverPath,
                                 d.AdultPrice,
                                 g.DepartureDate
                             };
@@ -125,12 +126,13 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
 
                 // 最後 GroupBy 移除重複行程
                 var result = await query
-                    .GroupBy(x => new { x.OfficialTravelId, x.Title, x.Description,x.AdultPrice })
+                    .GroupBy(x => new { x.OfficialTravelId, x.Title, x.Description,x.CoverPath,x.AdultPrice })
                     .Select(g => new SearchOutput
                     {
                         ProjectId = g.Key.OfficialTravelId,
                         Title = g.Key.Title,
                         Description = g.Key.Description,
+                        Cover = g.Key.CoverPath,
                         Price = g.Key.AdultPrice,
                     })
                     .ToListAsync();
