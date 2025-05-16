@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
-using TravelAgencyFrontendAPI.Models; // For PaymentMethod enum
+using TravelAgency.Shared.Models; // For PaymentMethod enum
 
 namespace TravelAgencyFrontendAPI.DTOs.OrderDTOs
 {

@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using TravelAgencyFrontendAPI.Models; // For InvoiceOption enum
+using TravelAgency.Shared.Models; // For InvoiceOption enum
 
 namespace TravelAgencyFrontendAPI.DTOs.OrderDTOs
 {

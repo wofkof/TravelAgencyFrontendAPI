@@ -2,8 +2,8 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore; // For ToListAsync, Include, etc.
-using TravelAgencyFrontendAPI.Data;
-using TravelAgencyFrontendAPI.Models;
+using TravelAgency.Shared.Data;
+using TravelAgency.Shared.Models;
 using TravelAgencyFrontendAPI.DTOs.OrderDTOs; // Your Order DTOs namespace
 using System.Security.Claims; // For HttpContext.User to get MemberId
 using Microsoft.AspNetCore.Authorization; // If you want to protect this endpoint

@@ -1,4 +1,4 @@
-﻿using TravelAgencyFrontendAPI.Models;
+﻿using TravelAgency.Shared.Models;
 
 namespace TravelAgencyFrontendAPI.DTOs.FavoriteTravelerDTOs
 {
@@ -8,11 +8,11 @@ namespace TravelAgencyFrontendAPI.DTOs.FavoriteTravelerDTOs
         public int MemberId { get; set; }
 
         public string Name { get; set; } = null!;
-        public string Phone { get; set; } = null!;
+        public string? Phone { get; set; }
         public string IdNumber { get; set; } = null!;
-        public DateTime? BirthDate { get; set; }
+        public DateTime BirthDate { get; set; }
         public GenderType? Gender { get; set; }
-        public string Email { get; set; } = null!;
+        public string? Email { get; set; }
         public DocumentType? DocumentType { get; set; }
         public string? DocumentNumber { get; set; }
         public string? PassportSurname { get; set; }

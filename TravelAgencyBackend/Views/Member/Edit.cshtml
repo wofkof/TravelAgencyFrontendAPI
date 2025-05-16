@@ -1,0 +1,75 @@
+﻿@model TravelAgencyBackend.ViewModels.MemberEditViewModel
+
+@{
+    ViewData["Title"] = "編輯會員";
+}
+
+<h1>編輯會員</h1>
+
+<h4>會員</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="MemberId" />
+
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Phone" class="control-label"></label>
+                <input asp-for="Phone" class="form-control" />
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Status" class="control-label"></label>
+                <select asp-for="Status" class="form-control" asp-items="Html.GetEnumSelectList<MemberStatus>()"></select>
+                <span asp-validation-for="Status" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Note" class="control-label"></label>
+                <textarea asp-for="Note" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Note" class="text-danger"></span>
+            </div>
+            <hr>
+
+            @* 管理會員 *@
+            @if (PermissionChecker.CanManageMembers)
+            {
+                <button type="submit" class="btn btn-primary">儲存變更</button>
+            }
+            else
+            {
+                <button type="submit" class="btn btn-primary disabled"
+                tabindex="-1" aria-disabled="true" onclick="return false;">
+                    儲存變更
+                </button>
+            }
+
+            <div class="vr"></div>
+
+            @* 查看會員 *@
+            @if (PermissionChecker.CanViewMembers)
+            {
+                <a asp-action="Details" asp-route-id="@Model.MemberId" class="btn btn-secondary">返回查看</a>
+            }
+            else
+            {
+                <a asp-controller="Home" asp-action="Index" asp-route-id="@Model.MemberId" class="btn btn-secondary">返回首頁</a>
+            }
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

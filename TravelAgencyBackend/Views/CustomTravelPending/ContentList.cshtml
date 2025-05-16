@@ -1,0 +1,112 @@
+﻿@model TravelAgencyBackend.ViewModels.CustomTravelPendingViewModel
+
+@{
+	ViewData["Title"] = "ContentList";
+}
+
+<h2>訂單行程內容</h2>
+
+<p>
+	<a asp-action="CreateContent" asp-route-id="@ViewBag.CoustomTravelId" class="btn btn-outline-success">新增內容</a>
+</p>
+<table class="table">
+	<thead>
+		<tr>
+			<th>
+				@Html.DisplayNameFor(model => model.Content.First().ContentId)
+			</th>
+			<th>
+				@Html.DisplayNameFor(model => model.Content.First().CustomTravelId)
+			</th>
+			<th>
+				@Html.DisplayNameFor(model => model.Content.First().Category)
+			</th>
+			<th>
+				@Html.DisplayNameFor(model => model.Content.First().ItemId)
+			</th>
+			<th>
+				@Html.DisplayNameFor(model => model.Content.First().Day)
+			</th>
+			<th>
+				@Html.DisplayNameFor(model => model.Content.First().Time)
+			</th>
+			<th>
+				@Html.DisplayNameFor(model => model.Content.First().AccommodationName)
+			</th>
+			<th>修改</th>
+			<th>刪除</th>
+		</tr>
+	</thead>
+	<tbody>
+		@{
+			foreach (var item in Model.Content)
+			{
+				<tr>
+					<td>
+						@Html.DisplayFor(modelItem => item.ContentId)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.CustomTravelId)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.Category)
+					</td>
+					<td>
+						@{
+							string itemName = "";
+
+							switch (item.Category)
+							{
+								case TravelItemCategory.Attraction:
+									itemName = Model.Attraction.FirstOrDefault(a => a.AttractionId == item.ItemId)?.AttractionName;
+									break;
+								case TravelItemCategory.Restaurant:
+									itemName = Model.Restaurant.FirstOrDefault(r => r.RestaurantId == item.ItemId)?.RestaurantName;
+									break;
+								case TravelItemCategory.Accommodation:
+									itemName = Model.Hotel.FirstOrDefault(h => h.AccommodationId == item.ItemId)?.AccommodationName;
+									break;
+								case TravelItemCategory.Transport:
+									itemName = Model.Transportation.FirstOrDefault(t => t.TransportId == item.ItemId)?.TransportMethod;
+									break;
+							}
+														
+						}
+						@itemName
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.Day)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.Time)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.AccommodationName)
+					</td>
+					<td>
+						@if (PermissionChecker.CanManageCustomTravels)
+						{
+							<a asp-controller="CustomTravelPending" asp-action="EditContent" asp-route-id="@item.ContentId" class="btn btn-outline-warning">修改</a>
+						}
+						else
+						{
+							<a class="btn btn-outline-warning disabled" tabindex="-1" aria-disabled="true" onclick="return false">修改</a>
+						}
+					</td>
+					<td>
+						@if (PermissionChecker.CanManageCustomTravels)
+					{
+							<a asp-controller="CustomTravelPending" asp-action="DeleteContent" asp-route-id="@item.ContentId" class="btn btn-outline-danger" onclick="return confirm('確定要刪除嗎?')">刪除</a>
+					}
+					else
+					{
+						<a class="btn btn-outline-danger disabled" tabindex="-1" aria-disabled="true" onclick="return false">刪除</a>
+					}
+					</td>
+				</tr>
+			}
+		}
+	</tbody>
+</table>
+<div class="mt-4">
+</div>

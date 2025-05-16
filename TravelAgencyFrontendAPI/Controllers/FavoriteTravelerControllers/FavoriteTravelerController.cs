@@ -1,14 +1,14 @@
 ﻿//using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TravelAgencyFrontendAPI.Data;
 using TravelAgencyFrontendAPI.DTOs;
 using TravelAgencyFrontendAPI.DTOs.MemberDTOs;
-using TravelAgencyFrontendAPI.Models;
 using TravelAgencyFrontendAPI.Helpers;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using TravelAgencyFrontendAPI.DTOs.FavoriteTravelerDTOs;
+using TravelAgency.Shared.Models;
+using TravelAgency.Shared.Data;
 
 
 

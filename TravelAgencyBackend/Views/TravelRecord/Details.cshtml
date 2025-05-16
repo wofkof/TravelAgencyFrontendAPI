@@ -1,0 +1,98 @@
+﻿    @model TravelAgencyBackend.ViewModels.TravelRecord.TravelItemGroupDetailsViewModel
+    @using TravelAgency.Shared.Models
+
+@{
+    ViewData["Title"] = "行程訂單列表";
+}
+
+<h1 class="text-center mb-4">@ViewData["Title"]: @Model.ItemName</h1>
+
+@* 行程統計摘要 *@
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h4 class="my-0 fw-normal">行程統計摘要</h4>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ItemName)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.ItemName)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TotalParticipants)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.TotalParticipants)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TotalAmount)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.TotalAmount)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.OrderCount)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.OrderCount)</dd>
+        </dl>
+    </div>
+</div>
+
+@* 相關訂單列表 *@
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h4 class="my-0 fw-normal">@Html.DisplayNameFor(model => model.CompletedOrders)</h4>
+    </div>
+    <div class="card-body">
+        @if (Model.CompletedOrders != null && Model.CompletedOrders.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    @* 使用 table-sm 讓表格更緊湊 *@
+                    <thead>
+                        <tr>
+                            <th>@Html.DisplayNameFor(model => model.CompletedOrders.First().OrderId)</th>
+                            <th>@Html.DisplayNameFor(model => model.CompletedOrders.First().MemberName)</th>
+                            <th class="text-center">@Html.DisplayNameFor(model => model.CompletedOrders.First().ParticipantsCount)</th>
+                            <th class="text-end">@Html.DisplayNameFor(model => model.CompletedOrders.First().TotalAmount)</th>
+                            <th>@Html.DisplayNameFor(model => model.CompletedOrders.First().CreatedAt)</th>
+                            @* 可以加入其他需要的訂單欄位 *@
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model.CompletedOrders)
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => order.OrderId)</td>
+                                <td>@Html.DisplayFor(modelItem => order.MemberName)</td>
+                                <td class="text-center">@Html.DisplayFor(modelItem => order.ParticipantsCount)</td>
+                                <td class="text-end">@Html.DisplayFor(modelItem => order.TotalAmount)</td>
+                                <td>@Html.DisplayFor(modelItem => order.CreatedAt)</td>
+                                <td>
+                                    @* 連結到訂單的詳細頁面 *@
+                                    <a asp-controller="Order" asp-action="SimpleDetails"
+                                    asp-route-id="@order.OrderId"
+                                    asp-route-originItemId="@Model.ItemId" 
+                                    asp-route-originCategory="@Model.Category" 
+                                    class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-search"></i> 查看訂單
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p>此行程沒有相關的已付款訂單記錄。</p>
+        }
+    </div>
+</div>
+
+<div class="mt-4">
+    @if (PermissionChecker.CanViewOrders)
+    {
+        <a asp-action="Index" class="btn btn-secondary">返回行程統計列表</a>
+    }
+    else
+    {
+        <a asp-action="Index" class="btn btn-secondary disabled"
+           tabindex="-1" aria-disabled="true" onclick="return false;">
+        返回行程統計列表
+        </a>
+    }
+</div>

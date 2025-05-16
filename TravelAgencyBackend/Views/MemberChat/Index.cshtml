@@ -1,0 +1,66 @@
+﻿@model ChatRoom
+
+<h2>與客服對話</h2>
+<p>員工名稱：@Model.Employee.Name</p>
+
+<div id="chatArea" class="border bg-light p-3 mb-3" style="max-height: 400px; overflow-y: auto;">
+    @foreach (var msg in Model.Messages.OrderBy(m => m.SentAt))
+    {
+        <div class="mb-2">
+            <strong>@(msg.SenderType == SenderType.Employee ? "客服：" : "我：")</strong>
+            @msg.Content
+            <div class="text-muted" style="font-size: 0.85em;">
+                @msg.SentAt.ToString("yyyy-MM-dd HH:mm")
+                @if (msg.SenderType == SenderType.Employee && !msg.IsRead)
+                {
+                    <span class="badge bg-warning text-dark">未讀</span>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@if (Model.Status == ChatStatus.Closed)
+{
+    <div class="alert alert-warning">此聊天室已關閉, 無法回覆訊息。</div>
+}
+else
+{
+    <form asp-action="SendMessage" method="post">
+        <input type="hidden" name="chatRoomId" value="@Model.ChatRoomId" />
+        <textarea name="content" class="form-control mb-2" rows="3" placeholder="輸入訊息..." required></textarea>
+        <button type="submit" class="btn btn-primary">送出訊息</button>
+    </form>
+}
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            scrollToBottom();
+        });
+        function scrollToBottom() {
+            var chatArea = document.getElementById("chatArea");
+            chatArea.scrollTop = chatArea.scrollHeight;
+        };
+        function loadMessages() {
+            $.get('/MemberChat/GetMessages', { chatRoomId: @Model.ChatRoomId }, function (data) {
+                let html = '';
+                data.forEach(function (msg) {
+                    html += `
+                        <div class="mb-2">
+                            <strong>${msg.sender === "Employee" ? "客服：" : "我："}</strong>
+                            ${msg.content}
+                            <div class="text-muted" style="font-size: 0.9em;">
+                                ${msg.sentAt}
+                            </div>
+                        </div>
+                    `;
+                });
+                $('#chatArea').html(html);
+            });
+        }
+
+        setInterval(loadMessages, 3000);
+    </script>
+}

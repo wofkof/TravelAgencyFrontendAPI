@@ -1,0 +1,34 @@
+﻿@model TravelAgencyBackend.ViewModels.ChatRoomCreateViewModel
+
+@{
+    ViewData["Title"] = "建立聊天室";
+}
+
+<h2>建立聊天室</h2>
+
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label asp-for="MemberId" class="form-label"></label>
+        <select asp-for="MemberId" class="form-select" asp-items="Model.MemberList">
+            <option value="">-- 請選擇會員 --</option>
+        </select>
+        <span asp-validation-for="MemberId" class="text-danger"></span>
+    </div>
+
+    @* 管理聊天室 *@
+    @if (PermissionChecker.CanManageChatRooms)
+    {
+        <button type="submit" class="btn btn-primary">建立聊天室</button>
+    }
+    else
+    {
+        <button type="submit" class="btn btn-primary disabled"
+        tabindex="-1" aria-disabled="true" onclick="return false">
+        建立聊天室
+        </button>
+    }
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

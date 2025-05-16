@@ -1,0 +1,112 @@
+﻿@using TravelAgencyBackend.ViewModels.Employee
+@model EmployeeEditViewModel
+
+@{
+    ViewData["Title"] = "修改員工";
+    // var imagePath = string.IsNullOrWhiteSpace(Model.ImagePath)
+    //     ? Url.Content("~/images/default.png")
+    //     : Url.Content("~/uploads/" + Model.ImagePath);
+}
+
+<h1 class="mb-4 text-start">修改員工作業</h1>
+
+<div class="row">
+    <!-- 📄 左側表單 -->
+    <div class="col-md-8">
+        <form asp-action="Edit" asp-route-id="@Model.EmployeeId" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="EmployeeId" />
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" autocomplete="off" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Gender" class="form-label"></label>
+                    <select asp-for="Gender" asp-items="ViewBag.GenderList" class="form-select">
+                        <option value="">-- 請選擇性別 --</option>
+                    </select>
+                    <span asp-validation-for="Gender" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="BirthDate" class="form-label"></label>
+                    <input asp-for="BirthDate" class="form-control" type="date" autocomplete="off" />
+                    <span asp-validation-for="BirthDate" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Phone" class="form-label"></label>
+                    <input asp-for="Phone" class="form-control" autocomplete="off" />
+                    <span asp-validation-for="Phone" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" autocomplete="off" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Address" class="form-label"></label>
+                    <input asp-for="Address" class="form-control" autocomplete="off" />
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Password" class="form-label">密碼（留空代表不修改）</label>
+                    <input asp-for="Password" class="form-control" type="password" autocomplete="off" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="RoleId" class="form-label"></label>
+                    <select asp-for="RoleId" asp-items="ViewBag.RoleList" class="form-select">
+                        <option value="">-- 請選擇員工職位 --</option>
+                    </select>
+                    <span asp-validation-for="RoleId" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="HireDate" class="form-label"></label>
+                    <input asp-for="HireDate" class="form-control" type="date" autocomplete="off" />
+                    <span asp-validation-for="HireDate" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Status" class="form-label"></label>
+                    <select asp-for="Status" asp-items="ViewBag.StatusList" class="form-select">
+                        <option value="">-- 請選擇狀態 --</option>
+                    </select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Note" class="form-label"></label>
+                    <textarea asp-for="Note" class="form-control" rows="2" autocomplete="off"></textarea>
+                    <span asp-validation-for="Note" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-between">
+                <a asp-action="List" class="btn btn-outline-secondary btn-lg px-4">返回列表</a>
+                <button type="submit" class="btn btn-outline-primary btn-lg px-4">確定修改</button>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-4 text-center">
+        <label class="form-label d-block">員工照片</label>
+        <div>
+            <img id="previewImage"
+                 src="@(string.IsNullOrWhiteSpace(Model.ImagePath) ? Url.Content("~/images/default.png") : Url.Content("~/uploads/" + Model.ImagePath))"
+                 alt="預覽圖片" class="img-fluid rounded" style="max-height: 200px;" />
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function previewPhoto(event) {
+            const [file] = event.target.files;
+            if (file) {
+                document.querySelector('#previewImage').src = URL.createObjectURL(file);
+            }
+        }
+    </script>
+
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
