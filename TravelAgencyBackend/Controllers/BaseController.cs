@@ -11,10 +11,7 @@ namespace TravelAgencyBackend.Controllers
         {
             _permissionService = permissionService;
         }
-
-        /// <summary>
-        /// 權限檢查，不通過時回傳 Forbid()
-        /// </summary>
+        
         protected IActionResult? CheckPermissionOrForbid(string permissionName)
         {
             if (!_permissionService.HasPermission(permissionName))
@@ -22,14 +19,16 @@ namespace TravelAgencyBackend.Controllers
             return null;
         }
 
-        /// <summary>
-        /// 權限檢查（以布林值代表是否有權限），不通過時回傳 Forbid()
-        /// </summary>
         protected IActionResult? CheckPermissionOrForbid(bool hasPermission, string displayName)
         {
             if (!hasPermission)
                 return Forbid($"您沒有「{displayName}」的權限");
             return null;
+        }
+
+        protected int GetCurrentEmployeeId()
+        {
+            return HttpContext.Session.GetInt32("EmployeeId") ?? 0;
         }
 
     }
