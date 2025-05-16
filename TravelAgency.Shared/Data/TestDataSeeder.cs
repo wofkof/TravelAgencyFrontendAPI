@@ -105,9 +105,9 @@ namespace TravelAgency.Shared.Data
 
                 _context.Members.Add(new Member
                 {
-                    Name = "測試會員",
-                    Email = "member@test.com",
-                    Phone = "0911111111",
+                    Name = "葉曄燁",
+                    Email = "member1989@gmail.com",
+                    Phone = "0925806525",
                     PasswordHash = hash,
                     PasswordSalt = salt,
                     GoogleId = null,
@@ -118,26 +118,7 @@ namespace TravelAgency.Shared.Data
                 await _context.SaveChangesAsync();
             }
         }
-        //private async Task SeedMembersAsync()
-        //{
-        //    if (!_context.Members.Any())
-        //    {
-        //        _context.Members.Add(new Member
-        //        {
-        //            Name = "測試會員",
-        //            Email = "member@test.com",
-        //            Phone = "0911111111",
-        //            PasswordHash = "FakeHashValue",
-        //            PasswordSalt = "FakeSaltValue",
-        //            GoogleId = null,
-        //            IsBlacklisted = false,
-        //            Note = "這是測試用會員"
-        //        });
-
-        //        await _context.SaveChangesAsync();
-        //    }
-        //}
-
+        
         private async Task SeedChatRoomsAsync()
         {
             if (!_context.ChatRooms.Any())
