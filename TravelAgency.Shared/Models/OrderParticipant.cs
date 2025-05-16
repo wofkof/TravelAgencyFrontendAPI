@@ -8,7 +8,7 @@
 
         public string Name { get; set; } = null!;
         public DateTime BirthDate { get; set; }
-        public string IdNumber { get; set; } = null!;
+        public string? IdNumber { get; set; }
         public GenderType Gender { get; set; }
         public string Phone { get; set; } = null!;
         public string Email { get; set; } = null!;
