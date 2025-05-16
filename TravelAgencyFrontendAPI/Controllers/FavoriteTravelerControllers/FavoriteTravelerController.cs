@@ -55,6 +55,9 @@ namespace TravelAgencyFrontendAPI.Controllers.FavoriteTravelerController
         [HttpPost]
         public async Task<IActionResult> CreateTraveler([FromBody] FavoriteTravelerDto dto)
         {
+            var validationResult = ValidateTaiwanId(dto);
+            if (validationResult != null)
+                return validationResult;
             var traveler = new MemberFavoriteTraveler
             {
                 MemberId = dto.MemberId,
@@ -84,6 +87,10 @@ namespace TravelAgencyFrontendAPI.Controllers.FavoriteTravelerController
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTraveler(int id, [FromBody] FavoriteTravelerDto dto)
         {
+            var validationResult = ValidateTaiwanId(dto);
+            if (validationResult != null)
+                return validationResult;
+
             var traveler = await _context.MemberFavoriteTravelers.FindAsync(id);
             if (traveler == null || traveler.Status == FavoriteStatus.Deleted)
                 return NotFound();
@@ -120,6 +127,21 @@ namespace TravelAgencyFrontendAPI.Controllers.FavoriteTravelerController
             await _context.SaveChangesAsync();
             return NoContent();
         }
+        private IActionResult? ValidateTaiwanId(FavoriteTravelerDto dto)
+        {
+            if (dto.Nationality == "TW")
+            {
+                if (string.IsNullOrWhiteSpace(dto.IdNumber))
+                    return BadRequest("台灣國籍的旅客必須填寫身分證字號");
+
+                var idRegex = new Regex("^[A-Z][1289]\\d{8}$");
+                if (!idRegex.IsMatch(dto.IdNumber))
+                    return BadRequest("台灣身分證字號格式不正確");
+            }
+
+            return null;
+        }
+
     }
 }
     
