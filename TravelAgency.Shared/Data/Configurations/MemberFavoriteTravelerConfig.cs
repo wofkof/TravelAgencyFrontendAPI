@@ -19,7 +19,7 @@ namespace TravelAgency.Shared.Data.Configurations
 
             entity.Property(p => p.Phone).HasMaxLength(20).IsRequired(false);
             entity.HasIndex(p => p.Phone).IsUnique();
-            
+
             entity.Property(p => p.Email).HasMaxLength(100).IsRequired(false);
             entity.HasIndex(p => p.Email).IsUnique();
 
