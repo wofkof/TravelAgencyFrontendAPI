@@ -31,13 +31,13 @@ namespace TravelAgencyFrontendAPI.DTOs.OrderDTOs
         [Required(ErrorMessage = "旅客性別為必填")]
         public GenderType Gender { get; set; }
 
-        [Required(ErrorMessage = "旅客手機為必填")]
-        [Phone(ErrorMessage = "請輸入有效的手機號碼")]
+        //[Required(ErrorMessage = "旅客手機為必填")]
+        //[Phone(ErrorMessage = "請輸入有效的手機號碼")]
         [StringLength(20)]
         public string Phone { get; set; }
 
-        [Required(ErrorMessage = "旅客電子信箱為必填")]
-        [EmailAddress(ErrorMessage = "請輸入有效的電子信箱")]
+        //[Required(ErrorMessage = "旅客電子信箱為必填")]
+        //[EmailAddress(ErrorMessage = "請輸入有效的電子信箱")]
         [StringLength(255)]
         public string Email { get; set; }
 

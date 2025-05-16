@@ -53,9 +53,9 @@ namespace TravelAgencyFrontendAPI.Controllers
             {
                 MemberId = currentUserId.Value,
 
-                //OrdererName = orderCreateDto.OrdererInfo.Name, // 訂購人姓名
-                //OrdererPhone = orderCreateDto.OrdererInfo.MobilePhone, // 訂購人電話
-                //OrdererEmail = orderCreateDto.OrdererInfo.Email, // 訂購人Email
+                OrdererName = orderCreateDto.OrdererInfo.Name, // 訂購人姓名
+                OrdererPhone = orderCreateDto.OrdererInfo.MobilePhone, // 訂購人電話
+                OrdererEmail = orderCreateDto.OrdererInfo.Email, // 訂購人Email
 
                 TotalAmount = orderCreateDto.TotalAmount,
                 PaymentMethod = orderCreateDto.SelectedPaymentMethod, // 使用者選擇的付款方式
@@ -157,7 +157,20 @@ namespace TravelAgencyFrontendAPI.Controllers
                 if (!string.IsNullOrEmpty(participantDto.Note)) // 可以考慮合併常用旅客的備註和DTO的備註
                     participant.Note = participantDto.Note;
 
-
+                if (participantDto.MemberIdAsParticipant.HasValue && participantDto.MemberIdAsParticipant.Value > 0)
+                {
+                    // 將 DTO 中的 MemberId 賦予給 OrderParticipant 實體的 MemberId
+                    //participant.MemberId = participantDto.MemberIdAsParticipant.Value;
+                }
+                else
+                {
+                    // 如果 participantDto.MemberIdAsParticipant 沒有值 (例如是 null 或 0)
+                    // 根據您的業務邏輯，這裡可能需要處理非會員旅客的情況
+                    // 例如：如果資料庫允許 OrderParticipant.MemberId 為 NULL，您可以將其設為 NULL
+                    // participant.MemberId = null; // 假設資料庫允許為 NULL
+                    // 如果不允許 NULL，且必須關聯會員，那麼沒有提供有效 MemberId 時應該拒絕建立參與者或訂單
+                    // 在這種情況下，您可能需要在保存前進行檢查或在 DTO 層做 Required 驗證
+                }
                 // 如果 participantDto.MemberIdAsParticipant 有值，表示這位旅客同時也是系統會員
                 // 您可以根據此 ID 做額外檢查或記錄，但 OrderParticipant 表本身沒有直接的 MemberId FK
                 // participant.AssociatedMemberId = participantDto.MemberIdAsParticipant; (如果 OrderParticipant 有此欄位)
@@ -251,9 +264,9 @@ namespace TravelAgencyFrontendAPI.Controllers
             return Ok(new{
                 order.OrderId,
                 order.MemberId,
-                //OrdererName = order.OrdererName, // 回傳快照的訂購人姓名
-                //OrdererPhone = order.OrdererPhone, // 回傳快照的訂購人電話
-                //OrdererEmail = order.OrdererEmail, // 回傳快照的訂購人Email
+                OrdererName = order.OrdererName, // 回傳快照的訂購人姓名
+                OrdererPhone = order.OrdererPhone, // 回傳快照的訂購人電話
+                OrdererEmail = order.OrdererEmail, // 回傳快照的訂購人Email
                 order.TotalAmount,
                 PaymentMethod = order.PaymentMethod?.ToString(),
                 Status = order.Status.ToString(),
