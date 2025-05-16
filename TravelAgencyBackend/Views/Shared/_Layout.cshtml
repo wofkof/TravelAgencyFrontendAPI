@@ -1,0 +1,53 @@
+﻿@{
+    ViewData["Title"] = "TravelAgencyBackend";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TravelAgencyBackend</title>
+
+    <!-- ArchitectUI CSS 最前面載入 -->
+    <link rel="stylesheet" href="~/assets/styles/main.css" />
+
+    <!-- ASP.NET Bootstrap 自訂 CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/assets/styles/main.css" asp-append-version="true" />
+
+    <!-- Icon Font -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pixeden-stroke-7-icon@1.2.3/pe-icon-7-stroke/dist/pe-icon-7-stroke.min.css">
+    
+    <!-- 在 head 中加入 DataTables 的 CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+</head>
+<body class="loading">
+    <div class="app-container app-theme-white body-tabs-shadow fixed-sidebar fixed-header">
+
+        @await Html.PartialAsync("_Header")
+
+        <div class="app-main">
+            @await Html.PartialAsync("_Sidebar")
+
+            <div class="app-main__outer">
+                <div class="app-main__inner">
+                    @RenderBody()
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @await Html.PartialAsync("_Scripts")
+    <!-- 在 body 結尾加入 jQuery 和 DataTables 的 JS -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    @RenderSection("Scripts", required: false)
+
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    }
+
+</body>
+</html>

@@ -1,0 +1,104 @@
+﻿@model TravelAgencyBackend.ViewModels.ParticipantCreateViewModel
+
+@{
+    ViewData["Title"] = "新增參與人";
+}
+
+<h1>新增參與人</h1>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label class="form-label">所屬會員</label>
+        <input type="text" class="form-control" value="@ViewBag.MemberName" disabled />
+        <input type="hidden" asp-for="MemberId" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="EnglishName" class="form-label"></label>
+        <input asp-for="EnglishName" class="form-control" />
+        <span asp-validation-for="EnglishName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Phone" class="form-label"></label>
+        <input asp-for="Phone" class="form-control" />
+        <span asp-validation-for="Phone" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="IdNumber" class="form-label"></label>
+        <input asp-for="IdNumber" class="form-control" />
+        <span asp-validation-for="IdNumber" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="BirthDate" class="form-label"></label>
+        <input asp-for="BirthDate" class="form-control" type="date" />
+        <span asp-validation-for="BirthDate" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Gender" class="form-label"></label>
+        <select asp-for="Gender" class="form-control" asp-items="Html.GetEnumSelectList<GenderType>();"></select>
+        <span asp-validation-for="Gender" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="IssuedPlace" class="form-label"></label>
+        <select asp-for="IssuedPlace" class="form-control" asp-items="ViewBag.IssuedPlaces">
+            <option value="">請選擇</option>
+        </select>
+        <span asp-validation-for="IssuedPlace" class="text-danger"></span>
+    </div>
+
+
+    <div class="mb-3">
+        <label asp-for="PassportNumber" class="form-label"></label>
+        <input asp-for="PassportNumber" class="form-control" />
+        <span asp-validation-for="PassportNumber" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="PassportIssueDate" class="form-label"></label>
+        <input asp-for="PassportIssueDate" class="form-control" type="date"/>
+        <span asp-validation-for="PassportIssueDate" class="text-danger"></span>
+    </div>
+
+    @* 管理參與人 *@
+    @if (PermissionChecker.CanManageParticipants)
+    {
+        <button type="submit" class="btn btn-primary">建立</button>
+    }
+    else
+    {
+        <button type="submit" class="btn btn-primary disabled"
+        tabindex="-1" aria-disabled="true" onclick="return false">
+            建立
+        </button>
+    }
+
+    @* 查看參與人 *@
+    @if (PermissionChecker.CanViewParticipants)
+    {
+        <a asp-action="Index" class="btn btn-secondary">返回列表</a>
+    }
+	else
+	{
+		<a asp-action="Index" class="btn btn-secondary disabled"
+		   tabindex="-1" aria-disabled="true" onclick="return false">
+			返回列表
+		</a>
+	}
+
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

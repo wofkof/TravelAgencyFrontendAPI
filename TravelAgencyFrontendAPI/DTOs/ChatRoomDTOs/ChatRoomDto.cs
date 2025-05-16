@@ -1,4 +1,4 @@
-﻿namespace TravelAgencyFrontendAPI.DTOs
+﻿namespace TravelAgencyFrontendAPI.DTOs.ChatRoomDTOs
 {
     public class ChatRoomDto
     {

@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TravelAgencyFrontendAPI.Data;
+using TravelAgency.Shared.Data;
 using TravelAgencyFrontendAPI.DTOs.OfficialDTOs;
 using TravelAgencyFrontendAPI.DTOs.OfficialDTOs.Search;
-using TravelAgencyFrontendAPI.Models;
+using TravelAgency.Shared.Models;
 
 namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
 {

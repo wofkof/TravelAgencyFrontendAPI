@@ -1,0 +1,180 @@
+﻿    @model TravelAgencyBackend.ViewModels.TravelRecord.TravelItemGroupIndexViewModel
+
+@{
+    ViewData["Title"] = "行程統計報表"; // 更新標題
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+<style>
+    /* --- 樣式 (複製之前的，可微調) --- */
+    .sort-link i {
+        margin-left: 5px;
+        color: #6c757d;
+    }
+
+    .sort-link.active i {
+        color: #0d6efd;
+    }
+
+    .search-form .form-control, .search-form .form-select {
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .search-form .btn {
+        margin-bottom: 0.5rem;
+    }
+
+    .truncate-text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .list-container {
+        position: relative;
+        min-height: 150px;
+    }
+
+    .table-loading-overlay {
+        position: absolute; /* ... */
+    }
+
+        .table-loading-overlay.is-loading { /* ... */
+        }
+
+    .pagination-info { /* ... */
+    }
+
+    .page-size-select {
+        max-width: 150px;
+    }
+
+    .item-group-table tfoot td {
+        border: none;
+        padding-top: 1rem;
+    }
+    /* 使用新的 table class */
+    /* 欄寬建議 */
+    .item-group-table th:nth-child(1), .item-group-table td:nth-child(1) {
+        width: 40%;
+    }
+    /* 行程名稱 */
+    .item-group-table th:nth-child(2), .item-group-table td:nth-child(2) {
+        width: 15%;
+        text-align: center;
+    }
+    /* 總人數 */
+    .item-group-table th:nth-child(3), .item-group-table td:nth-child(3) {
+        width: 15%;
+        text-align: right;
+    }
+    /* 總金額 */
+    .item-group-table th:nth-child(4), .item-group-table td:nth-child(4) {
+        width: 15%;
+        text-align: center;
+    }
+    /* 訂單數 */
+    .item-group-table th:last-child, .item-group-table td:last-child {
+        width: 15%;
+        text-align: center;
+    }
+    /* 操作 */
+</style>
+
+<h1 class="text-center mb-4">@ViewData["Title"]</h1>
+
+@* 搜尋表單 (加入類別下拉) *@
+<form asp-action="Index" method="get" class="mb-4 p-3 border rounded bg-light search-form" id="searchForm">
+    <div class="row g-2 align-items-center">
+        <div class="col-md-auto">
+            <input asp-for="SearchItemName" class="form-control form-control-sm" placeholder="輸入行程名稱搜尋..." />
+        </div>
+        @* --- 新增類別下拉 --- *@
+        <div class="col-md-auto">
+            <select asp-for="SearchCategory" class="form-select form-select-sm" asp-items="Model.Categories">
+                <option value="">-- 所有類別 --</option>
+            </select>
+        </div>
+        @* --- 新增結束 --- *@
+        <div class="col-md-auto">
+            <select asp-for="PageSize" class="form-select form-select-sm page-size-select" asp-items="Model.PageSizeOptions" id="pageSizeSelect"></select>
+        </div>
+        <div class="col-md-auto">
+            <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search me-1"></i> 搜尋</button>
+            <a asp-action="Index" class="btn btn-secondary btn-sm"><i class="fas fa-undo me-1"></i> 清除</a>
+        </div>
+    </div>
+    <input type="hidden" name="sortField" value="@Model.SortField" id="currentSortField" />
+    <input type="hidden" name="sortDirection" value="@Model.SortDirection" id="currentSortDirection" />
+    <input type="hidden" name="pageNumber" value="@Model.PageIndex" id="currentPageNumber" />
+</form>
+
+@* 列表容器 *@
+<div class="list-container" id="itemGroupListContainer">
+    <div class="table-loading-overlay" id="tableLoadingOverlay">
+        <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+    </div>
+    @await Html.PartialAsync("_TravelItemGroupListPartial", Model)
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const listContainer = document.getElementById('itemGroupListContainer');
+            const loadingOverlay = document.getElementById('tableLoadingOverlay');
+            const searchForm = document.getElementById('searchForm');
+            const currentSortFieldInput = document.getElementById('currentSortField');
+            const currentSortDirectionInput = document.getElementById('currentSortDirection');
+            const currentPageNumberInput = document.getElementById('currentPageNumber');
+            const pageSizeSelect = document.getElementById('pageSizeSelect');
+            const categorySelect = searchForm.querySelector('[name="SearchCategory"]'); // 抓取類別下拉
+
+            async function loadListData(url) {
+                // ... (同之前的 fetch 邏輯) ...
+                 if(loadingOverlay) loadingOverlay.classList.add('is-loading');
+                try {
+                    const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const html = await response.text();
+                    listContainer.innerHTML = html;
+                    history.pushState(null, '', url);
+                    const urlParams = new URLSearchParams(url.split('?')[1] || '');
+                    currentSortFieldInput.value = urlParams.get('sortField') || 'ItemName';
+                    currentSortDirectionInput.value = urlParams.get('sortDirection') || 'asc';
+                    currentPageNumberInput.value = urlParams.get('pageNumber') || '1';
+                    pageSizeSelect.value = urlParams.get('pageSize') || '10';
+                    // 同步類別下拉選單的值 (如果 URL 有)
+                    categorySelect.value = urlParams.get('SearchCategory') || '';
+
+                } catch (error) { /* ... */ }
+                finally { /* ... */ if(loadingOverlay) { setTimeout(() => loadingOverlay.classList.remove('is-loading'), 100); } }
+            }
+
+            // --- 事件綁定 (同之前) ---
+            listContainer.addEventListener('click', function(event) { /* ... */ submitSearchForm(); });
+            searchForm.addEventListener('submit', function(event) { event.preventDefault(); currentPageNumberInput.value = '1'; submitSearchForm(); });
+            pageSizeSelect.addEventListener('change', function() { currentPageNumberInput.value = '1'; submitSearchForm(); });
+            // --- 新增：監聽類別下拉選單變更 ---
+            categorySelect.addEventListener('change', function() { currentPageNumberInput.value = '1'; submitSearchForm(); });
+
+            // --- 輔助函數：提交表單 (確保包含 SearchCategory) ---
+            function submitSearchForm() {
+                 const formData = new FormData(searchForm);
+                 const searchParams = new URLSearchParams(formData);
+                 // 確保包含所有參數
+                 searchParams.set('sortField', currentSortFieldInput.value);
+                 searchParams.set('sortDirection', currentSortDirectionInput.value);
+                 searchParams.set('pageNumber', currentPageNumberInput.value);
+                 searchParams.set('pageSize', pageSizeSelect.value);
+                 // SearchItemName 和 SearchCategory 會自動從 formData 取得
+
+                 const url = `@Url.Action("Index", "TravelRecord")?${searchParams.toString()}`;
+                 loadListData(url);
+             }
+        });
+    </script>
+}

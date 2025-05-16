@@ -1,0 +1,107 @@
+﻿@model TravelAgency.Shared.Models.CustomTravel
+
+
+@{
+    ViewData["Title"] = "EditOrder";
+}
+
+<h2>修改訂單</h2>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="EditOrder">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="CustomTravelId" value="@Model.CustomTravelId" />
+            <div class="form-group">
+                <label asp-for="MemberId" class="control-label">會員</label>
+                <select asp-for="MemberId" class="form-control" asp-items="ViewBag.Members">
+                    <option value="">請選擇會員</option>
+                </select>
+                <span asp-validation-for="MemberId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ReviewEmployeeId" class="control-label">審核員工</label>
+                <select asp-for="ReviewEmployeeId" class="form-control" asp-items="ViewBag.ReviewEmployees"> 
+                    <option value="">請選擇審核員工</option> 
+                </select> 
+                <span asp-validation-for="ReviewEmployeeId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CreatedAt" class="control-label"></label>
+                <input asp-for="CreatedAt" class="form-control" />
+                <span asp-validation-for="CreatedAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="UpdatedAt" class="control-label"></label>
+                <input asp-for="UpdatedAt" class="form-control" />
+                <span asp-validation-for="UpdatedAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DepartureDate" class="control-label"></label>
+                <input asp-for="DepartureDate" class="form-control" />
+                <span asp-validation-for="DepartureDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EndDate" class="control-label"></label>
+                <input asp-for="EndDate" class="form-control" />
+                <span asp-validation-for="EndDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Days" class="control-label"></label>
+                <input asp-for="Days" class="form-control" />
+                <span asp-validation-for="Days" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="People" class="control-label"></label>
+                <input asp-for="People" class="form-control" />
+                <span asp-validation-for="People" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TotalAmount" class="control-label"></label>
+                <input asp-for="TotalAmount" class="form-control" />
+                <span asp-validation-for="TotalAmount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Note" class="control-label"></label>
+                <input asp-for="Note" class="form-control" />
+                <span asp-validation-for="Note" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-2">
+                <label asp-for="Status" class="control-label"></label>                
+                <select asp-for="Status"
+                asp-items="Html.GetEnumSelectList<CustomTravelStatus>()"
+                class="form-select d-inline w-auto mx-2">                    
+                </select>
+                <span asp-validation-for="Status" class="text-danger"></span>
+            </div>            
+            <div class="mt-4">
+                @if (PermissionChecker.CanManageCustomTravels)
+                {
+                    <input type="submit" value="修改" class="btn btn-primary" />
+                }
+                else
+                {
+                    <input type="submit" value="修改" class="btn btn-primary disabled"
+                    tabindex="-1" aria-disabled="true" onclick="return false;" />
+                }
+                @if (PermissionChecker.CanViewCustomTravels)
+                {
+                    <a asp-action="List" class="btn btn-secondary">返回</a>
+                }
+                else
+                {
+                    <a asp-action="List" class="btn btn-secondary disabled"
+                       tabindex="-1" aria-disabled="true" onclick="return false;">
+                    返回
+                   </a>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

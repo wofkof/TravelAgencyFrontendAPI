@@ -1,7 +1,7 @@
 // File: DTOs/OrderDTOs/OrderDto.cs
 using System;
 using System.Collections.Generic;
-using TravelAgencyFrontendAPI.Models; // For Enums like OrderStatus, PaymentMethod
+using TravelAgency.Shared.Models; // For Enums like OrderStatus, PaymentMethod
 
 namespace TravelAgencyFrontendAPI.DTOs.OrderDTOs
 {

@@ -1,5 +1,7 @@
-﻿using TravelAgencyFrontendAPI.Models;
+using TravelAgency.Shared.Data;
+using TravelAgency.Shared.Models;
 using TravelAgencyFrontendAPI.Extensions;
+
 namespace TravelAgencyFrontendAPI.DTOs.CustomTravelDTOs
 {   
     public class CustomTravelDto

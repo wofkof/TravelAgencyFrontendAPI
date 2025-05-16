@@ -1,0 +1,96 @@
+﻿@model TravelAgencyBackend.ViewModels.ScheduleWithActivityNameViewModel
+
+@{
+    var s = Model.Schedule;
+}
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>檢視</h1>
+@* 楷茵 *@
+<div>
+    <hr />
+    <dl class="row">
+        @* <dt class = "col-sm-2"> *@
+        @*     @Html.DisplayNameFor(model => s.ItemId) *@
+        @* </dt> *@
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.ActivityName)
+        </dd>
+        @* <dt class = "col-sm-2"> *@
+        @*     @Html.DisplayNameFor(model => s.Category) *@
+        @* </dt> *@
+        @* <dd class = "col-sm-10"> *@
+        @*     @Html.DisplayFor(model => s.Category) *@
+        @* </dd> *@
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => s.Day)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => s.Day)
+        </dd>
+        @* <dt class = "col-sm-2"> *@
+        @*     @Html.DisplayNameFor(model => s.StartTime) *@
+        @* </dt> *@
+        @* <dd class = "col-sm-10"> *@
+        @*     @Html.DisplayFor(model => s.StartTime) *@
+        @* </dd> *@
+        @* <dt class = "col-sm-2"> *@
+        @*     @Html.DisplayNameFor(model => s.Date) *@
+        @* </dt> *@
+        @* <dd class = "col-sm-10"> *@
+        @*     @Html.DisplayFor(model => s.Date) *@
+        @* </dd> *@
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => s.Description)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => s.Description)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => s.Note1)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => s.Note1)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => s.Note2)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => s.Note2)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => s.OfficialTravelDetail)
+        </dt>
+        @* <dd class = "col-sm-10"> *@
+        @*     @Html.DisplayFor(model => s.OfficialTravelDetail.DepartureDate) 出發 *@
+        @* </dd> *@
+    </dl>
+</div>
+<div>
+    @if (PermissionChecker.CanManageOfficialTravels)
+    {
+        <a asp-action="Edit" asp-route-id="@s?.OfficialTravelScheduleId">編輯</a>
+    }
+    else
+    {
+        <a asp-action="Edit" asp-route-id="@s?.OfficialTravelScheduleId" class="disabled"
+        tabindex="-1" aria-disabled="true" onclick="return false;">
+            編輯
+        </a>
+    }
+    |
+    @if (PermissionChecker.CanViewOfficialTravels)
+    {
+        <a asp-action="Index">回到日程目錄</a>
+    }
+    else
+    {
+        <a asp-action="Index" class="disabled"
+           tabindex="-1" aria-disabled="true" onclick="return false;">
+        回到日程目錄
+        </a>
+    }
+</div>
