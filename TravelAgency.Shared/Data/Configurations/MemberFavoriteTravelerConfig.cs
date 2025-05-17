@@ -38,7 +38,7 @@ namespace TravelAgency.Shared.Data.Configurations
             entity.Property(p => p.Note).HasMaxLength(255).IsRequired(false);
             entity.Property(p => p.Status).HasMaxLength(20).HasDefaultValue(FavoriteStatus.Active).HasConversion<string>().IsRequired();
 
-            entity.Property(p => p.IdNumber).HasMaxLength(20).IsRequired();
+            entity.Property(p => p.IdNumber).HasMaxLength(20).IsRequired(false);
             entity.HasIndex(p => p.IdNumber).IsUnique();
 
             entity.Property(p => p.BirthDate).HasColumnType("date").IsRequired();
