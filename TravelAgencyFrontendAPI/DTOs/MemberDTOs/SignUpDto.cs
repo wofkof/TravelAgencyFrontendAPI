@@ -7,15 +7,18 @@ namespace TravelAgencyFrontendAPI.DTOs.MemberDTOs
 	public class SignUpDto
 	{
         [Required(ErrorMessage = "Required")]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Required")]
-        public string Phone { get; set; }
+        public string Phone { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Required")]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Required")]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
+
+        public string? EmailVerificationCode { get; set; }
+
     }
 }

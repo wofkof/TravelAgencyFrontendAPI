@@ -73,9 +73,25 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
             {
                 return ValidationProblem(ModelState);
             }
+            // 🔐 比對驗證碼
+            //var existing = await _context.Members.FirstOrDefaultAsync(m => m.Email == dto.Email);
+
+            //if (existing == null)
+            //{
+            //    ModelState.AddModelError("EmailVerificationCode", "請先發送驗證碼");
+            //    return ValidationProblem(ModelState);
+            //}
+
+            //if (existing.EmailVerificationCode != dto.EmailVerificationCode ||
+            //    existing.EmailVerificationExpireTime < DateTime.Now)
+            //{
+            //    ModelState.AddModelError("EmailVerificationCode", "驗證碼錯誤或已過期，請重新輸入");
+            //    return ValidationProblem(ModelState);
+            //}
 
             // 產生 6 碼驗證碼
             var code = new Random().Next(100000, 999999).ToString();
+
 
             // 密碼雜湊處理
             PasswordHasher.CreatePasswordHash(dto.Password, out string hash, out string salt);
@@ -153,6 +169,72 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 name = member.Name,
                 id = member.MemberId
             });
+        }
+
+        // POST: api/Account/send-email-code
+        [HttpPost("send-email-code")]
+        public async Task<IActionResult> SendEmailVerificationCode([FromBody] SendVerificationCodeDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Email))
+            {
+                return BadRequest("Email 為必填欄位");
+            }
+
+            // ❗ 改為禁止重複註冊的判斷（如果該 Email 已存在就不再發送）
+            if (await _context.Members.AnyAsync(m => m.Email == dto.Email))
+            {
+                return BadRequest("此 Email 已被註冊，請直接登入或使用其他信箱");
+            }
+
+            // 然後繼續產生驗證碼、寄出 Email（可存入暫存區或前端自己保存）
+            var code = new Random().Next(100000, 999999).ToString();
+
+            // 可選：將驗證碼儲存在伺服器記憶體/快取/資料表（這段未寫，可日後擴充）
+
+            try
+            {
+                await _emailService.SendEmailAsync(
+                    dto.Email,
+                    "嶼你同行 - 註冊驗證碼",
+                    $"您好，這是您的 Email 驗證碼：<b>{code}</b><br>請在 10 分鐘內完成驗證。"
+                );
+
+                return Ok("驗證碼已發送");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"寄信錯誤：{ex.Message}");
+                return StatusCode(500, $"驗證碼寄送失敗：{ex.Message}");
+            }
+
+        }
+
+        // POST: api/Account/verify-email-code
+        [HttpPost("verify-email-code")]
+        public async Task<IActionResult> VerifyEmailCode([FromBody] VerifyEmailCodeDto dto)
+        {
+            var member = await _context.Members.FirstOrDefaultAsync(m => m.Email == dto.Email);
+
+            if (member == null)
+                return NotFound("找不到該會員");
+
+            if (member.IsEmailVerified)
+                return BadRequest("該信箱已驗證過");
+
+            if (member.EmailVerificationExpireTime < DateTime.Now)
+                return BadRequest("驗證碼已過期，請重新取得");
+
+            if (member.EmailVerificationCode != dto.Code)
+                return BadRequest("驗證碼錯誤");
+
+            // 驗證成功
+            member.IsEmailVerified = true;
+            member.EmailVerificationCode = null;
+            member.EmailVerificationExpireTime = null;
+
+            await _context.SaveChangesAsync();
+
+            return Ok("信箱驗證成功");
         }
 
     }

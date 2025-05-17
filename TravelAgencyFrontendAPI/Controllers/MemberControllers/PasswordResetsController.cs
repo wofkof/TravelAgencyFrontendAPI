@@ -61,27 +61,34 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
         }
 
         // POST: api/PasswordResets/reset
-        [HttpPost("reset")]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
-        {
-            var reset = await _context.ResetPasswords
-                .FirstOrDefaultAsync(r => r.Token == dto.Token && !r.IsUsed && r.ExpireTime > DateTime.Now);
+        //[HttpPost("reset")]
+        //public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+        //{
+        //    var verification = await _context.EmailVerificationCodes
+        //        .FirstOrDefaultAsync(v =>
+        //            v.VerificationCode == dto.Token &&
+        //            v.VerificationType == EmailVerificationCode.VerificationTypeEnum.ResetPassword &&
+        //            !v.IsVerified &&
+        //            v.ExpireAt > DateTime.Now);
 
-            if (reset == null)
-                return BadRequest("重設連結無效或已過期");
+        //    if (verification == null)
+        //        return BadRequest("驗證碼無效或已過期");
 
-            var member = await _context.Members.FindAsync(reset.MemberId);
-            if (member == null)
-                return BadRequest("找不到對應會員");
+        //    var member = await _context.Members.FirstOrDefaultAsync(m => m.Email == verification.Email);
+        //    if (member == null)
+        //        return BadRequest("找不到對應會員");
 
-            PasswordHasher.CreatePasswordHash(dto.NewPassword, out string newHash, out string newSalt);
-            member.PasswordHash = newHash;
-            member.PasswordSalt = newSalt;
+        //    // 更新密碼
+        //    PasswordHasher.CreatePasswordHash(dto.NewPassword, out string newHash, out string newSalt);
+        //    member.PasswordHash = newHash;
+        //    member.PasswordSalt = newSalt;
 
-            reset.IsUsed = true;
-            await _context.SaveChangesAsync();
+        //    // 標記驗證碼為已使用
+        //    verification.IsVerified = true;
+        //    await _context.SaveChangesAsync();
 
-            return Ok("密碼已重設");
-        }
+        //    return Ok("密碼已重設");
+        //}
+
     }
 }
