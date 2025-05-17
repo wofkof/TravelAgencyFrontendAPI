@@ -12,7 +12,7 @@ namespace TravelAgencyFrontendAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    // [Authorize] // <--- 建議加上這個，確保只有登入會員才能下單
+    [Authorize] // <--- 加上這個，確保只有登入會員才能下單
     public class OrderController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -54,7 +54,7 @@ namespace TravelAgencyFrontendAPI.Controllers
                 MemberId = currentUserId.Value,
 
                 OrdererName = orderCreateDto.OrdererInfo.Name, // 訂購人姓名
-                OrdererPhone = orderCreateDto.OrdererInfo.MobilePhone, // 訂購人電話
+                OrdererPhone = NormalizePhoneNumber(orderCreateDto.OrdererInfo.MobilePhone), // 訂購人電話
                 OrdererEmail = orderCreateDto.OrdererInfo.Email, // 訂購人Email
 
                 TotalAmount = orderCreateDto.TotalAmount,
@@ -86,6 +86,26 @@ namespace TravelAgencyFrontendAPI.Controllers
             // 4. 處理旅客列表 (OrderParticipants)
             foreach (var participantDto in orderCreateDto.Participants)
             {
+                if (participantDto.DocumentType == DocumentType.Passport && string.IsNullOrEmpty(participantDto.DocumentNumber))
+                {
+                    // 添加一個 Model 錯誤或直接返回 BadRequest
+                    ModelState.AddModelError($"Participants[{order.OrderParticipants.Count}].DocumentNumber", "選擇護照作為證件類型時，護照號碼為必填。");
+                    // 如果您有多個自定義驗證，可以先收集錯誤，最後統一返回 BadRequest
+                    // 為了範例簡潔，這裡假設您會統一處理錯誤
+                }
+
+                // 檢查必填欄位是否有值 (雖然 DTO 已有 [Required]，但這裡可以再次確認或記錄)
+                if (string.IsNullOrEmpty(participantDto.Name)) { /* ... 錯誤處理 ... */ }
+                // ... 其他必填欄位檢查 ...
+
+                // 如果有自定義驗證錯誤，建議在這裡檢查並提前返回
+                if (!ModelState.IsValid)
+                {
+                    // 記錄錯誤並返回
+                    _logger.LogWarning("CreateOrder Participant Custom Validation Failed: {@ModelStateErrors}", ModelState);
+                    return BadRequest(ModelState);
+                }
+
                 var participant = new OrderParticipant();
 
                 if (participantDto.FavoriteTravelerId.HasValue && participantDto.FavoriteTravelerId.Value > 0)
@@ -123,6 +143,15 @@ namespace TravelAgencyFrontendAPI.Controllers
                     }
                 }
 
+                if (participantDto.DocumentType == DocumentType.Passport && string.IsNullOrEmpty(participantDto.DocumentNumber))
+                {
+                    ModelState.AddModelError($"Participants[{order.OrderParticipants.Count}].DocumentNumber", "選擇護照作為證件類型時，護照號碼為必填。");
+                }
+                // 或者其他組合規則，例如：IdNumber 或 DocumentNumber 至少要有一個非空？
+                if (string.IsNullOrEmpty(participantDto.IdNumber) && string.IsNullOrEmpty(participantDto.DocumentNumber))
+                {
+                    ModelState.AddModelError($"Participants[{order.OrderParticipants.Count}].IdOrDocumentNumber", "旅客身分證號或證件號碼至少需填寫一項。");
+                }
                 // 無論是否從常用旅客載入，都允許 DTO 中的資料覆蓋或提供 (如果 DTO 欄位有值)
                 // 這裡的邏輯是：如果 DTO 提供了值，就用 DTO 的；否則，如果從常用旅客載入了值，就保留。
                 // 另一種策略是：常用旅客優先，DTO僅用於新增或沒有常用旅客ID的情況。
@@ -130,53 +159,36 @@ namespace TravelAgencyFrontendAPI.Controllers
                 // 但對於 Name, Phone, Email 等必填欄位，如果常用旅客沒填到，DTO 應提供。
 
                 // 確保 Name, Phone, Email 等核心資訊來自 DTO (因為 DTO 這些欄位是 Required)
-                participant.Name = participantDto.Name;
-                participant.Phone = participantDto.Phone;
-                participant.Email = participantDto.Email;
 
                 // 對於可選欄位，如果 DTO 有提供就使用，否則保留從常用旅客載入的值 (如果有的話)
                 // DateTime 和 Enum 的 Nullable 判斷比較 tricky，因為 DTO 中通常直接是 DateTime/Enum 而不是 DateTime?/Enum?
                 // 但 OrderParticipantDto 中的 BirthDate, Gender, DocumentType 是必填的
-
+                participant.Name = participantDto.Name;
                 participant.BirthDate = participantDto.BirthDate;
-                participant.IdNumber = participantDto.IdNumber; // DTO中 IdNumber 也是必填
-                participant.Gender = participantDto.Gender;     // DTO中 Gender 也是必填
-                participant.DocumentType = participantDto.DocumentType; // DTO中 DocumentType 也是必填
+                participant.IdNumber = participantDto.IdNumber; // IdNumber 在 DTO 中允許為空
+                participant.Gender = participantDto.Gender;
+                participant.Phone = participantDto.Phone; // Phone 在 DTO 中允許為空
+                participant.Email = participantDto.Email; // Email 在 DTO 中允許為空
+                participant.DocumentType = participantDto.DocumentType; // DocumentType 在 DTO 中是必填
+                participant.DocumentNumber = participantDto.DocumentNumber; // DocumentNumber 在 DTO 中允許為空
 
-                // 可選的，如果DTO有值就覆蓋
-                if (!string.IsNullOrEmpty(participantDto.DocumentNumber))
-                    participant.DocumentNumber = participantDto.DocumentNumber;
-                if (!string.IsNullOrEmpty(participantDto.PassportSurname))
-                    participant.PassportSurname = participantDto.PassportSurname;
-                if (!string.IsNullOrEmpty(participantDto.PassportGivenName))
-                    participant.PassportGivenName = participantDto.PassportGivenName;
-                if (participantDto.PassportExpireDate.HasValue)
-                    participant.PassportExpireDate = participantDto.PassportExpireDate.Value;
-                if (!string.IsNullOrEmpty(participantDto.Nationality))
-                    participant.Nationality = participantDto.Nationality;
-                if (!string.IsNullOrEmpty(participantDto.Note)) // 可以考慮合併常用旅客的備註和DTO的備註
-                    participant.Note = participantDto.Note;
-
-                if (participantDto.MemberIdAsParticipant.HasValue && participantDto.MemberIdAsParticipant.Value > 0)
-                {
-                    // 將 DTO 中的 MemberId 賦予給 OrderParticipant 實體的 MemberId
-                    //participant.MemberId = participantDto.MemberIdAsParticipant.Value;
-                }
-                else
-                {
-                    // 如果 participantDto.MemberIdAsParticipant 沒有值 (例如是 null 或 0)
-                    // 根據您的業務邏輯，這裡可能需要處理非會員旅客的情況
-                    // 例如：如果資料庫允許 OrderParticipant.MemberId 為 NULL，您可以將其設為 NULL
-                    // participant.MemberId = null; // 假設資料庫允許為 NULL
-                    // 如果不允許 NULL，且必須關聯會員，那麼沒有提供有效 MemberId 時應該拒絕建立參與者或訂單
-                    // 在這種情況下，您可能需要在保存前進行檢查或在 DTO 層做 Required 驗證
-                }
-                // 如果 participantDto.MemberIdAsParticipant 有值，表示這位旅客同時也是系統會員
-                // 您可以根據此 ID 做額外檢查或記錄，但 OrderParticipant 表本身沒有直接的 MemberId FK
-                // participant.AssociatedMemberId = participantDto.MemberIdAsParticipant; (如果 OrderParticipant 有此欄位)
+                // 可選的護照等欄位，如果 DTO 有提供就使用
+                participant.PassportSurname = participantDto.PassportSurname;
+                participant.PassportGivenName = participantDto.PassportGivenName;
+                participant.PassportExpireDate = participantDto.PassportExpireDate;
+                participant.Nationality = participantDto.Nationality;
+                participant.Note = participantDto.Note;
 
                 order.OrderParticipants.Add(participant);
             }
+
+            // 在嘗試儲存到資料庫之前，再次檢查 ModelState，包括剛才添加的自定義錯誤
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("CreateOrder Final Model State Invalid After Custom Validation: {@ModelStateErrors}", ModelState);
+                return BadRequest(ModelState);
+            }
+
             // 5. 儲存到資料庫
             try
             {
@@ -186,7 +198,10 @@ namespace TravelAgencyFrontendAPI.Controllers
             catch (DbUpdateException ex)
             {
                 _logger.LogError(ex, "建立訂單時資料庫更新失敗。");
-                // 可以檢查 ex.InnerException 來獲取更詳細的錯誤
+                // 可以在這裡檢查 ex.InnerException 來獲取更詳細的資料庫層級錯誤 (例如欄位長度不符、Constraint 違規等)
+                // 例如：System.Data.SqlClient.SqlException 或 Microsoft.EntityFrameworkCore.DbUpdateException 的 InnerException
+                string innerMessage = ex.InnerException?.Message ?? ex.Message;
+                _logger.LogError("Inner Exception: {InnerMessage}", innerMessage);
                 return StatusCode(StatusCodes.Status500InternalServerError, "建立訂單失敗，請稍後再試。");
             }
             catch (Exception ex)
@@ -296,7 +311,55 @@ namespace TravelAgencyFrontendAPI.Controllers
                 }).ToList()
             });
         }
+
+        // *** 在這裡添加電話號碼正規化的私有 Helper Method ***
+        private string NormalizePhoneNumber(string phoneNumberString)
+        {
+            if (string.IsNullOrEmpty(phoneNumberString))
+            {
+                return phoneNumberString; // 如果是 null 或空字串，直接返回
+            }
+
+            string normalizedNumber = phoneNumberString.Trim(); // 移除前後空白
+
+            // 檢查是否以 "+" 開頭，且長度足夠進行檢查 (至少包含 +國碼數字0數字 或 +國碼數字數字)
+            if (normalizedNumber.StartsWith("+") && normalizedNumber.Length >= 3) // 假設最短國碼數字至少2位，如 +886
+            {
+                // 找到國碼後面的數字部分
+                int firstDigitAfterPlus = 1; // 從 '+' 的下一個字元開始
+                int firstNonDigitIndexAfterPlus = firstDigitAfterPlus;
+
+                // 找到國碼數字部分的結束位置 (第一個非數字字元)
+                while (firstNonDigitIndexAfterPlus < normalizedNumber.Length && char.IsDigit(normalizedNumber[firstNonDigitIndexAfterPlus]))
+                {
+                    firstNonDigitIndexAfterPlus++;
+                }
+
+                // 如果國碼數字部分存在，且後面還有號碼
+                if (firstNonDigitIndexAfterPlus > firstDigitAfterPlus && firstNonDigitIndexAfterPlus < normalizedNumber.Length)
+                {
+                    string countryCodeWithPlus = normalizedNumber.Substring(0, firstNonDigitIndexAfterPlus); // 包含 "+" 和國碼數字
+                    string restOfNumber = normalizedNumber.Substring(firstNonDigitIndexAfterPlus); // 國碼後面的號碼部分
+
+                    // 檢查號碼的其餘部分是否以 "0" 開頭，並且其長度大於 1
+                    if (restOfNumber.StartsWith("0") && restOfNumber.Length > 1)
+                    {
+                        // 移除開頭的 "0"
+                        restOfNumber = restOfNumber.Substring(1);
+                    }
+
+                    // 重新組合國碼和處理後的號碼
+                    normalizedNumber = countryCodeWithPlus + restOfNumber;
+                }
+                // else: 如果格式不符合預期 (例如只有 + 或 +國碼沒有後續號碼)，保持原樣
+            }
+            // else: 如果不以 "+" 開頭，根據您的需求決定如何處理，這裡保持原樣
+
+            return normalizedNumber;
+        }
     }
+
+
 
     // 定義這個 OrderSummaryDto，用於 PostOrder 的回應
     public class OrderSummaryDto

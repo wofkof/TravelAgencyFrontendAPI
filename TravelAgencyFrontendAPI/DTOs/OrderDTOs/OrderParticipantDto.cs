@@ -24,9 +24,9 @@ namespace TravelAgencyFrontendAPI.DTOs.OrderDTOs
         [Required(ErrorMessage = "旅客生日為必填")]
         public DateTime BirthDate { get; set; }
 
-        [Required(ErrorMessage = "旅客身分證號/證件號碼為必填")]
+        //[Required(ErrorMessage = "旅客身分證號/證件號碼為必填")]
         [StringLength(50)]
-        public string IdNumber { get; set; } // 根據 DocumentType 可能對應不同證件號碼
+        public string? IdNumber { get; set; } // 根據 DocumentType 可能對應不同證件號碼
 
         [Required(ErrorMessage = "旅客性別為必填")]
         public GenderType Gender { get; set; }
