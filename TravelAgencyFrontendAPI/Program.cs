@@ -14,10 +14,18 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "https://localhost:7107" , "https://localhost:7258")
+        policy.WithOrigins("http://localhost:3000", "https://localhost:7107", "https://localhost:7258", "https://192.168.1.122:3000")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
+    });
+});
+
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(7265, listenOptions =>
+    {
+        listenOptions.UseHttps(); 
     });
 });
 
