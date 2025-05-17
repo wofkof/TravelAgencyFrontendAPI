@@ -17,9 +17,12 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
     public class AccountController : ControllerBase
     {
         private readonly AppDbContext _context;
-        public AccountController(AppDbContext context)
+        private readonly EmailService _emailService;
+
+        public AccountController(AppDbContext context, EmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         // POST: api/Account/signup 
@@ -71,6 +74,9 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 return ValidationProblem(ModelState);
             }
 
+            // 產生 6 碼驗證碼
+            var code = new Random().Next(100000, 999999).ToString();
+
             // 密碼雜湊處理
             PasswordHasher.CreatePasswordHash(dto.Password, out string hash, out string salt);
 
@@ -82,12 +88,22 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 PasswordHash = hash,
                 PasswordSalt = salt,
                 RegisterDate = DateTime.Now,
-                Status = MemberStatus.Active
+                Status = MemberStatus.Active,
+
+                // ✅ 寄送驗證碼用欄位
+                EmailVerificationCode = code,
+                EmailVerificationExpireTime = DateTime.Now.AddMinutes(10),
+                IsEmailVerified = false
             };
 
             _context.Members.Add(member);
             await _context.SaveChangesAsync();
-
+            // ✅ 寄出 Email 驗證碼
+            await _emailService.SendEmailAsync(
+                member.Email,
+                "嶼你同行 - 註冊驗證碼",
+                $"您好，歡迎加入嶼你同行！<br><br>您的驗證碼為：<b>{code}</b><br><br>請於 10 分鐘內完成信箱驗證，以啟用您的帳戶。"
+            );
             return Ok("註冊成功，確定後將跳轉回登入頁");
         }
 

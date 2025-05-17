@@ -16,10 +16,12 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
     public class PasswordResetsController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly EmailService _emailService;
 
-        public PasswordResetsController(AppDbContext context)
+        public PasswordResetsController(AppDbContext context, EmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         // POST: api/PasswordResets/request
@@ -30,20 +32,30 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
             if (member == null)
                 return BadRequest("Email 不存在");
 
-            var token = Guid.NewGuid().ToString();
-            var reset = new ResetPassword
-            {
-                MemberId = member.MemberId,
-                Token = token,
-                CreatedTime = DateTime.Now,
-                ExpireTime = DateTime.Now.AddMinutes(30),
-                IsUsed = false
-            };
+            // 產生 6 碼驗證碼
+            var code = new Random().Next(100000, 999999).ToString();
 
-            _context.ResetPasswords.Add(reset);
+            // 建立 Token 與驗證碼
+            //var reset = new ResetPassword
+            //{
+            //    MemberId = member.MemberId,
+            //    Token = Guid.NewGuid().ToString(),
+            //    Code = code, // ✅ 新增驗證碼欄位
+            //    CreatedTime = DateTime.Now,
+            //    ExpireTime = DateTime.Now.AddMinutes(10),
+            //    IsUsed = false
+            //};
+
+            //_context.ResetPasswords.Add(reset);
             await _context.SaveChangesAsync();
 
-            // TODO: 寄出 Email（你可以串 SMTP 或用 MailKit 實作）
+            // 寄送驗證碼 Email
+            await _emailService.SendEmailAsync(
+                email,
+                "嶼你同行 - 密碼重設驗證碼",
+                $"您好，您的驗證碼為：<b>{code}</b><br>請在 10 分鐘內輸入驗證碼完成密碼重設流程。"
+            );
+
 
             return Ok("已寄送重設密碼信");
         }
