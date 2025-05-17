@@ -62,7 +62,7 @@ namespace TravelAgencyBackend.ViewModels
         public bool IsRead { get; set; }
     }
 
-    // ✅ 發送訊息用（如果你之後改成用 AJAX 發送）
+    // 發送訊息用（如果你之後改成用 AJAX 發送）
     public class SendMessageViewModel
     {
         [Required]
@@ -71,5 +71,9 @@ namespace TravelAgencyBackend.ViewModels
         [Required(ErrorMessage = "請輸入訊息內容")]
         [StringLength(500)]
         public string Content { get; set; } = null!;
+
+        [Required]
+        public string MessageType { get; set; } = "text"; 
     }
+
 }

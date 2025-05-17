@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TravelAgency.Shared.Data;
 
@@ -11,9 +12,11 @@ using TravelAgency.Shared.Data;
 namespace TravelAgency.Shared.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250516014505_InitSQL2")]
+    partial class InitSQL2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -926,6 +929,7 @@ namespace TravelAgency.Shared.Migrations
                         .HasDefaultValue("Other");
 
                     b.Property<string>("IdNumber")
+                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -983,8 +987,7 @@ namespace TravelAgency.Shared.Migrations
                         .HasFilter("[Email] IS NOT NULL");
 
                     b.HasIndex("IdNumber")
-                        .IsUnique()
-                        .HasFilter("[IdNumber] IS NOT NULL");
+                        .IsUnique();
 
                     b.HasIndex("MemberId");
 
@@ -1624,8 +1627,12 @@ namespace TravelAgency.Shared.Migrations
                         .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("IdNumber")
+                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("MemberId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1665,8 +1672,9 @@ namespace TravelAgency.Shared.Migrations
                         .IsUnique();
 
                     b.HasIndex("IdNumber")
-                        .IsUnique()
-                        .HasFilter("[IdNumber] IS NOT NULL");
+                        .IsUnique();
+
+                    b.HasIndex("MemberId");
 
                     b.HasIndex("OrderId");
 
@@ -2380,11 +2388,19 @@ namespace TravelAgency.Shared.Migrations
 
             modelBuilder.Entity("TravelAgency.Shared.Models.OrderParticipant", b =>
                 {
+                    b.HasOne("TravelAgency.Shared.Models.Member", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("TravelAgency.Shared.Models.Order", "Order")
                         .WithMany("OrderParticipants")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Member");
 
                     b.Navigation("Order");
                 });

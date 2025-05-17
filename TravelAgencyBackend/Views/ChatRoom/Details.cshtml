@@ -1,128 +1,264 @@
 ﻿@model TravelAgencyBackend.ViewModels.ChatRoomDetailViewModel
-
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "與 " + Model.MemberName + " 的對話";
+    var senderId = @ViewBag.EmployeeId; // 設定 ViewBag.EmployeeId
 }
 
-<h1>與 @Model.MemberName 的對話</h1>
+<h1>@ViewData["Title"]</h1>
 
 <div class="mb-3">
-
-    @* 管理聊天室 *@
-    @if (PermissionChecker.CanManageChatRooms)
-    {
-        <a asp-action="Index" class="btn btn-secondary">返回聊天室列表</a>
-    }
-    else
-    {
-        <a asp-action="Index" class="btn btn-secondary disabled"
-        tabindex="-1" aria-disabled="true" onclick="return false">
-            返回聊天室列表
-        </a>
-    }
+    <a asp-action="Index" class="btn btn-secondary">返回聊天室列表</a>
 </div>
-
-<h4>聊天室</h4>
-
-@if (Model.Status == ChatStatus.Opened)
-{
-    <form asp-action="Close" method="post" class="mb-3">
-        <input type="hidden" name="id" value="@Model.ChatRoomId" />
-
-        @* 管理聊天室 *@
-        @if (PermissionChecker.CanManageChatRooms)
-        {
-            <button type="submit" class="btn btn-warning" onclick="return confirm('確定要關閉聊天室嗎?')">關閉聊天室</button>
-        }
-        else
-        {
-            <button type="submit" class="btn btn-warning disabled"
-            tabindex="-1" aria-disabled="true" onclick="return false">
-                關閉聊天室
-            </button>
-        }
-    </form>
-}
-else
-{
-    <div class="alert alert-secondary">此聊天室已關閉</div>
-}
 
 <hr />
 
-<div id="chatArea" class="border p-3 bg-light mb-4" style="max-height: 400px; overflow-y: auto;">
-    @foreach (var msg in Model.Messages)
-    {
-        <div class="mb-2">
-            <strong>@(msg.SenderType == "Employee" ? "員工" : "會員")：</strong>
-            @msg.Content
-            <div class="text-muted" style="font-size: 0.9em;">
-                @msg.SentAt
-                @if (!msg.IsRead)
-                {
-                    <span class="badge bg-warning text-dark">未讀</span>
-                }
-            </div>
-        </div>
-    }
-</div>
+<!-- 訊息顯示區 -->
+<div id="chatArea" class="border p-3 bg-light mb-4" style="max-height: 400px; overflow-y: auto;"></div>
 
-<form asp-action="SendMessage" method="post">
-    <input name="ChatRoomId" type="hidden" value="@Model.ChatRoomId" />
-
-    <div class="mb-3">
-        <textarea name="Content" class="form-control" rows="3" required maxlength="500"></textarea>
-    </div>
-
-    @* 管理聊天室 *@
+<!-- 訊息輸入與送出 -->
+<div class="mb-3 d-flex gap-2">
+    <input id="messageInput" class="form-control" placeholder="輸入訊息..." />
+    <input type="file" id="fileInput" accept="image/*" />
     @if (PermissionChecker.CanManageChatRooms)
     {
-        <button type="submit" class="btn btn-primary">送出訊息</button>
+        <button id="sendBtn" class="btn btn-primary">送出</button>
     }
     else
     {
-        <button type="submit" class="btn btn-primary disabled"
-        tabindex="-1" aria-disabled="true" onclick="return false">
-        送出訊息
-        </button>
+        <button class="btn btn-primary disabled" disabled>送出</button>
     }
-</form>
+</div>
 
+<!-- 通話按鈕 -->
+<div class="mb-3">
+    @if (PermissionChecker.CanManageChatRooms)
+    {
+        <button onclick="startCall(false)" class="btn btn-outline-primary">📞 語音通話</button>
+        <button onclick="startCall(true)" class="btn btn-outline-success">📹 視訊通話</button>
+    }
+    else
+    {
+        <button class="btn btn-outline-primary disabled" disabled>📞 語音通話</button>
+        <button class="btn btn-outline-success disabled" disabled>📹 視訊通話</button>
+    }
+</div>
+
+<!-- 通話控制區 -->
+<div id="callControls" class="mb-3" style="display: none;">
+    <p id="callTimer" class="text-muted"></p>
+    <p id="callStatus" class="fw-bold text-info">📞 來電中...</p>
+    <button onclick="acceptCall()" class="btn btn-success">接聽</button>
+    <button onclick="rejectCall()" class="btn btn-danger">拒絕</button>
+    <button onclick="endCall()" class="btn btn-secondary">掛斷</button>
+</div>
+
+<!-- 音訊 / 視訊 -->
+<div class="d-flex gap-3">
+    <video id="localVideo" autoplay playsinline muted style="width: 240px; border: 1px solid #ccc;"></video>
+    <video id="remoteVideo" autoplay playsinline style="width: 240px; border: 1px solid #ccc;"></video>
+</div>
+
+<audio id="remoteAudio" autoplay style="display: none;"></audio>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script>
-        $(document).ready(function () {
-            scrollToBottom();
-        });
+        const chatRoomId = @Model.ChatRoomId;
+        const senderType = "Employee";
+        const senderId = @senderId;
 
-        function scrollToBottom() {
-            var chatArea = document.getElementById("chatArea");
+        let connection, localStream, remoteConnectionId, peer, incomingOffer;
+        let callTimerInterval, callStartTime;
+
+        document.getElementById("sendBtn")?.addEventListener("click", sendMessage);
+
+        setupConnection();
+
+        async function setupConnection() {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl(`https://localhost:7265/chathub?userId=${senderId}&userType=${senderType}`)
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on("ReceiveMessage", appendMessage);
+            connection.on("ReceiveCallOffer", async (fromId, offer) => {
+                remoteConnectionId = fromId;
+                incomingOffer = offer;
+                showCallControls("📞 來電中...");
+            });
+            connection.on("ReceiveCallAnswer", async (fromId, answer) => {
+                await peer.setRemoteDescription(new RTCSessionDescription(answer));
+                updateCallStatus("✅ 通話中");
+                startCallTimer();
+            });
+            connection.on("ReceiveIceCandidate", async (fromId, candidate) => {
+                await peer.addIceCandidate(new RTCIceCandidate(candidate));
+            });
+            connection.on("CallRejected", () => {
+                alert("❌ 對方已拒絕通話");
+                endCall(false);
+            });
+            connection.on("ReceiveEndCall", () => {
+                alert("📴 對方已掛斷");
+                endCall(false);
+            });
+
+            await connection.start();
+            await connection.invoke("JoinGroup", chatRoomId.toString());
+            loadMessages();
+        }
+
+        async function sendMessage() {
+            const content = document.getElementById("messageInput").value.trim();
+            const payload = {
+                      chatRoomId: @Model.ChatRoomId,
+                      senderType: "Employee",
+                      senderId: @ViewBag.EmployeeId,
+                      messageType: "text", 
+                      content: document.getElementById("messageInput").value
+                    };
+            if (!content) return;
+
+            await fetch("https://localhost:7265/api/Messages", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+            document.getElementById("messageInput").value = "";
+        }
+
+        async function loadMessages() {
+            const res = await fetch(`https://localhost:7265/api/Messages/${chatRoomId}`);
+            const messages = await res.json();
+            messages.forEach(appendMessage);
+        }
+
+        function appendMessage(msg) {
+            const chatArea = document.getElementById("chatArea");
+            const div = document.createElement("div");
+            div.className = "mb-2";
+            div.innerHTML = `
+                <strong>${msg.senderType === "Employee" ? "員工" : "會員"}：</strong>
+                ${msg.content}
+                <div class="text-muted small">${new Date(msg.sentAt).toLocaleString()}</div>
+            `;
+            chatArea.appendChild(div);
             chatArea.scrollTop = chatArea.scrollHeight;
         }
 
-        function loadMessages() {
-            $.get('/ChatRoom/GetMessages', { chatRoomId: @Model.ChatRoomId }, function (data) {
-                let html = '';
-                data.forEach(function (msg) {
-                    html += `
-                        <div class="mb-2">
-                            <strong>${msg.sender == "Employee" ? "員工" : "會員"}：</strong>
-                            ${msg.content}
-                            <div class="text-muted" style="font-size: 0.9em;">
-                                ${msg.sentAt}
-                                ${msg.sender == "Employee" && !msg.isRead ? '<span class="badge bg-warning text-dark">未讀</span>' : ''}
-                            </div>
-                        </div>
-                    `;
-                });
-                $('#chatArea').html(html);
-            });
+        // 通話相關邏輯
+        async function startCall(useVideo = false) {
+            const targetType = "Member";
+            const targetId = 11110;
+
+            const targetConnId = await connection.invoke("GetConnectionId", targetType, targetId);
+            if (!targetConnId) return alert("對方未連線");
+
+            remoteConnectionId = targetConnId;
+
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: useVideo });
+            document.getElementById("localVideo").srcObject = localStream;
+
+            peer = createPeerConnection();
+            localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
+
+            const offer = await peer.createOffer();
+            await peer.setLocalDescription(offer);
+            await connection.invoke("SendCallOffer", targetConnId, offer);
+
+            showCallControls("⏳ 等待對方接聽...");
         }
 
-        setInterval(loadMessages, 3000);
+        async function acceptCall() {
+            updateCallStatus("⏳ 接通中...");
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+            document.getElementById("localVideo").srcObject = localStream;
+
+            peer = createPeerConnection();
+            localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
+
+            await peer.setRemoteDescription(new RTCSessionDescription(incomingOffer));
+            const answer = await peer.createAnswer();
+            await peer.setLocalDescription(answer);
+            await connection.invoke("SendCallAnswer", remoteConnectionId, answer);
+
+            updateCallStatus("✅ 通話中");
+            startCallTimer();
+        }
+
+        async function rejectCall() {
+            await connection.invoke("RejectCall", remoteConnectionId);
+            endCall(false);
+        }
+
+        async function endCall(sendSignal = true) {
+            if (localStream) {
+                localStream.getTracks().forEach(t => t.stop());
+                localStream = null;
+                document.getElementById("localVideo").srcObject = null;
+            }
+            if (peer) {
+                peer.close();
+                peer = null;
+            }
+            document.getElementById("remoteAudio").srcObject = null;
+            document.getElementById("remoteVideo").srcObject = null;
+            document.getElementById("callControls").style.display = "none";
+            stopCallTimer();
+
+            if (sendSignal && remoteConnectionId) {
+                await connection.invoke("EndCall", remoteConnectionId);
+            }
+        }
+
+        function createPeerConnection() {
+            const pc = new RTCPeerConnection({
+                iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+            });
+
+            pc.onicecandidate = (e) => {
+                if (e.candidate) {
+                    connection.invoke("SendIceCandidate", remoteConnectionId, e.candidate);
+                }
+            };
+
+            pc.ontrack = (e) => {
+                const stream = e.streams[0];
+                document.getElementById("remoteAudio").srcObject = stream;
+                document.getElementById("remoteVideo").srcObject = stream;
+            };
+
+            return pc;
+        }
+
+        function showCallControls(text) {
+            document.getElementById("callControls").style.display = "block";
+            updateCallStatus(text);
+        }
+
+        function updateCallStatus(text) {
+            document.getElementById("callStatus").innerText = text;
+        }
+
+        function startCallTimer() {
+            callStartTime = new Date();
+            updateCallTimer();
+            callTimerInterval = setInterval(updateCallTimer, 1000);
+        }
+
+        function stopCallTimer() {
+            clearInterval(callTimerInterval);
+            document.getElementById("callTimer").innerText = "";
+        }
+
+        function updateCallTimer() {
+            const now = new Date();
+            const seconds = Math.floor((now - callStartTime) / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const remaining = seconds % 60;
+            document.getElementById("callTimer").innerText =
+                `通話時間：${String(minutes).padStart(2, '0')}:${String(remaining).padStart(2, '0')}`;
+        }
     </script>
 }
-

@@ -148,6 +148,7 @@ namespace TravelAgencyBackend.Controllers
             var vm = _mapper.Map<ChatRoomDetailViewModel>(chatRoom);
             vm.Messages = _mapper.Map<List<ChatMessageViewModel>>(chatRoom.Messages.OrderBy(m => m.SentAt).ToList());
 
+            ViewBag.EmployeeId = GetCurrentEmployeeId();
             return View(vm);
         }
 
