@@ -141,6 +141,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
             PasswordHasher.CreatePasswordHash(dto.NewPassword, out string hash, out string salt);
             member.PasswordHash = hash;
             member.PasswordSalt = salt;
+            member.UpdatedAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
             return Ok("密碼已重設成功");
