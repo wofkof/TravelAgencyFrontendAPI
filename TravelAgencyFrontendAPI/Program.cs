@@ -21,11 +21,11 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.WebHost.ConfigureKestrel(serverOptions =>
+builder.WebHost.ConfigureKestrel(options =>
 {
-    serverOptions.ListenAnyIP(7265, listenOptions =>
+    options.ListenAnyIP(7265, listenOptions =>
     {
-        listenOptions.UseHttps(); 
+        listenOptions.UseHttps("certs/travel-api.pfx", "1234");
     });
 });
 

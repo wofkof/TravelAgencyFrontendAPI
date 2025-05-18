@@ -69,6 +69,7 @@
 
         let connection, localStream, remoteConnectionId, peer, incomingOffer;
         let callTimerInterval, callStartTime;
+        const api = "https://travel-api.local:7265"
 
         document.getElementById("sendBtn")?.addEventListener("click", sendMessage);
 
@@ -76,7 +77,7 @@
 
         async function setupConnection() {
             connection = new signalR.HubConnectionBuilder()
-                .withUrl(`https://localhost:7265/chathub?userId=${senderId}&userType=${senderType}`)
+                .withUrl(api + `/chathub?userId=${senderId}&userType=${senderType}`)
                 .withAutomaticReconnect()
                 .build();
 
@@ -119,7 +120,7 @@
                     };
             if (!content) return;
 
-            await fetch("https://localhost:7265/api/Messages", {
+            await fetch(api + "/api/Messages", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
@@ -129,7 +130,7 @@
         }
 
         async function loadMessages() {
-            const res = await fetch(`https://localhost:7265/api/Messages/${chatRoomId}`);
+            const res = await fetch(api + `/api/Messages/${chatRoomId}`);
             const messages = await res.json();
             messages.forEach(appendMessage);
         }
