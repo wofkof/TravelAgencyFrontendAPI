@@ -74,24 +74,25 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 return ValidationProblem(ModelState);
             }
             // 🔐 比對驗證碼
-            //var existing = await _context.Members.FirstOrDefaultAsync(m => m.Email == dto.Email);
+            var verification = await _context.EmailVerificationCodes
+        .FirstOrDefaultAsync(e => e.Email == dto.Email &&
+                                  e.VerificationType == EmailVerificationCode.VerificationTypeEnum.SignUp &&
+                                  !e.IsVerified);
 
-            //if (existing == null)
-            //{
-            //    ModelState.AddModelError("EmailVerificationCode", "請先發送驗證碼");
-            //    return ValidationProblem(ModelState);
-            //}
+            if (verification == null)
+            {
+                ModelState.AddModelError("EmailVerificationCode", "請先發送驗證碼");
+                return ValidationProblem(ModelState);
+            }
 
-            //if (existing.EmailVerificationCode != dto.EmailVerificationCode ||
-            //    existing.EmailVerificationExpireTime < DateTime.Now)
-            //{
-            //    ModelState.AddModelError("EmailVerificationCode", "驗證碼錯誤或已過期，請重新輸入");
-            //    return ValidationProblem(ModelState);
-            //}
+            if (verification.VerificationCode != dto.EmailVerificationCode || verification.ExpireAt < DateTime.Now)
+            {
+                ModelState.AddModelError("EmailVerificationCode", "驗證碼錯誤或已過期");
+                return ValidationProblem(ModelState);
+            }
 
-            // 產生 6 碼驗證碼
-            var code = new Random().Next(100000, 999999).ToString();
-
+            // 標記驗證成功
+            verification.IsVerified = true;
 
             // 密碼雜湊處理
             PasswordHasher.CreatePasswordHash(dto.Password, out string hash, out string salt);
@@ -105,21 +106,12 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 PasswordSalt = salt,
                 RegisterDate = DateTime.Now,
                 Status = MemberStatus.Active,
+                IsEmailVerified = true
 
-                // ✅ 寄送驗證碼用欄位
-                EmailVerificationCode = code,
-                EmailVerificationExpireTime = DateTime.Now.AddMinutes(10),
-                IsEmailVerified = false
             };
 
             _context.Members.Add(member);
-            await _context.SaveChangesAsync();
-            // ✅ 寄出 Email 驗證碼
-            await _emailService.SendEmailAsync(
-                member.Email,
-                "嶼你同行 - 註冊驗證碼",
-                $"您好，歡迎加入嶼你同行！<br><br>您的驗證碼為：<b>{code}</b><br><br>請於 10 分鐘內完成信箱驗證，以啟用您的帳戶。"
-            );
+            await _context.SaveChangesAsync();          
             return Ok("註冊成功，確定後將跳轉回登入頁");
         }
 
@@ -176,66 +168,47 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
         public async Task<IActionResult> SendEmailVerificationCode([FromBody] SendVerificationCodeDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Email))
-            {
                 return BadRequest("Email 為必填欄位");
-            }
 
-            // ❗ 改為禁止重複註冊的判斷（如果該 Email 已存在就不再發送）
             if (await _context.Members.AnyAsync(m => m.Email == dto.Email))
-            {
-                return BadRequest("此 Email 已被註冊，請直接登入或使用其他信箱");
-            }
+                return BadRequest("此 Email 已被註冊");
 
-            // 然後繼續產生驗證碼、寄出 Email（可存入暫存區或前端自己保存）
             var code = new Random().Next(100000, 999999).ToString();
 
-            // 可選：將驗證碼儲存在伺服器記憶體/快取/資料表（這段未寫，可日後擴充）
+            // 新增或更新驗證碼
+            var existing = await _context.EmailVerificationCodes
+                .FirstOrDefaultAsync(e => e.Email == dto.Email && e.VerificationType == EmailVerificationCode.VerificationTypeEnum.SignUp
+);
 
-            try
+            if (existing != null)
             {
-                await _emailService.SendEmailAsync(
-                    dto.Email,
-                    "嶼你同行 - 註冊驗證碼",
-                    $"您好，這是您的 Email 驗證碼：<b>{code}</b><br>請在 10 分鐘內完成驗證。"
-                );
-
-                return Ok("驗證碼已發送");
+                existing.VerificationCode = code;
+                existing.CreatedAt = DateTime.Now;
+                existing.ExpireAt = DateTime.Now.AddMinutes(10);
+                existing.IsVerified = false;
             }
-            catch (Exception ex)
+            else
             {
-                Console.WriteLine($"寄信錯誤：{ex.Message}");
-                return StatusCode(500, $"驗證碼寄送失敗：{ex.Message}");
+                _context.EmailVerificationCodes.Add(new EmailVerificationCode
+                {
+                    Email = dto.Email,
+                    VerificationCode = code,
+                    VerificationType = EmailVerificationCode.VerificationTypeEnum.SignUp,
+                    CreatedAt = DateTime.Now,
+                    ExpireAt = DateTime.Now.AddMinutes(10),
+                    IsVerified = false
+                });
             }
-
-        }
-
-        // POST: api/Account/verify-email-code
-        [HttpPost("verify-email-code")]
-        public async Task<IActionResult> VerifyEmailCode([FromBody] VerifyEmailCodeDto dto)
-        {
-            var member = await _context.Members.FirstOrDefaultAsync(m => m.Email == dto.Email);
-
-            if (member == null)
-                return NotFound("找不到該會員");
-
-            if (member.IsEmailVerified)
-                return BadRequest("該信箱已驗證過");
-
-            if (member.EmailVerificationExpireTime < DateTime.Now)
-                return BadRequest("驗證碼已過期，請重新取得");
-
-            if (member.EmailVerificationCode != dto.Code)
-                return BadRequest("驗證碼錯誤");
-
-            // 驗證成功
-            member.IsEmailVerified = true;
-            member.EmailVerificationCode = null;
-            member.EmailVerificationExpireTime = null;
 
             await _context.SaveChangesAsync();
 
-            return Ok("信箱驗證成功");
-        }
+            await _emailService.SendEmailAsync(
+                dto.Email,
+                "嶼你同行 - 註冊驗證碼",
+                $"您好，您的驗證碼為：<b>{code}</b><br>請在 10 分鐘內完成註冊。"
+            );
 
+            return Ok("驗證碼已寄出");
+        }
     }
 }

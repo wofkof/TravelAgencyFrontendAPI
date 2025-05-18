@@ -10,6 +10,8 @@ namespace TravelAgency.Shared.Data
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<EmailVerificationCode> ResetPasswords { get; set; }
+        public DbSet<EmailVerificationCode> EmailVerificationCodes { get; set; }
+
         public DbSet<MemberFavoriteTraveler> MemberFavoriteTravelers { get; set; }
         public DbSet<ChatRoom> ChatRooms { get; set; }
         public DbSet<Message> Messages { get; set; }

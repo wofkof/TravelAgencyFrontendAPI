@@ -18,7 +18,8 @@ namespace TravelAgencyFrontendAPI.DTOs.MemberDTOs
         [Required(ErrorMessage = "Required")]
         public string Password { get; set; } = string.Empty;
 
-        public string? EmailVerificationCode { get; set; }
+        [Required(ErrorMessage = "Required")]
+        public string EmailVerificationCode { get; set; } = string.Empty;
 
     }
 }
