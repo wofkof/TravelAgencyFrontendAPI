@@ -75,7 +75,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
             }
             // 🔐 比對驗證碼
             var verification = await _context.EmailVerificationCodes
-        .FirstOrDefaultAsync(e => e.Email == dto.Email &&
+            .FirstOrDefaultAsync(e => e.Email == dto.Email &&
                                   e.VerificationType == EmailVerificationCode.VerificationTypeEnum.SignUp &&
                                   !e.IsVerified);
 
@@ -204,8 +204,31 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
 
             await _emailService.SendEmailAsync(
                 dto.Email,
-                "嶼你同行 - 註冊驗證碼",
-                $"您好，您的驗證碼為：<b>{code}</b><br>請在 10 分鐘內完成註冊。"
+                "歡迎註冊會員 - 驗證碼通知",
+                $@"
+                <div style='font-family:Arial,sans-serif; font-size:16px; color:#333; line-height:1.8'>
+                  <div style='text-align:center; margin-bottom:20px'>
+                    <img src='https://i.postimg.cc/kgC50Qfb/logo.png' alt='嶼你同行 LOGO' width='180' />
+                  </div>
+
+                  <p>親愛的旅客您好，</p>
+                  <p>感謝您註冊 <strong>嶼你同行</strong>，以下是您的 Email 驗證碼：</p>
+
+                  <div style='text-align:center; margin:20px 0'>
+                    <span style='font-size:28px; font-weight:bold; color:#1d4ed8'>{code}</span>
+                  </div>
+
+                  <p>請於 <strong>10 分鐘</strong> 內完成註冊流程。</p>
+
+                  <hr style='margin:30px 0; border:none; border-top:1px solid #ddd' />
+
+                 <p style='font-size:14px; color:#888'>
+                  若您並未申請註冊，請忽略此信件。<br>
+                  此為系統自動發送的通知信件，請勿直接回覆。
+                </p>
+                  <p>嶼你同行 客服中心 敬上</p>
+                </div>
+                "
             );
 
             return Ok("驗證碼已寄出");
