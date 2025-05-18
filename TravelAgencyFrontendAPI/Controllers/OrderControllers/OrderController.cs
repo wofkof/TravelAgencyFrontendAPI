@@ -12,11 +12,11 @@ namespace TravelAgencyFrontendAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // <--- 加上這個，確保只有登入會員才能下單
+    //[Authorize] // 加上這個，確保只有登入會員才能下單
     public class OrderController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly ILogger<OrderController> _logger; // For logging
+        private readonly ILogger<OrderController> _logger;
 
         public OrderController(AppDbContext context, ILogger<OrderController> logger)
         {
@@ -34,21 +34,19 @@ namespace TravelAgencyFrontendAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            // 1. 獲取當前登入的 MemberId
             var currentUserId = GetCurrentUserId();
             if (currentUserId == null)
             {
                 return Unauthorized("使用者未登入或無法識別身份。");
             }
 
-            // 2. 驗證 Member 是否存在 (可選，但建議)
             var memberExists = await _context.Members.AnyAsync(m => m.MemberId == currentUserId.Value);
             if (!memberExists)
             {
                 return NotFound($"會員 ID {currentUserId.Value} 不存在。");
             }
 
-            // 3. 開始建立 Order 實體
+            // 初始化 Order 物件
             var order = new Order
             {
                 MemberId = currentUserId.Value,
@@ -57,46 +55,149 @@ namespace TravelAgencyFrontendAPI.Controllers
                 OrdererPhone = NormalizePhoneNumber(orderCreateDto.OrdererInfo.MobilePhone), // 訂購人電話
                 OrdererEmail = orderCreateDto.OrdererInfo.Email, // 訂購人Email
 
-                TotalAmount = orderCreateDto.TotalAmount,
                 PaymentMethod = orderCreateDto.SelectedPaymentMethod, // 使用者選擇的付款方式
-                Status = OrderStatus.Pending, // 初始狀態設為 Pending (或 AwaitingPayment)
+                Status = OrderStatus.Awaiting, // 初始狀態設為Awaiting(待付款)
                 CreatedAt = DateTime.UtcNow, // 使用 UTC 時間
                 Note = orderCreateDto.OrderNotes,
-
-                // 處理訂購人資訊 (即使從會員資料帶入，也記錄訂單當下的快照)
-                // 這裡假設 Order Model 本身不直接儲存訂購人的姓名/電話/Email，
-                // 這些資訊主要體現在 OrderParticipant (如果訂購人也是旅客)
-                // 或者您可以考慮在 Order Model 新增 OrdererName, OrdererPhone, OrdererEmail 欄位
-                // 以下是假設 Order Model 有這些欄位的情況：
-                // OrdererName = orderCreateDto.OrdererInfo.Name,
-                // OrdererPhone = orderCreateDto.OrdererInfo.MobilePhone,
-                // OrdererEmail = orderCreateDto.OrdererInfo.Email,
-
                 // 處理發票請求資訊
                 InvoiceOption = orderCreateDto.InvoiceRequestInfo.InvoiceOption,
                 InvoiceDeliveryEmail = orderCreateDto.InvoiceRequestInfo.InvoiceDeliveryEmail,
                 InvoiceUniformNumber = orderCreateDto.InvoiceRequestInfo.InvoiceUniformNumber,
                 InvoiceTitle = orderCreateDto.InvoiceRequestInfo.InvoiceTitle,
                 InvoiceAddBillingAddr = orderCreateDto.InvoiceRequestInfo.InvoiceAddBillingAddr,
-                InvoiceBillingAddress = orderCreateDto.InvoiceRequestInfo.InvoiceBillingAddress
-                // 如果您為 "捐贈發票" 在 Order Model 新增了 IsInvoiceDonated 欄位:
-                // IsInvoiceDonated = orderCreateDto.InvoiceRequestInfo.DonateInvoice,
+                InvoiceBillingAddress = orderCreateDto.InvoiceRequestInfo.InvoiceBillingAddress,
+                OrderDetails = new List<OrderDetail>(), // 初始化訂單明細集合
+                OrderParticipants = new List<OrderParticipant>() // 初始化旅客集合
             };
+
+            decimal calculatedServerTotalAmount = 0;
+
+            // --- 核心修改：根據前端傳來的 CartItems 生成 OrderDetails ---
+            foreach (var cartItemDto in orderCreateDto.CartItems)
+            {
+                decimal unitPrice = 0;
+                string productName = "";
+                string optionSpecificDescription = cartItemDto.OptionType; // 選項的描述
+                ProductCategory itemCategory; // 用來儲存轉換後的 ProductCategory
+
+                if (Enum.TryParse<ProductCategory>(cartItemDto.ProductType, true, out var parsedCategory)) // true 表示忽略大小寫
+                {
+                    itemCategory = parsedCategory;
+                }
+                else
+                {
+                    _logger.LogWarning($"無效的 ProductType: {cartItemDto.ProductType}。");
+                    return BadRequest($"不支援的商品類型: {cartItemDto.ProductType}。");
+                }
+                if (itemCategory == ProductCategory.GroupTravel)
+                {
+                    var groupTravel = await _context.GroupTravels
+                                                .Include(gt => gt.OfficialTravelDetail)
+                                                    .ThenInclude(otd => otd.OfficialTravel)
+                                                .FirstOrDefaultAsync(gt => gt.GroupTravelId == cartItemDto.ProductId && gt.GroupStatus == "開團");
+
+                    if (groupTravel == null)
+                    {
+                        return BadRequest($"團體行程 (ID: GT{cartItemDto.ProductId}) 無效、未開放報名，或找不到對應的行程資料。");
+                    }
+                    if (groupTravel.OfficialTravelDetail == null)
+                    {
+                        return BadRequest($"團體行程 (ID: GT{cartItemDto.ProductId}) 缺少必要的價格明細設定 (OfficialTravelDetail)。");
+                    }
+                    if (groupTravel.OfficialTravelDetail.OfficialTravel == null)
+                    {
+                        return BadRequest($"團體行程 (ID: GT{cartItemDto.ProductId}) 關聯的官方行程主檔資料遺失。");
+                    }
+                    if (groupTravel.OfficialTravelDetail.State != DetailState.Locked) // 假設價格必須是鎖定狀態
+                    {
+                        return BadRequest($"團體行程 (ID: GT{cartItemDto.ProductId}) 的價格資訊目前未鎖定，無法下單。");
+                    }
+                    productName = groupTravel.OfficialTravelDetail.OfficialTravel.Title;
+                    var priceDetail = groupTravel.OfficialTravelDetail; // 價格資訊從這裡來
+
+                    switch (cartItemDto.OptionType.ToUpper())
+                    {
+                        case "成人": case "ADULT": unitPrice = priceDetail.AdultPrice ?? 0; break;
+                        case "兒童加床": unitPrice = priceDetail.AdultPrice ?? 0; optionSpecificDescription = "兒童加床"; break; // 假設加床價格與成人相同
+                        case "兒童佔床": unitPrice = priceDetail.ChildPrice ?? 0; optionSpecificDescription = "兒童佔床"; break;
+                        case "兒童不佔床": unitPrice = priceDetail.BabyPrice ?? 0; optionSpecificDescription = "兒童不佔床"; break; // 假設不佔床同嬰兒價
+                        case "兒童": unitPrice = priceDetail.ChildPrice ?? 0; break;
+                        case "嬰兒": case "BABY": unitPrice = priceDetail.BabyPrice ?? 0; break;
+                        default:
+                            _logger.LogWarning($"團體行程 '{productName}' (GT{cartItemDto.ProductId}) 的選項類型 '{cartItemDto.OptionType}' 無法識別或未定價。");
+                            return BadRequest($"商品 '{productName}' 的選項類型 '{cartItemDto.OptionType}' 無法識別或未提供價格。");
+                    }
+
+                    if (unitPrice <= 0 && cartItemDto.Quantity > 0)
+                    {
+                        _logger.LogWarning($"團體行程 '{productName}' 選項 '{cartItemDto.OptionType}' 的價格異常 ({unitPrice})。");
+                        return BadRequest($"商品 '{productName}' 選項 '{cartItemDto.OptionType}' 的價格資料異常。");
+                    }
+                }
+                else if (itemCategory == ProductCategory.CustomTravel)
+                {
+                    var customTravel = await _context.CustomTravels
+                                             .FirstOrDefaultAsync(ct => ct.CustomTravelId == cartItemDto.ProductId && ct.Status == CustomTravelStatus.Pending); // 假設是 Pending 狀態
+                    if (customTravel == null)
+                    {
+                        return BadRequest($"客製化行程產品 (ID: CT{cartItemDto.ProductId}) 無效或未發佈。");
+                    }
+
+                    unitPrice = customTravel.TotalAmount; // CustomTravel 的價格是其 TotalAmount
+                    productName = customTravel.Note ?? $"客製化行程 {customTravel.CustomTravelId}"; // 使用 Note 作為名稱，或預設名稱
+                    optionSpecificDescription = cartItemDto.OptionType; // 例如 "全包方案" 或前端傳來的選項描述
+
+                    if (unitPrice <= 0 && cartItemDto.Quantity > 0)
+                    {
+                        _logger.LogWarning($"團體行程 '{productName}' 選項 '{cartItemDto.OptionType}' 的價格異常 ({unitPrice})。");
+                        return BadRequest($"商品 '{productName}' 選項 '{cartItemDto.OptionType}' 的價格資料異常。");
+                    }
+                }
+                else
+                {
+                    return BadRequest($"系統內部錯誤：無法處理的商品類型 {itemCategory}。");
+                }
+
+                var orderDetail = new OrderDetail
+                {
+                    OrderId = order.OrderId,
+                    Category = itemCategory,                     // << 賦值 ProductCategory
+                    ItemId = cartItemDto.ProductId,              // << 賦值 ItemId (GroupTravelId 或 CustomTravelId)
+                    Description = $"{productName} - {optionSpecificDescription}",
+                    Quantity = cartItemDto.Quantity,
+                    Price = unitPrice,
+                    TotalAmount = cartItemDto.Quantity * unitPrice,
+                };
+                order.OrderDetails.Add(orderDetail);
+                calculatedServerTotalAmount += orderDetail.TotalAmount;
+            }
+
+            // 使用伺服器計算的總金額，並可選擇性地與前端傳來的總金額進行比較
+            order.TotalAmount = calculatedServerTotalAmount;
+            if (Math.Abs(calculatedServerTotalAmount - orderCreateDto.TotalAmount) > 0.01m) // 允許0.01的誤差
+            {
+                _logger.LogWarning("訂單總金額不一致。會員ID {MemberId}。伺服器計算: {CalculatedTotal}, 前端提供: {DtoTotal}.",
+                    currentUserId.Value, calculatedServerTotalAmount, orderCreateDto.TotalAmount);
+            }
 
             // 4. 處理旅客列表 (OrderParticipants)
             foreach (var participantDto in orderCreateDto.Participants)
             {
-                if (participantDto.DocumentType == DocumentType.Passport && string.IsNullOrEmpty(participantDto.DocumentNumber))
+                if (participantDto.DocumentType == DocumentType.PASSPORT && string.IsNullOrEmpty(participantDto.DocumentNumber))
                 {
                     // 添加一個 Model 錯誤或直接返回 BadRequest
                     ModelState.AddModelError($"Participants[{order.OrderParticipants.Count}].DocumentNumber", "選擇護照作為證件類型時，護照號碼為必填。");
-                    // 如果您有多個自定義驗證，可以先收集錯誤，最後統一返回 BadRequest
-                    // 為了範例簡潔，這裡假設您會統一處理錯誤
                 }
 
                 // 檢查必填欄位是否有值 (雖然 DTO 已有 [Required]，但這裡可以再次確認或記錄)
                 if (string.IsNullOrEmpty(participantDto.Name)) { /* ... 錯誤處理 ... */ }
                 // ... 其他必填欄位檢查 ...
+
+                // 或者其他組合規則，例如：IdNumber 或 DocumentNumber 至少要有一個非空？
+                if (string.IsNullOrEmpty(participantDto.IdNumber) && string.IsNullOrEmpty(participantDto.DocumentNumber))
+                {
+                    ModelState.AddModelError($"Participants[{order.OrderParticipants.Count}].IdOrDocumentNumber", "旅客身分證號或證件號碼至少需填寫一項。");
+                }
 
                 // 如果有自定義驗證錯誤，建議在這裡檢查並提前返回
                 if (!ModelState.IsValid)
@@ -106,7 +207,24 @@ namespace TravelAgencyFrontendAPI.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var participant = new OrderParticipant();
+                var participant = new OrderParticipant
+                {
+                    Name = participantDto.Name,
+                    BirthDate = participantDto.BirthDate,
+                    IdNumber = participantDto.IdNumber,
+                    Gender = participantDto.Gender,
+
+                    Phone = participantDto.Phone,
+                    Email = participantDto.Email,
+
+                    DocumentType = participantDto.DocumentType,
+                    DocumentNumber = participantDto.DocumentNumber,
+                    PassportSurname = participantDto.PassportSurname,
+                    PassportGivenName = participantDto.PassportGivenName,
+                    PassportExpireDate = participantDto.PassportExpireDate,
+                    Nationality = participantDto.Nationality,
+                    Note = participantDto.Note
+                };
 
                 if (participantDto.FavoriteTravelerId.HasValue && participantDto.FavoriteTravelerId.Value > 0)
                 {
@@ -116,108 +234,63 @@ namespace TravelAgencyFrontendAPI.Controllers
                                                    ft.MemberId == currentUserId.Value && // 確保是該會員的常用旅客
                                                    ft.Status == FavoriteStatus.Active); // 確保常用旅客是有效的
 
-                    if (favoriteTraveler != null)
-                    {
-                        // 使用常用旅客資料預填 OrderParticipant
-                        participant.Name = favoriteTraveler.Name;
-                        participant.BirthDate = favoriteTraveler.BirthDate ?? default; // 如果常用旅客生日可為null，提供預設值
-                        participant.IdNumber = favoriteTraveler.IdNumber;
-                        participant.Gender = favoriteTraveler.Gender ?? default; // 同上
-                        participant.Phone = favoriteTraveler.Phone;
-                        participant.Email = favoriteTraveler.Email;
-                        participant.DocumentType = favoriteTraveler.DocumentType ?? default; // 同上
-                        participant.DocumentNumber = favoriteTraveler.DocumentNumber;
-                        participant.PassportSurname = favoriteTraveler.PassportSurname;
-                        participant.PassportGivenName = favoriteTraveler.PassportGivenName;
-                        participant.PassportExpireDate = favoriteTraveler.PassportExpireDate;
-                        participant.Nationality = favoriteTraveler.Nationality;
-                        participant.Note = favoriteTraveler.Note; // 可以考慮是否要合併 DTO 的 Note
+                    // 使用常用旅客資料預填 OrderParticipant
+                    participant.Name = favoriteTraveler.Name;
+                    participant.BirthDate = favoriteTraveler.BirthDate ?? default; // 如果常用旅客生日可為null，提供預設值
+                    participant.IdNumber = favoriteTraveler.IdNumber;
+                    participant.Gender = favoriteTraveler.Gender ?? default; // 同上
+                    participant.Phone = favoriteTraveler.Phone;
+                    participant.Email = favoriteTraveler.Email;
+                    participant.DocumentType = favoriteTraveler.DocumentType ?? default; // 同上
+                    participant.DocumentNumber = favoriteTraveler.DocumentNumber;
+                    participant.PassportSurname = favoriteTraveler.PassportSurname;
+                    participant.PassportGivenName = favoriteTraveler.PassportGivenName;
+                    participant.PassportExpireDate = favoriteTraveler.PassportExpireDate;
+                    participant.Nationality = favoriteTraveler.Nationality;
+                    participant.Note = favoriteTraveler.Note; // 可以考慮是否要合併 DTO 的 Note
 
-                        // 記錄是從哪個常用旅客來的 (可選)
-                        // participant.SourceFavoriteTravelerId = favoriteTraveler.FavoriteTravelerId;
-                    }
-                    else
-                    {
-                        // 找不到有效的常用旅客，記錄警告，並完全依賴 DTO 的資料
-                        _logger.LogWarning($"找不到 MemberId: {currentUserId.Value} 的常用旅客 FavoriteTravelerId: {participantDto.FavoriteTravelerId.Value}，或該旅客狀態非 Active。將直接使用 DTO 提供的旅客資料。");
-                    }
                 }
-
-                if (participantDto.DocumentType == DocumentType.Passport && string.IsNullOrEmpty(participantDto.DocumentNumber))
-                {
-                    ModelState.AddModelError($"Participants[{order.OrderParticipants.Count}].DocumentNumber", "選擇護照作為證件類型時，護照號碼為必填。");
-                }
-                // 或者其他組合規則，例如：IdNumber 或 DocumentNumber 至少要有一個非空？
-                if (string.IsNullOrEmpty(participantDto.IdNumber) && string.IsNullOrEmpty(participantDto.DocumentNumber))
-                {
-                    ModelState.AddModelError($"Participants[{order.OrderParticipants.Count}].IdOrDocumentNumber", "旅客身分證號或證件號碼至少需填寫一項。");
-                }
-                // 無論是否從常用旅客載入，都允許 DTO 中的資料覆蓋或提供 (如果 DTO 欄位有值)
-                // 這裡的邏輯是：如果 DTO 提供了值，就用 DTO 的；否則，如果從常用旅客載入了值，就保留。
-                // 另一種策略是：常用旅客優先，DTO僅用於新增或沒有常用旅客ID的情況。
-                // 以下採用 DTO 優先的策略 (如果 DTO 有值就覆蓋常用旅客的值)
-                // 但對於 Name, Phone, Email 等必填欄位，如果常用旅客沒填到，DTO 應提供。
-
-                // 確保 Name, Phone, Email 等核心資訊來自 DTO (因為 DTO 這些欄位是 Required)
-
-                // 對於可選欄位，如果 DTO 有提供就使用，否則保留從常用旅客載入的值 (如果有的話)
-                // DateTime 和 Enum 的 Nullable 判斷比較 tricky，因為 DTO 中通常直接是 DateTime/Enum 而不是 DateTime?/Enum?
-                // 但 OrderParticipantDto 中的 BirthDate, Gender, DocumentType 是必填的
-                participant.Name = participantDto.Name;
-                participant.BirthDate = participantDto.BirthDate;
-                participant.IdNumber = participantDto.IdNumber; // IdNumber 在 DTO 中允許為空
-                participant.Gender = participantDto.Gender;
-                participant.Phone = participantDto.Phone; // Phone 在 DTO 中允許為空
-                participant.Email = participantDto.Email; // Email 在 DTO 中允許為空
-                participant.DocumentType = participantDto.DocumentType; // DocumentType 在 DTO 中是必填
-                participant.DocumentNumber = participantDto.DocumentNumber; // DocumentNumber 在 DTO 中允許為空
-
-                // 可選的護照等欄位，如果 DTO 有提供就使用
-                participant.PassportSurname = participantDto.PassportSurname;
-                participant.PassportGivenName = participantDto.PassportGivenName;
-                participant.PassportExpireDate = participantDto.PassportExpireDate;
-                participant.Nationality = participantDto.Nationality;
-                participant.Note = participantDto.Note;
-
                 order.OrderParticipants.Add(participant);
             }
 
             // 在嘗試儲存到資料庫之前，再次檢查 ModelState，包括剛才添加的自定義錯誤
             if (!ModelState.IsValid)
             {
-                _logger.LogWarning("CreateOrder Final Model State Invalid After Custom Validation: {@ModelStateErrors}", ModelState);
+                _logger.LogWarning("CreateOrder 最終 ModelState 無效: {@ModelStateErrors}", ModelState.Values.SelectMany(v => v.Errors));
                 return BadRequest(ModelState);
             }
 
-            // 5. 儲存到資料庫
-            try
+            // 資料庫儲存 (使用交易)
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                _context.Orders.Add(order);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException ex)
-            {
-                _logger.LogError(ex, "建立訂單時資料庫更新失敗。");
-                // 可以在這裡檢查 ex.InnerException 來獲取更詳細的資料庫層級錯誤 (例如欄位長度不符、Constraint 違規等)
-                // 例如：System.Data.SqlClient.SqlException 或 Microsoft.EntityFrameworkCore.DbUpdateException 的 InnerException
-                string innerMessage = ex.InnerException?.Message ?? ex.Message;
-                _logger.LogError("Inner Exception: {InnerMessage}", innerMessage);
-                return StatusCode(StatusCodes.Status500InternalServerError, "建立訂單失敗，請稍後再試。");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "建立訂單時發生未預期錯誤。");
-                return StatusCode(StatusCodes.Status500InternalServerError, "建立訂單時發生錯誤。");
+                try
+                {
+                    _context.Orders.Add(order);
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+                catch (DbUpdateException ex)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "建立訂單時資料庫更新失敗。InnerException: {InnerMessage}", ex.InnerException?.Message);
+                    return StatusCode(StatusCodes.Status500InternalServerError, "建立訂單失敗，請稍後再試。");
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "建立訂單時發生未預期錯誤。");
+                    return StatusCode(StatusCodes.Status500InternalServerError, "建立訂單時發生錯誤。");
+                }
             }
 
-            // 6. 準備回應給前端的資料
+            // 準備回應給前端的資料
             // 回傳訂單ID，以及支付所需的相關資訊 (這部分取決於您與支付閘道的整合方式)
             var orderSummary = new OrderSummaryDto
             {
                 OrderId = order.OrderId,
                 OrderStatus = order.Status.ToString(),
                 TotalAmount = order.TotalAmount,
-                SelectedPaymentMethod = order.PaymentMethod?.ToString() ?? "N/A",
+                SelectedPaymentMethod = order.PaymentMethod?.ToString(),
                 // 您可能還需要回傳一個專門給支付閘道使用的 token 或重新導向 URL 的參數
                 // PaymentGatewayRedirectUrl = ... (這需要根據支付閘道API決定)
                 // PaymentReference = ...
@@ -250,67 +323,7 @@ namespace TravelAgencyFrontendAPI.Controllers
         }
 
         // GET: api/Order/{id} (範例，用於 CreatedAtAction 和前端查詢訂單)
-        [HttpGet("{id}")]
-        public async Task<ActionResult<OrderDto>> GetOrderById(int id) //  OrderDto 用於顯示訂單詳情
-        {
-            var currentUserId = GetCurrentUserId();
-            if (currentUserId == null)
-            {
-                return Unauthorized();
-            }
 
-            var order = await _context.Orders
-                                .Include(o => o.OrderParticipants)
-                                .Include(o => o.OrderDetails) // 付款完成後才會有資料
-                                .FirstOrDefaultAsync(o => o.OrderId == id && o.MemberId == currentUserId.Value);
-
-            if (order == null)
-            {
-                return NotFound($"找不到訂單 ID {id}，或您無權存取此訂單。");
-            }
-
-            // 這裡需要將 Order 實體映射到一個 OrderDto (包含訂單所有詳細資訊的 DTO)
-            // 這個 OrderDto 會比 OrderSummaryDto 更詳細
-            // 以下為簡化範例，直接回傳 order (實際應映射到 DTO)
-            // var orderDto = MapOrderToOrderDto(order); // 您需要實作這個映射方法
-            // return Ok(orderDto);
-
-            // 暫時回傳 order 實體，您應建立並使用一個詳細的 OrderDto
-            return Ok(new{
-                order.OrderId,
-                order.MemberId,
-                OrdererName = order.OrdererName, // 回傳快照的訂購人姓名
-                OrdererPhone = order.OrdererPhone, // 回傳快照的訂購人電話
-                OrdererEmail = order.OrdererEmail, // 回傳快照的訂購人Email
-                order.TotalAmount,
-                PaymentMethod = order.PaymentMethod?.ToString(),
-                Status = order.Status.ToString(),
-                order.CreatedAt,
-                order.PaymentDate,
-                order.Note,
-                order.InvoiceOption,
-                order.InvoiceDeliveryEmail,
-                order.InvoiceUniformNumber,
-                order.InvoiceTitle,
-                order.InvoiceAddBillingAddr,
-                order.InvoiceBillingAddress,
-                Participants = order.OrderParticipants.Select(p => new {
-                    p.Name,
-                    p.Phone,
-                    p.Email, // 擷取部分旅客資訊
-                    p.BirthDate,
-                    p.IdNumber,
-                    p.Gender,
-                    p.DocumentType
-                }).ToList(),
-                OrderDetails = order.OrderDetails.Select(od => new {
-                    od.Description,
-                    od.Quantity,
-                    od.Price,
-                    od.TotalAmount
-                }).ToList()
-            });
-        }
 
         // *** 在這裡添加電話號碼正規化的私有 Helper Method ***
         private string NormalizePhoneNumber(string phoneNumberString)
@@ -357,9 +370,93 @@ namespace TravelAgencyFrontendAPI.Controllers
 
             return normalizedNumber;
         }
+
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<OrderDto>> GetOrderById(int id) //  OrderDto 用於顯示訂單詳情
+        {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == null)
+            {
+                return Unauthorized();
+            }
+
+            var orderData = await _context.Orders
+                .Include(o => o.OrderParticipants)
+                .Include(o => o.OrderDetails)
+                //    .ThenInclude(od => od.GroupTravel) // 如果需要在訂單詳情中顯示 GroupTravel 的資訊
+                //.Include(o => o.OrderDetails)
+                //    .ThenInclude(od => od.CustomTravel)   // 如果需要在訂單詳情中顯示 CustomTravel 的資訊
+                .FirstOrDefaultAsync(o => o.OrderId == id && o.MemberId == currentUserId.Value);
+
+            if (orderData == null)
+            {
+                return NotFound($"找不到訂單 ID {id}，或您無權存取此訂單。");
+            }
+
+            // 手動載入關聯的 GroupTravel 和 CustomTravel (如果需要且未在上面 Include)
+            // 這種方式效率可能稍差，但較直觀
+            foreach (var detail in orderData.OrderDetails)
+            {
+                if (detail.Category == ProductCategory.GroupTravel)
+                {
+                    await _context.Entry(detail).Reference(d => d.GroupTravel).LoadAsync();
+                    if (detail.GroupTravel != null)
+                    {
+                        await _context.Entry(detail.GroupTravel).Reference(gt => gt.OfficialTravelDetail).LoadAsync();
+                        if (detail.GroupTravel.OfficialTravelDetail != null)
+                        {
+                            await _context.Entry(detail.GroupTravel.OfficialTravelDetail).Reference(otd => otd.OfficialTravel).LoadAsync();
+                        }
+                    }
+                }
+                else if (detail.Category == ProductCategory.CustomTravel)
+                {
+                    await _context.Entry(detail).Reference(d => d.CustomTravel).LoadAsync();
+                }
+            }
+
+            // 暫時回傳 order 實體，應建立並使用一個詳細的 OrderDto
+            return Ok(new
+            {
+                orderData.OrderId,
+                orderData.MemberId,
+                OrdererName = orderData.OrdererName,
+                OrdererPhone = orderData.OrdererPhone,
+                OrdererEmail = orderData.OrdererEmail,
+                orderData.TotalAmount,
+                PaymentMethod = orderData.PaymentMethod.ToString(),
+                Status = orderData.Status.ToString(),
+                orderData.CreatedAt,
+                orderData.PaymentDate,
+                orderData.Note,
+                orderData.InvoiceOption,
+                Participants = orderData.OrderParticipants.Select(p => new
+                {
+                    p.Name,
+                    //p.Phone,
+                    //p.Email,
+                    p.BirthDate,
+                    p.IdNumber,
+                    p.Gender,
+                    p.DocumentType
+                }).ToList(),
+                OrderDetails = orderData.OrderDetails.Select(od => new
+                {
+                    ProductTypeName = od.Category.ToString(),
+                    ItemId = od.ItemId,
+                    ProductName = od.Category == ProductCategory.GroupTravel ?
+                                  od.GroupTravel?.OfficialTravelDetail?.OfficialTravel?.Title :
+                                 (od.Category == ProductCategory.CustomTravel ? od.CustomTravel?.Note : "N/A"),
+                    od.Description,
+                    od.Quantity,
+                    od.Price,
+                    od.TotalAmount
+                }).ToList()
+            });
+        }
+
     }
-
-
 
     // 定義這個 OrderSummaryDto，用於 PostOrder 的回應
     public class OrderSummaryDto

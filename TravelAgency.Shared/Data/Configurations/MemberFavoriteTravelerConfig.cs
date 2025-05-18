@@ -23,7 +23,7 @@ namespace TravelAgency.Shared.Data.Configurations
             entity.Property(p => p.Email).HasMaxLength(100).IsRequired(false);
             entity.HasIndex(p => p.Email).IsUnique();
 
-            entity.Property(p => p.DocumentType).HasMaxLength(20).HasConversion<string>().HasDefaultValue(DocumentType.Passport).IsRequired(false);
+            entity.Property(p => p.DocumentType).HasMaxLength(20).HasConversion<string>().HasDefaultValue(DocumentType.PASSPORT).IsRequired(false);
             entity.Property(p => p.DocumentNumber).HasMaxLength(50).IsRequired(false);
 
             entity.Property(p => p.PassportSurname).HasMaxLength(50).IsRequired(false);

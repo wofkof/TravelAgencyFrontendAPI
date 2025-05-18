@@ -24,10 +24,6 @@
         public int OrderId { get; set; }
         public int MemberId { get; set; }
 
-        //public string OrdererName { get; set; } = null!;
-        //public string OrdererPhone { get; set; } = null!;
-        //public string OrdererEmail { get; set; } = null!;
-
         public decimal TotalAmount { get; set; }
         public PaymentMethod? PaymentMethod { get; set; } 
         public OrderStatus Status { get; set; } = OrderStatus.Pending;

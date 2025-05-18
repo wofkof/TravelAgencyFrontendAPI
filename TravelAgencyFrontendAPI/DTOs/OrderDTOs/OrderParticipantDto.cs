@@ -34,12 +34,12 @@ namespace TravelAgencyFrontendAPI.DTOs.OrderDTOs
         //[Required(ErrorMessage = "旅客手機為必填")]
         //[Phone(ErrorMessage = "請輸入有效的手機號碼")]
         [StringLength(20)]
-        public string Phone { get; set; }
+        public string? Phone { get; set; }
 
         //[Required(ErrorMessage = "旅客電子信箱為必填")]
         //[EmailAddress(ErrorMessage = "請輸入有效的電子信箱")]
         [StringLength(255)]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [Required(ErrorMessage = "旅客證件類型為必填")]
         public DocumentType DocumentType { get; set; } // Passport, ResidencePermit, EntryPermit
