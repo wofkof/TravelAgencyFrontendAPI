@@ -30,65 +30,80 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
         {
             var member = await _context.Members.FirstOrDefaultAsync(m => m.Email == email);
             if (member == null)
-                return BadRequest("Email 不存在");
+                return BadRequest("該會員不存在，請先註冊");
 
             // 產生 6 碼驗證碼
             var code = new Random().Next(100000, 999999).ToString();
 
-            // 建立 Token 與驗證碼
-            //var reset = new ResetPassword
-            //{
-            //    MemberId = member.MemberId,
-            //    Token = Guid.NewGuid().ToString(),
-            //    Code = code, // ✅ 新增驗證碼欄位
-            //    CreatedTime = DateTime.Now,
-            //    ExpireTime = DateTime.Now.AddMinutes(10),
-            //    IsUsed = false
-            //};
+            // 建立一筆 Email 驗證資料
+            var verification = new EmailVerificationCode
+            {
+                Email = email,
+                VerificationCode = code,
+                VerificationType = EmailVerificationCode.VerificationTypeEnum.ResetPassword,
+                IsVerified = false,
+                CreatedAt = DateTime.Now,
+                ExpireAt = DateTime.Now.AddMinutes(10)
+            };
 
-            //_context.ResetPasswords.Add(reset);
+            _context.EmailVerificationCodes.Add(verification);
             await _context.SaveChangesAsync();
 
-            // 寄送驗證碼 Email
+            // 發送 Email
             await _emailService.SendEmailAsync(
                 email,
                 "嶼你同行 - 密碼重設驗證碼",
-                $"您好，您的驗證碼為：<b>{code}</b><br>請在 10 分鐘內輸入驗證碼完成密碼重設流程。"
+                $"您好，您的驗證碼為：<b>{code}</b><br>請在 10 分鐘內完成驗證碼輸入與密碼設定。<br><br><span style='font-size:13px;color:#888'>此為系統自動發送，請勿回覆。</span>"
             );
 
+            return Ok("已寄出驗證碼");
+        }
 
-            return Ok("已寄送重設密碼信");
+        // POST: api/PasswordResets/verify-code
+        [HttpPost("verify-code")]
+        public async Task<IActionResult> VerifyCode([FromBody] VerifyCodeDto dto)
+        {
+            var record = await _context.EmailVerificationCodes
+                .Where(v => v.Email == dto.Email && v.VerificationType == EmailVerificationCode.VerificationTypeEnum.ResetPassword)
+                .OrderByDescending(v => v.CreatedAt)
+                .FirstOrDefaultAsync();
+
+            if (record == null || record.IsVerified || record.ExpireAt < DateTime.Now)
+                return BadRequest("驗證碼無效或已過期");
+
+            if (record.VerificationCode != dto.Code)
+                return BadRequest("驗證碼錯誤");
+
+            record.IsVerified = true;
+            await _context.SaveChangesAsync();
+
+            return Ok("驗證成功");
         }
 
         // POST: api/PasswordResets/reset
-        //[HttpPost("reset")]
-        //public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
-        //{
-        //    var verification = await _context.EmailVerificationCodes
-        //        .FirstOrDefaultAsync(v =>
-        //            v.VerificationCode == dto.Token &&
-        //            v.VerificationType == EmailVerificationCode.VerificationTypeEnum.ResetPassword &&
-        //            !v.IsVerified &&
-        //            v.ExpireAt > DateTime.Now);
+        [HttpPost("reset")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+        {
+            var member = await _context.Members.FirstOrDefaultAsync(m => m.Email == dto.Email);
+            if (member == null)
+                return BadRequest("找不到該會員");
 
-        //    if (verification == null)
-        //        return BadRequest("驗證碼無效或已過期");
+            var latestVerification = await _context.EmailVerificationCodes
+                .Where(v => v.Email == dto.Email && v.VerificationType == EmailVerificationCode.VerificationTypeEnum.ResetPassword)
+                .OrderByDescending(v => v.CreatedAt)
+                .FirstOrDefaultAsync();
 
-        //    var member = await _context.Members.FirstOrDefaultAsync(m => m.Email == verification.Email);
-        //    if (member == null)
-        //        return BadRequest("找不到對應會員");
+            if (latestVerification == null || !latestVerification.IsVerified)
+                return BadRequest("尚未完成驗證碼驗證");
 
-        //    // 更新密碼
-        //    PasswordHasher.CreatePasswordHash(dto.NewPassword, out string newHash, out string newSalt);
-        //    member.PasswordHash = newHash;
-        //    member.PasswordSalt = newSalt;
+            // 密碼雜湊處理（根據你自己的加密邏輯）
+            PasswordHasher.CreatePasswordHash(dto.NewPassword, out string hash, out string salt);
+            member.PasswordHash = hash;
+            member.PasswordSalt = salt;
 
-        //    // 標記驗證碼為已使用
-        //    verification.IsVerified = true;
-        //    await _context.SaveChangesAsync();
-
-        //    return Ok("密碼已重設");
-        //}
+            await _context.SaveChangesAsync();
+            return Ok("密碼已重設成功");
+        }
 
     }
 }
