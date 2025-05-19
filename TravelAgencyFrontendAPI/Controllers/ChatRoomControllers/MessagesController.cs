@@ -30,21 +30,46 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
             var messages = await _context.Messages
                 .Where(m => m.ChatRoomId == chatRoomId && !m.IsDeleted)
                 .OrderBy(m => m.SentAt)
-                .Select(m => new MessageDto
-                {
-                    MessageId = m.MessageId,
-                    ChatRoomId = m.ChatRoomId,
-                    SenderType = m.SenderType.ToString(),
-                    SenderId = m.SenderId,
-                    MessageType = m.MessageType.ToString(),
-                    Content = m.Content,
-                    SentAt = m.SentAt,
-                    IsRead = m.IsRead
-                })
                 .ToListAsync();
 
-            return Ok(messages);
+            var messageDtos = new List<MessageDto>();
+
+            var memberIds = messages.Where(m => m.SenderType == SenderType.Member)
+                                    .Select(m => m.SenderId).Distinct().ToList();
+            var employeeIds = messages.Where(m => m.SenderType == SenderType.Employee)
+                                      .Select(m => m.SenderId).Distinct().ToList();
+
+            var memberMap = await _context.Members
+                .Where(m => memberIds.Contains(m.MemberId))
+                .ToDictionaryAsync(m => m.MemberId, m => m.Name);
+
+            var employeeMap = await _context.Employees
+                .Where(e => employeeIds.Contains(e.EmployeeId))
+                .ToDictionaryAsync(e => e.EmployeeId, e => e.Name);
+
+            foreach (var msg in messages)
+            {
+                var senderName = msg.SenderType == SenderType.Employee
+                    ? employeeMap.GetValueOrDefault(msg.SenderId, "未知員工")
+                    : memberMap.GetValueOrDefault(msg.SenderId, "未知會員");
+
+                messageDtos.Add(new MessageDto
+                {
+                    MessageId = msg.MessageId,
+                    ChatRoomId = msg.ChatRoomId,
+                    SenderType = msg.SenderType.ToString(),
+                    SenderId = msg.SenderId,
+                    SenderName = senderName,
+                    MessageType = msg.MessageType.ToString(),
+                    Content = msg.Content,
+                    SentAt = msg.SentAt,
+                    IsRead = msg.IsRead
+                });
+            }
+
+            return Ok(messageDtos);
         }
+
 
         // POST: api/Messages
         [HttpPost]
@@ -72,14 +97,36 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
 
             await _context.SaveChangesAsync();
 
-            dto.MessageId = message.MessageId;
-            dto.SentAt = message.SentAt;
+            string senderName;
+            if (message.SenderType == SenderType.Employee)
+            {
+                var emp = await _context.Employees.FindAsync(message.SenderId);
+                senderName = emp?.Name ?? "未知員工";
+            }
+            else
+            {
+                var mem = await _context.Members.FindAsync(message.SenderId);
+                senderName = mem?.Name ?? "未知會員";
+            }
+
+            var messageDto = new MessageDto
+            {
+                MessageId = message.MessageId,
+                ChatRoomId = message.ChatRoomId,
+                SenderId = message.SenderId,
+                SenderType = message.SenderType.ToString(),
+                SenderName = senderName,
+                MessageType = message.MessageType.ToString(),
+                Content = message.Content,
+                SentAt = message.SentAt,
+                IsRead = message.IsRead
+            };
 
             // SignalR 廣播
             await _hub.Clients.Group(dto.ChatRoomId.ToString())
-                .SendAsync("ReceiveMessage", dto);
+                .SendAsync("ReceiveMessage", messageDto);
 
-            return CreatedAtAction(nameof(GetMessages), new { chatRoomId = dto.ChatRoomId }, dto);
+            return CreatedAtAction(nameof(GetMessages), new { chatRoomId = dto.ChatRoomId }, messageDto);
         }
 
         // POST: api/messages/mark-as-read
