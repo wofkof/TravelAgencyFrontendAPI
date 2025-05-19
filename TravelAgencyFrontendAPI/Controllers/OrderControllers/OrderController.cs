@@ -160,7 +160,7 @@ namespace TravelAgencyFrontendAPI.Controllers
 
                 var orderDetail = new OrderDetail
                 {
-                    OrderId = order.OrderId,
+                    //OrderId = order.OrderId,
                     Category = itemCategory,                     // << 賦值 ProductCategory
                     ItemId = cartItemDto.ProductId,              // << 賦值 ItemId (GroupTravelId 或 CustomTravelId)
                     Description = $"{productName} - {optionSpecificDescription}",
@@ -233,6 +233,11 @@ namespace TravelAgencyFrontendAPI.Controllers
                         .FirstOrDefaultAsync(ft => ft.FavoriteTravelerId == participantDto.FavoriteTravelerId.Value &&
                                                    ft.MemberId == currentUserId.Value && // 確保是該會員的常用旅客
                                                    ft.Status == FavoriteStatus.Active); // 確保常用旅客是有效的
+
+                    if (favoriteTraveler == null)
+                    {
+                        return BadRequest($"找不到常用旅客 ID: {participantDto.FavoriteTravelerId.Value} 或該旅客已停用。");
+                    }
 
                     // 使用常用旅客資料預填 OrderParticipant
                     participant.Name = favoriteTraveler.Name;
@@ -396,28 +401,33 @@ namespace TravelAgencyFrontendAPI.Controllers
 
             // 手動載入關聯的 GroupTravel 和 CustomTravel (如果需要且未在上面 Include)
             // 這種方式效率可能稍差，但較直觀
-            foreach (var detail in orderData.OrderDetails)
+            // --- 核心修改：手動載入 OrderDetail 中的 GroupTravel 或 CustomTravel ---
+            if (orderData.OrderDetails != null) // 確保 OrderDetails 不是 null
             {
-                if (detail.Category == ProductCategory.GroupTravel)
+                foreach (var detail in orderData.OrderDetails)
                 {
-                    await _context.Entry(detail).Reference(d => d.GroupTravel).LoadAsync();
-                    if (detail.GroupTravel != null)
+                    if (detail.Category == ProductCategory.GroupTravel)
                     {
-                        await _context.Entry(detail.GroupTravel).Reference(gt => gt.OfficialTravelDetail).LoadAsync();
-                        if (detail.GroupTravel.OfficialTravelDetail != null)
-                        {
-                            await _context.Entry(detail.GroupTravel.OfficialTravelDetail).Reference(otd => otd.OfficialTravel).LoadAsync();
-                        }
+                        // 使用 ItemId 從 _context.GroupTravels 查詢
+                        // 確保你的 GroupTravel 實體有與 detail.ItemId 對應的主鍵，例如 GroupTravelId
+                        var groupTravelItem = await _context.GroupTravels
+                                                    .Include(gt => gt.OfficialTravelDetail) // 假設你需要 OfficialTravelDetail
+                                                        .ThenInclude(otd => otd.OfficialTravel) // 進一步載入 OfficialTravel
+                                                    .FirstOrDefaultAsync(gt => gt.GroupTravelId == detail.ItemId); // 使用 ItemId 關聯
+                        detail.GroupTravel = groupTravelItem; // 將查詢到的物件賦值給 [NotMapped] 屬性
+                    }
+                    else if (detail.Category == ProductCategory.CustomTravel)
+                    {
+                        // 使用 ItemId 從 _context.CustomTravels 查詢
+                        // 確保你的 CustomTravel 實體有與 detail.ItemId 對應的主鍵，例如 CustomTravelId
+                        var customTravelItem = await _context.CustomTravels
+                                                     .FirstOrDefaultAsync(ct => ct.CustomTravelId == detail.ItemId); // 使用 ItemId 關聯
+                        detail.CustomTravel = customTravelItem; // 將查詢到的物件賦值給 [NotMapped] 屬性
                     }
                 }
-                else if (detail.Category == ProductCategory.CustomTravel)
-                {
-                    await _context.Entry(detail).Reference(d => d.CustomTravel).LoadAsync();
-                }
             }
-
             // 暫時回傳 order 實體，應建立並使用一個詳細的 OrderDto
-            return Ok(new
+            var orderDto = new // 你應該用你定義的 OrderDto
             {
                 orderData.OrderId,
                 orderData.MemberId,
@@ -425,26 +435,25 @@ namespace TravelAgencyFrontendAPI.Controllers
                 OrdererPhone = orderData.OrdererPhone,
                 OrdererEmail = orderData.OrdererEmail,
                 orderData.TotalAmount,
-                PaymentMethod = orderData.PaymentMethod.ToString(),
+                PaymentMethod = orderData.PaymentMethod?.ToString(), // 加上 ?. 避免 PaymentMethod 為 null 時出錯
                 Status = orderData.Status.ToString(),
                 orderData.CreatedAt,
                 orderData.PaymentDate,
                 orderData.Note,
-                orderData.InvoiceOption,
-                Participants = orderData.OrderParticipants.Select(p => new
+                orderData.InvoiceOption, // 假設 InvoiceOption 是 string 或 enum
+                Participants = orderData.OrderParticipants?.Select(p => new // 加上 ?.
                 {
                     p.Name,
-                    //p.Phone,
-                    //p.Email,
                     p.BirthDate,
                     p.IdNumber,
-                    p.Gender,
-                    p.DocumentType
+                    p.Gender, // 假設 Gender 是 string 或 enum
+                    p.DocumentType // 假設 DocumentType 是 string 或 enum
                 }).ToList(),
-                OrderDetails = orderData.OrderDetails.Select(od => new
+                OrderDetails = orderData.OrderDetails?.Select(od => new // 加上 ?.
                 {
                     ProductTypeName = od.Category.ToString(),
-                    ItemId = od.ItemId,
+                    od.ItemId,
+                    // 這裡可以安全地訪問 od.GroupTravel 和 od.CustomTravel，因為它們已經被手動填入
                     ProductName = od.Category == ProductCategory.GroupTravel ?
                                   od.GroupTravel?.OfficialTravelDetail?.OfficialTravel?.Title :
                                  (od.Category == ProductCategory.CustomTravel ? od.CustomTravel?.Note : "N/A"),
@@ -453,10 +462,14 @@ namespace TravelAgencyFrontendAPI.Controllers
                     od.Price,
                     od.TotalAmount
                 }).ToList()
-            });
-        }
+            };
 
+            return Ok(orderDto);
+        }
+    
     }
+
+
 
     // 定義這個 OrderSummaryDto，用於 PostOrder 的回應
     public class OrderSummaryDto

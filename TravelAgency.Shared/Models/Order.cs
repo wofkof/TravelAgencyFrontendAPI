@@ -39,6 +39,10 @@
         public string OrdererPhone { get; set; } = null!;
         public string OrdererEmail { get; set; } = null!;
 
+        public string? ECPayTradeNo { get; set; } // 綠界交易編號
+        public string? MerchantTradeNo { get; set; } // 自訂商店交易編號
+
+
         public Member Member { get; set; } = null!;
         public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
         public ICollection<OrderInvoice> OrderInvoices { get; set; } = new List<OrderInvoice>();

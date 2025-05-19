@@ -51,7 +51,7 @@ namespace TravelAgencyFrontendAPI.Controllers // 您的 Controller 命名空間
         [HttpPost("Checkout/{orderId}")] // 例如：POST /api/ECPay/Checkout/123
         public async Task<IActionResult> PrepareECPayPayment(int orderId)
         {
-            // 1. 驗證用戶身份 (假設您有類似 GetCurrentUserId 的方法)
+            // 驗證用戶身份 (假設您有類似 GetCurrentUserId 的方法)
             var currentUserId = GetCurrentUserId(); 
             if (currentUserId == null)
             {
@@ -59,14 +59,9 @@ namespace TravelAgencyFrontendAPI.Controllers // 您的 Controller 命名空間
                 return Unauthorized("使用者未登入。");
             }
 
-            // 2. 從資料庫取得訂單資料，並包含必要的關聯資料
+            // 1. 從資料庫取得訂單資料，並包含必要的關聯資料
             var order = await _context.Orders
-                .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.GroupTravel)
-                        .ThenInclude(gt => gt.OfficialTravelDetail)
-                            .ThenInclude(otd => otd.OfficialTravel)
-                .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.CustomTravel)
+                .Include(o => o.OrderDetails) // 只載入 OrderDetails 集合
                 .FirstOrDefaultAsync(o => o.OrderId == orderId && o.MemberId == currentUserId.Value);
 
             if (order == null)
@@ -75,11 +70,12 @@ namespace TravelAgencyFrontendAPI.Controllers // 您的 Controller 命名空間
                 return NotFound($"找不到訂單 (ID: {orderId}) 或您無權限進行此操作。");
             }
 
-            if (order.Status != OrderStatus.Awaiting) // 假設 OrderStatus.Awaiting 是待付款狀態
+            if (order.Status != OrderStatus.Awaiting)
             {
                 _logger.LogWarning("PrepareECPayPayment - 訂單 {OrderId} 狀態為 {Status}，非待付款狀態。", orderId, order.Status);
                 return BadRequest($"訂單 (ID: {orderId}) 目前狀態為 {order.Status}，無法進行付款。");
             }
+
             if (order.PaymentMethod.HasValue)
             {
                 switch (order.PaymentMethod.Value)
@@ -90,9 +86,7 @@ namespace TravelAgencyFrontendAPI.Controllers // 您的 Controller 命名空間
                     case PaymentMethod.LinePay:
                         _logger.LogInformation($"訂單 {order.OrderId} 選擇 LINE Pay，由此 ECPayController 處理是錯誤的。");
                         return BadRequest("選擇的支付方式為 LINE Pay，請透過正確的路徑處理。");
-                    // case 其他您支援的 PaymentMethodType:
-                    //     // 對應的處理
-                    //     break;
+
                     default:
                         _logger.LogError($"訂單 {order.OrderId} 請求了無法識別的支付方式代碼: {order.PaymentMethod.Value}。");
                         return BadRequest("系統無法識別所選的付款方式。");
@@ -103,36 +97,69 @@ namespace TravelAgencyFrontendAPI.Controllers // 您的 Controller 命名空間
                 _logger.LogError($"訂單 {order.OrderId} 未指定支付方式。");
                 return BadRequest("未指定付款方式。");
             }
-            // 3. 創建 ECPay.Models.Payment 物件並填充資料
-            var ecpayPaymentRequest = new ECPay.Models.Payment
+
+            // 2. 手動載入 OrderDetail 關聯的 GroupTravel 和 CustomTravel (優化 N+1)
+            if (order.OrderDetails != null && order.OrderDetails.Any())
             {
-                MerchantID = _merchantID,
-                URL = _ecpayApiUrl, // **重要**: 這個 URL 是綠界提交表單的目標網址，應由 PaymentConfiguration 設定或直接賦值
-                PaymentType = "aio",
-                EncryptType = 1, // SHA256
+                var groupTravelIds = order.OrderDetails
+                                        .Where(od => od.Category == ProductCategory.GroupTravel)
+                                        .Select(od => od.ItemId)
+                                        .Distinct()
+                                        .ToList();
+                var customTravelIds = order.OrderDetails
+                                        .Where(od => od.Category == ProductCategory.CustomTravel)
+                                        .Select(od => od.ItemId)
+                                        .Distinct()
+                                        .ToList();
 
-                MerchantTradeNo = $"11110{order.OrderId}_{DateTime.UtcNow.Ticks}", // 確保唯一性
-                MerchantTradeDate = order.CreatedAt.ToString("yyyy/MM/dd HH:mm:ss"),
-                TotalAmount = (int)order.TotalAmount,
-                TradeDesc = HttpUtility.UrlEncode($"訂單編號:{order.OrderId} - {order.OrdererName}"),
+                List<GroupTravel> groupTravels = new List<GroupTravel>();
+                if (groupTravelIds.Any())
+                {
+                    // 確保載入產生 ItemName 所需的關聯資料
+                    groupTravels = await _context.GroupTravels
+                                            .Where(gt => groupTravelIds.Contains(gt.GroupTravelId))
+                                            .Include(gt => gt.OfficialTravelDetail)
+                                            .ThenInclude(otd => otd.OfficialTravel) // 為了 OfficialTravel.Title
+                                            .ToListAsync();
+                }
 
-                ChoosePayment = "Credit", // 固定為信用卡
+                List<CustomTravel> customTravels = new List<CustomTravel>();
+                if (customTravelIds.Any())
+                {
+                    customTravels = await _context.CustomTravels
+                                             .Where(ct => customTravelIds.Contains(ct.CustomTravelId))
+                                             .ToListAsync(); // CustomTravel 的 Note 通常直接在 CustomTravel 物件上
+                }
 
-                ReturnURL = _ecpayReturnUrl, // 您的後端 Callback URL
-                ClientBackURL = $"{_ecpayClientBackUrlBase}{order.OrderId}", // 前端結果頁
+                foreach (var detail in order.OrderDetails)
+                {
+                    if (detail.Category == ProductCategory.GroupTravel)
+                    {
+                        detail.GroupTravel = groupTravels.FirstOrDefault(gt => gt.GroupTravelId == detail.ItemId);
+                    }
+                    else if (detail.Category == ProductCategory.CustomTravel)
+                    {
+                        detail.CustomTravel = customTravels.FirstOrDefault(ct => ct.CustomTravelId == detail.ItemId);
+                    }
+                }
+            }
 
-                InvoiceMark = "N" // 假設暫不開立發票
-                // 其他選填欄位按需設定，例如 Remark, CustomFields...
-                // Remark = HttpUtility.UrlEncode(order.Note)
-            };
+            // 3. 創建 ECPay PaymentConfiguration 並填充資料
+            var paymentConfig = new ECPay.Services.Checkout.PaymentConfiguration();
 
-            // 處理 ItemName
-            var itemNames = new List<string>();
+            string merchantTradeNo = $"ORD{order.OrderId}{Guid.NewGuid().ToString("N").Substring(0, 8)}";
+            // TradeDesc 需要 UrlEncode
+            string tradeDesc = System.Net.WebUtility.UrlEncode($"訂單 {order.OrderId} - {order.OrdererName}");
+            DateTime merchantTradeDate = order.CreatedAt; // 或 DateTime.Now，根據 ECPay 要求
+            int totalAmount = (int)order.TotalAmount;
+
+            // 準備 ItemName (ECPay 的商品名稱)
+            var itemNamesForEcpay = new List<string>();
             if (order.OrderDetails != null && order.OrderDetails.Any())
             {
                 foreach (var detail in order.OrderDetails)
                 {
-                    string productName = "商品";
+                    string productName = "商品"; // 預設名稱
                     if (detail.Category == ProductCategory.GroupTravel && detail.GroupTravel?.OfficialTravelDetail?.OfficialTravel != null)
                     {
                         productName = detail.GroupTravel.OfficialTravelDetail.OfficialTravel.Title;
@@ -141,36 +168,24 @@ namespace TravelAgencyFrontendAPI.Controllers // 您的 Controller 命名空間
                     {
                         productName = !string.IsNullOrEmpty(detail.CustomTravel.Note) ? detail.CustomTravel.Note : $"客製化行程-{detail.ItemId}";
                     }
-                    else if (!string.IsNullOrEmpty(detail.Description))
+                    else if (!string.IsNullOrEmpty(detail.Description)) // 作為備用
                     {
                         productName = detail.Description;
                     }
-                    itemNames.Add($"{productName} {detail.Quantity}份 x {detail.Price:N0}元");
+                    // 您可以根據需求調整顯示的格式，例如是否包含價格和數量
+                    itemNamesForEcpay.Add($"{productName}");
                 }
             }
             else
             {
-                itemNames.Add(HttpUtility.UrlEncode($"訂單 {order.OrderId} 總額"));
+                itemNamesForEcpay.Add($"訂單 {order.OrderId} 總額"); // 如果沒有明細的備用名稱
             }
-            ecpayPaymentRequest.ItemName = HttpUtility.UrlEncode(string.Join("#", itemNames));
-
-
-            // 4. 計算 CheckMacValue
-            //    強烈建議使用 ECPayDotNetCore-main SDK 提供的 PaymentConfiguration 來產生完整的 Payment 物件，
-            //    它會自動處理 CheckMacValue 的計算。
-            //    如果您手動 new Payment()，則需要手動調用 CheckMac 的計算。
-
-            // --- 使用 ECPayDotNetCore-main SDK 的 PaymentConfiguration 範例 ---
-            var paymentConfig = new ECPay.Services.Checkout.PaymentConfiguration(); // 實例化
-
-            string merchantTradeNo = $"ORD{order.OrderId}-{Guid.NewGuid().ToString().Substring(0, 8)}";
-            string tradeDesc = System.Web.HttpUtility.UrlEncode($"訂單 {order.OrderId} - {order.OrdererName}");
-            DateTime merchantTradeDate = order.CreatedAt;
-            int totalAmount = (int)order.TotalAmount;
+            // ItemName 參數也需要 UrlEncode，且多個品項用 # 分隔
+            string finalItemName = System.Net.WebUtility.UrlEncode(string.Join("#", itemNamesForEcpay));
 
             var itemDetailsForSdk = order.OrderDetails.Select(d =>
             {
-                string productName = "商品";
+                string productName = "商品"; // Default name
                 if (d.Category == ProductCategory.GroupTravel && d.GroupTravel?.OfficialTravelDetail?.OfficialTravel != null)
                     productName = d.GroupTravel.OfficialTravelDetail.OfficialTravel.Title;
                 else if (d.Category == ProductCategory.CustomTravel && d.CustomTravel != null)
@@ -178,10 +193,10 @@ namespace TravelAgencyFrontendAPI.Controllers // 您的 Controller 命名空間
                 else if (!string.IsNullOrEmpty(d.Description))
                     productName = d.Description;
 
-                return new TestCheckoutItem // SDK 使用 TestCheckoutItem
+                return new TestCheckoutItem // SDK uses TestCheckoutItem
                 {
-                    Name = productName, // Name 應該是單一品項的名稱，SDK 的 WithItems 會處理組合
-                    Price = (int)d.Price,
+                    Name = productName, // Name should be the name of a single item
+                    Price = (int)d.Price, // Price per unit for this item detail
                     Quantity = d.Quantity
                 };
             }).ToList();
@@ -243,30 +258,42 @@ namespace TravelAgencyFrontendAPI.Controllers // 您的 Controller 命名空間
             // 驗證 CheckMacValue (從設定檔讀取 HashKey/IV)
             bool isValid = ECPay.Services.CheckMac.PaymentResultIsValid(result, _hashKey, _hashIV); // 使用 DI 的 _hashKey, _hashIV
 
-            if (isValid)
+            if (!isValid)
             {
-                if (result.RtnCode == 1) // 付款成功
-                {
-                    _logger.LogInformation("付款成功，訂單號：{MerchantTradeNo}，綠界交易號：{TradeNo}", result.MerchantTradeNo, result.TradeNo);
-                    // 更新資料庫訂單狀態
-                    // 從 MerchantTradeNo 解析出您的 OrderId
-                    // 例如： var orderIdString = result.MerchantTradeNo.Replace("YOURORDERPREFIX_", "").Split('_')[0];
-                    // if (int.TryParse(orderIdString, out int orderIdFromMerchantTradeNo)) { ... }
-                    // 找到對應的訂單，更新其狀態為 Paid，並記錄 TradeNo 和 PaymentDate
-                    // await _orderService.MarkOrderAsPaid(orderIdFromMerchantTradeNo, result.TradeNo, result.PaymentDate);
-                }
-                else
-                {
-                    _logger.LogWarning("付款失敗或狀態異常，訂單號：{MerchantTradeNo}，RtnCode: {RtnCode}, RtnMsg: {RtnMsg}", result.MerchantTradeNo, result.RtnCode, result.RtnMsg);
-                    // 更新訂單狀態為 Failed 或其他對應狀態
-                }
-                return Content("1|OK");
+                _logger.LogError("ECPay Callback CheckMacValue 驗證失敗。訂單號：{MerchantTradeNo}", result.MerchantTradeNo);
+                return Content("0|FAIL");
+            }
+
+            // 嘗試從 MerchantTradeNo 解析出 OrderId（例如格式為 ORD1234-abc12345）
+            var orderIdPart = result.MerchantTradeNo?.Split('-').FirstOrDefault()?.Replace("ORD", "");
+            if (!int.TryParse(orderIdPart, out int orderId))
+            {
+                _logger.LogError("ECPay Callback 無法從 MerchantTradeNo 解析出 OrderId: {MerchantTradeNo}", result.MerchantTradeNo);
+                return Content("0|FAIL");
+            }
+
+            var order = await _context.Orders.FindAsync(orderId);
+            if (order == null)
+            {
+                _logger.LogError("ECPay Callback 找不到訂單 OrderId={OrderId}", orderId);
+                return Content("0|FAIL");
+            }
+
+            if (result.RtnCode == 1) // 付款成功
+            {
+                order.Status = OrderStatus.Pending;
+                order.PaymentDate = DateTime.UtcNow;
+                order.ECPayTradeNo = result.TradeNo; // 可以在 Order 模型中新增這個欄位
+                order.MerchantTradeNo = result.MerchantTradeNo;
+
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("訂單 {OrderId} 付款成功，狀態已更新。", orderId);
+                return Content("1|OK"); // 必須回傳這個格式告訴綠界 Callback 接收成功
             }
             else
             {
-                _logger.LogError("ECPay Callback CheckMacValue 驗證失敗。訂單號：{MerchantTradeNo}", result.MerchantTradeNo);
-                // 即使驗證失敗，通常也建議回傳 "1|OK" 以避免綠界重複通知，但內部需標記此問題。
-                return Content("0|ERROR: CheckMacValue verification failed"); // 或者 "1|OK" 但內部標記為異常
+                _logger.LogWarning("付款失敗或取消，訂單號：{MerchantTradeNo}，錯誤訊息：{RtnMsg}", result.MerchantTradeNo, result.RtnMsg);
+                return Content("1|OK"); // 即便失敗，也要回傳 1|OK，否則綠界會持續重送 Callback
             }
         }
 
@@ -289,19 +316,7 @@ namespace TravelAgencyFrontendAPI.Controllers // 您的 Controller 命名空間
                 var value = prop.GetValue(payment);
                 if (value != null)
                 {
-                    if (prop.PropertyType == typeof(int?) && prop.Name == "TotalAmount")
-                    {
-                        dict.Add(prop.Name, ((int?)value).Value.ToString());
-                    }
-                    else if (prop.PropertyType == typeof(int?) && prop.Name == "EncryptType")
-                    {
-                        dict.Add(prop.Name, ((int?)value).Value.ToString());
-                    }
-                    // 可根據需要處理其他特定型別
-                    else
-                    {
-                        dict.Add(prop.Name, value.ToString());
-                    }
+                    dict.Add(prop.Name, value.ToString());
                 }
             }
             return dict;
@@ -313,7 +328,7 @@ namespace TravelAgencyFrontendAPI.Controllers // 您的 Controller 命名空間
             var sb = new StringBuilder();
             sb.Append("<!DOCTYPE html><html><head><meta charset='utf-8'><title>Redirecting to ECPay...</title></head><body onload='document.forms[0].submit()'>");
             sb.AppendFormat("<form method='post' action='{0}'>", actionUrl);
-            _logger.LogInformation("--- ECPay Form Parameters ---");
+            _logger.LogInformation("--- ECPay Form Parameters (to be submitted to ECPay) ---");
             foreach (var item in parameters.OrderBy(x => x.Key)) // 建議排序以方便查看日誌
             {
                 // CheckMacValue 不應被 HtmlEncode，其他參數理論上在傳入前就應做好 UrlEncode (例如 TradeDesc, ItemName)
