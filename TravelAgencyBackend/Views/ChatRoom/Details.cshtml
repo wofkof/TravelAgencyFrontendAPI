@@ -69,6 +69,7 @@
 
         let connection, localStream, remoteConnectionId, peer, incomingOffer;
         let callTimerInterval, callStartTime;
+        const api = "https://travel-api.local:7265"
 
         document.getElementById("sendBtn")?.addEventListener("click", sendMessage);
 
@@ -76,7 +77,7 @@
 
         async function setupConnection() {
             connection = new signalR.HubConnectionBuilder()
-                .withUrl(`https://localhost:7265/chathub?userId=${senderId}&userType=${senderType}`)
+                .withUrl(api + `/chathub?userId=${senderId}&userType=${senderType}`)
                 .withAutomaticReconnect()
                 .build();
 
@@ -119,7 +120,7 @@
                     };
             if (!content) return;
 
-            await fetch("https://localhost:7265/api/Messages", {
+            await fetch(api + "/api/Messages", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
@@ -129,23 +130,35 @@
         }
 
         async function loadMessages() {
-            const res = await fetch(`https://localhost:7265/api/Messages/${chatRoomId}`);
+            const res = await fetch(api + `/api/Messages/${chatRoomId}`);
             const messages = await res.json();
             messages.forEach(appendMessage);
         }
 
         function appendMessage(msg) {
+            console.log(msg);
             const chatArea = document.getElementById("chatArea");
             const div = document.createElement("div");
             div.className = "mb-2";
-            div.innerHTML = `
-                <strong>${msg.senderType === "Employee" ? "員工" : "會員"}：</strong>
-                ${msg.content}
-                <div class="text-muted small">${new Date(msg.sentAt).toLocaleString()}</div>
-            `;
+
+            let contentHtml = "";
+            if (msg.messageType === "image") {
+                contentHtml = `<img src="${msg.content}" alt="圖片訊息" style="max-width: 200px;" />`;
+            } else {
+                contentHtml = msg.content;
+            }
+
+        div.innerHTML = `
+            <strong>${msg.senderName}：</strong>
+            ${contentHtml}
+            <div class="text-muted small">${new Date(msg.sentAt).toLocaleString()}</div>
+        `;
+
+
             chatArea.appendChild(div);
             chatArea.scrollTop = chatArea.scrollHeight;
         }
+
 
         // 通話相關邏輯
         async function startCall(useVideo = false) {
