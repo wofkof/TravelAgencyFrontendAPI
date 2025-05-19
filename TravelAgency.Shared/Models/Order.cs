@@ -9,10 +9,9 @@
     }
     public enum PaymentMethod
     {
-        CreditCard,
-        BankTransfer,
-        Cash,
-        Other
+        ECPay_CreditCard = 0,
+        LinePay = 1,
+        Other,
     }
     public enum InvoiceOption
     {
