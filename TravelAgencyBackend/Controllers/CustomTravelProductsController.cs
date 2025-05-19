@@ -233,7 +233,6 @@ namespace TravelAgencyBackend.Controllers
             if (check != null) return check;
 
             ViewBag.Districts = new SelectList(_context.Districts, "DistrictId", "DistrictName");
-            ViewBag.TravelSuppliers = new SelectList(_context.TravelSuppliers, "TravelSupplierId", "SupplierName");
             return View();
         }
         [HttpPost]
@@ -279,7 +278,6 @@ namespace TravelAgencyBackend.Controllers
             if (d == null)
                 return RedirectToAction("List");
             ViewBag.Districts = new SelectList(_context.Districts, "DistrictId", "DistrictName");
-            ViewBag.TravelSuppliers = new SelectList(_context.TravelSuppliers, "TravelSupplierId", "SupplierName");
             return View(d);
         }
         [HttpPost]
@@ -308,7 +306,6 @@ namespace TravelAgencyBackend.Controllers
             if (check != null) return check;
 
             ViewBag.Districts = new SelectList(_context.Districts, "DistrictId", "DistrictName");
-            ViewBag.TravelSuppliers = new SelectList(_context.TravelSuppliers, "TravelSupplierId", "SupplierName");
             return View();
         }
         [HttpPost]
@@ -353,7 +350,6 @@ namespace TravelAgencyBackend.Controllers
             if (d == null)
                 return RedirectToAction("List");
             ViewBag.Districts = new SelectList(_context.Districts, "DistrictId", "DistrictName");
-            ViewBag.TravelSuppliers = new SelectList(_context.TravelSuppliers, "TravelSupplierId", "SupplierName");
             return View(d);
         }
         [HttpPost]
@@ -382,7 +378,6 @@ namespace TravelAgencyBackend.Controllers
             if (check != null) return check;
 
             ViewBag.Districts = new SelectList(_context.Districts, "DistrictId", "DistrictName");
-            ViewBag.TravelSuppliers = new SelectList(_context.TravelSuppliers, "TravelSupplierId", "SupplierName");
             return View();
         }
         [HttpPost]
@@ -427,7 +422,6 @@ namespace TravelAgencyBackend.Controllers
             if (d == null)
                 return RedirectToAction("List");
             ViewBag.Districts = new SelectList(_context.Districts, "DistrictId", "DistrictName");
-            ViewBag.TravelSuppliers = new SelectList(_context.TravelSuppliers, "TravelSupplierId", "SupplierName");
             return View(d);
         }
         [HttpPost]
