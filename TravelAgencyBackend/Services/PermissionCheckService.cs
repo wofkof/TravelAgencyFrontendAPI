@@ -7,7 +7,7 @@ namespace TravelAgencyBackend.Services
     {
         private readonly AppDbContext _context;
         private readonly IHttpContextAccessor _httpContext;
-
+        
         public PermissionCheckService(AppDbContext context, IHttpContextAccessor httpContext)
         {
             _context = context;
