@@ -42,9 +42,14 @@ namespace TravelAgencyBackend.Helpers
             },
             [typeof(DocumentType)] = new()
             {
-                ["Passport"] = "護照",
+                ["ID_CARD_TW"] = "身分證",
+                ["PASSPORT"] = "護照",
                 ["ResidencePermit"] = "居留證",
                 ["EntryPermit"] = "入台證"
+               
+                
+                //ARC = 2,
+                //ENTRY_PERMIT = 3,
             },
             [typeof(AnnouncementStatus)] = new()
             {
