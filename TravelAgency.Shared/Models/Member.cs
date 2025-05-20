@@ -16,9 +16,10 @@ namespace TravelAgency.Shared.Models
     }
     public enum DocumentType
     {
-        Passport,
-        ResidencePermit,
-        EntryPermit
+        ID_CARD_TW = 0,
+        PASSPORT = 1,
+        ARC = 2,
+        ENTRY_PERMIT = 3,
     }
     public class Member
     {

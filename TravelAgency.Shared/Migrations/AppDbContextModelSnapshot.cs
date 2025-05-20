@@ -808,7 +808,7 @@ namespace TravelAgency.Shared.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("Passport");
+                        .HasDefaultValue("PASSPORT");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -954,7 +954,7 @@ namespace TravelAgency.Shared.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("Passport");
+                        .HasDefaultValue("PASSPORT");
 
                     b.Property<string>("Email")
                         .HasMaxLength(100)
@@ -1416,6 +1416,10 @@ namespace TravelAgency.Shared.Migrations
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("GETDATE()");
 
+                    b.Property<string>("ECPayTradeNo")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<bool>("InvoiceAddBillingAddr")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -1446,6 +1450,10 @@ namespace TravelAgency.Shared.Migrations
 
                     b.Property<int>("MemberId")
                         .HasColumnType("int");
+
+                    b.Property<string>("MerchantTradeNo")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Note")
                         .HasMaxLength(255)
@@ -1655,7 +1663,6 @@ namespace TravelAgency.Shared.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -1696,23 +1703,20 @@ namespace TravelAgency.Shared.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Phone")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
                     b.HasKey("OrderParticipantId");
 
                     b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("IdNumber")
                         .IsUnique()
-                        .HasFilter("[IdNumber] IS NOT NULL");
+                        .HasFilter("[Email] IS NOT NULL");
 
                     b.HasIndex("OrderId");
 
                     b.HasIndex("Phone")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[Phone] IS NOT NULL");
 
                     b.ToTable("T_OrderParticipant", (string)null);
                 });

@@ -9,10 +9,9 @@
     }
     public enum PaymentMethod
     {
-        CreditCard,
-        BankTransfer,
-        Cash,
-        Other
+        ECPay_CreditCard = 0,
+        LinePay = 1,
+        Other,
     }
     public enum InvoiceOption
     {
@@ -23,10 +22,6 @@
     {
         public int OrderId { get; set; }
         public int MemberId { get; set; }
-
-        //public string OrdererName { get; set; } = null!;
-        //public string OrdererPhone { get; set; } = null!;
-        //public string OrdererEmail { get; set; } = null!;
 
         public decimal TotalAmount { get; set; }
         public PaymentMethod? PaymentMethod { get; set; } 
@@ -43,6 +38,10 @@
         public string OrdererName { get; set; } = null!;
         public string OrdererPhone { get; set; } = null!;
         public string OrdererEmail { get; set; } = null!;
+
+        public string? ECPayTradeNo { get; set; } // 綠界交易編號
+        public string? MerchantTradeNo { get; set; } // 自訂商店交易編號
+
 
         public Member Member { get; set; } = null!;
         public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
