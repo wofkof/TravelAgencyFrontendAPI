@@ -299,7 +299,12 @@ namespace TravelAgency.Shared.Data
                     new Region { Country = "日本", Name = "中國" },
                     new Region { Country = "日本", Name = "四國" },
                     new Region { Country = "日本", Name = "九州" },
-                    new Region { Country = "日本", Name = "中部" }
+                    new Region { Country = "日本", Name = "中部" },
+                    new Region { Country = "台灣", Name = "北部" },
+                    new Region { Country = "台灣", Name = "中部" },
+                    new Region { Country = "台灣", Name = "東部" },
+                    new Region { Country = "台灣", Name = "南部" },
+                    new Region { Country = "台灣", Name = "離島" }
                 );
               await _context.SaveChangesAsync();
              }
@@ -686,6 +691,16 @@ namespace TravelAgency.Shared.Data
                     },
                     new OfficialTravelDetail
                     {
+                        OfficialTravelId = ForeigntravelId,
+                        TravelNumber = 2,
+                        AdultPrice = 15000,
+                        ChildPrice = 9000,
+                        BabyPrice = 1000,
+                        UpdatedAt = new DateTime(2025, 1, 5),
+                        State = DetailState.Locked
+                    },
+                    new OfficialTravelDetail
+                    {
                         OfficialTravelId = DomestictravelId,
                         TravelNumber = 1,
                         AdultPrice = 10000,
@@ -721,35 +736,69 @@ namespace TravelAgency.Shared.Data
                     {
                         OfficialTravelDetailId = FDetailId,
                         Day = 1,
-                        Description = "這是國外旅行行程第一天的描述",
-                        Breakfast = "這是國外旅行行程第一天的早餐",
-                        Lunch = "這是國外旅行行程第一天的午餐",
-                        Dinner = "這是國外旅行行程第一天的晚餐",
-                        Hotel = "這是國外旅行行程第一天的飯店",
+                        Description = "這是國外旅行行程1第一天的描述",
+                        Breakfast = "這是國外旅行行程1第一天的早餐",
+                        Lunch = "這是國外旅行行程1第一天的午餐",
+                        Dinner = "這是國外旅行行程1第一天的晚餐",
+                        Hotel = "這是國外旅行行程1第一天的飯店",
                         Attraction1 = _context.OfficialAttractions.First().AttractionId,
                         Attraction2 = null,
                         Attraction3 = null,
                         Attraction4 = null,
                         Attraction5 = null,
-                        Note1 = "這是國外旅行行程第一天的備註1",
-                        Note2 = "這是國外旅行行程第一天的備註2"
+                        Note1 = "這是國外旅行行程1第一天的備註1",
+                        Note2 = "這是國外旅行行程1第一天的備註2"
                     },
                     new OfficialTravelSchedule
                     {
                         OfficialTravelDetailId = FDetailId,
                         Day = 2,
-                        Description = "這是國外旅行行程第二天的描述",
-                        Breakfast = "這是國外旅行行程第二天的早餐",
-                        Lunch = "這是國外旅行行程第二天的午餐",
-                        Dinner = "這是國外旅行行程第二天的晚餐",
-                        Hotel = "這是國外旅行行程第二天的飯店",
+                        Description = "這是國外旅行行程1第二天的描述",
+                        Breakfast = "這是國外旅行行程1第二天的早餐",
+                        Lunch = "這是國外旅行行程1第二天的午餐",
+                        Dinner = "這是國外旅行行程1第二天的晚餐",
+                        Hotel = "這是國外旅行行程1第二天的飯店",
                         Attraction1 = _context.OfficialAttractions.Skip(1).First().AttractionId,
                         Attraction2 = null,
                         Attraction3 = null,
                         Attraction4 = null,
                         Attraction5 = null,
-                        Note1 = "這是國外旅行行程第二天的備註1",
-                        Note2 = "這是國外旅行行程第二天的備註2"
+                        Note1 = "這是國外旅行行程1第二天的備註1",
+                        Note2 = "這是國外旅行行程1第二天的備註2"
+                    },
+                    new OfficialTravelSchedule
+                    {
+                        OfficialTravelDetailId = _context.OfficialTravelDetails.Where(f => f.OfficialTravel.Category == TravelCategory.Foreign && f.State == DetailState.Locked).Skip(1).FirstOrDefault().OfficialTravelDetailId,
+                        Day = 1,
+                        Description = "這是國外旅行行程2第一天的描述",
+                        Breakfast = "這是國外旅行行程2第一天的早餐",
+                        Lunch = "這是國外旅行行程2第一天的午餐",
+                        Dinner = "這是國外旅行行程2第一天的晚餐",
+                        Hotel = "這是國外旅行行程2第一天的飯店",
+                        Attraction1 = _context.OfficialAttractions.First().AttractionId,
+                        Attraction2 = null,
+                        Attraction3 = null,
+                        Attraction4 = null,
+                        Attraction5 = null,
+                        Note1 = "這是國外旅行行程2第一天的備註1",
+                        Note2 = "這是國外旅行行程2第一天的備註2"
+                    },
+                    new OfficialTravelSchedule
+                    {
+                        OfficialTravelDetailId = _context.OfficialTravelDetails.Where(f => f.OfficialTravel.Category == TravelCategory.Foreign && f.State == DetailState.Locked).Skip(1).FirstOrDefault().OfficialTravelDetailId,
+                        Day = 2,
+                        Description = "這是國外旅行行程2第二天的描述",
+                        Breakfast = "這是國外旅行行程2第二天的早餐",
+                        Lunch = "這是國外旅行行程2第二天的午餐",
+                        Dinner = "這是國外旅行行程2第二天的晚餐",
+                        Hotel = "這是國外旅行行程2第二天的飯店",
+                        Attraction1 = _context.OfficialAttractions.Skip(1).First().AttractionId,
+                        Attraction2 = null,
+                        Attraction3 = null,
+                        Attraction4 = null,
+                        Attraction5 = null,
+                        Note1 = "這是國外旅行行程2第二天的備註1",
+                        Note2 = "這是國外旅行行程2第二天的備註2"
                     },
                     new OfficialTravelSchedule
                     {
@@ -907,6 +956,21 @@ namespace TravelAgency.Shared.Data
                      new GroupTravel
                      {
                          OfficialTravelDetailId = FDetailId,
+                         DepartureDate = new DateTime(2025, 4, 10),
+                         ReturnDate = new DateTime(2025, 4, 17),
+                         TotalSeats = 30,
+                         SoldSeats = 0,
+                         OrderDeadline = new DateTime(2025, 3, 1),
+                         MinimumParticipants = 10,
+                         GroupStatus = "開團",
+                         CreatedAt = new DateTime(2024, 8, 11),
+                         UpdatedAt = new DateTime(2025, 1, 5),
+                         RecordStatus = "正常"
+
+                     },
+                     new GroupTravel
+                     {
+                         OfficialTravelDetailId = _context.OfficialTravelDetails.Where(f => f.OfficialTravel.Category == TravelCategory.Foreign && f.State == DetailState.Locked).Skip(1).FirstOrDefault().OfficialTravelDetailId,
                          DepartureDate = new DateTime(2025, 4, 10),
                          ReturnDate = new DateTime(2025, 4, 17),
                          TotalSeats = 30,
