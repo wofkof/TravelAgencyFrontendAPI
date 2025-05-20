@@ -1,12 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TravelAgencyFrontendAPI.Hubs;
 using TravelAgency.Shared.Data;
+using TravelAgencyFrontendAPI.Helpers;
 using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+// 加入你自己的寄信服務
+builder.Services.AddScoped<EmailService>();
+
 //新增 Swagger 設定
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+
 
 
 // Add services to the container.
