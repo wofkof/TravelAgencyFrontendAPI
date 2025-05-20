@@ -33,15 +33,15 @@ namespace TravelAgencyFrontendAPI.DTOs.OfficialDTOs
         public List<AttractionDto> Attractions { get; set; }
     }
 
-    //public class GroupTravelDto
-    //{
-    //    public int GroupId { get; set; }
-    //    public DateTime? DepartureDate { get; set; }
-    //    public DateTime? ReturnDate { get; set; }
-    //    public int? TotalSeats { get; set; }
-    //    public int? SoldSeats { get; set; }
-    //    public string? GroupStatus { get; set; }
-    //}
+    public class GroupTravelDto
+    {
+        public int GroupId { get; set; }
+        public DateTime? DepartureDate { get; set; }
+        public DateTime? ReturnDate { get; set; }
+        public int? TotalSeats { get; set; }
+        public int? SoldSeats { get; set; }
+        public string? GroupStatus { get; set; }
+    }
 
     public class AttractionDto 
     {
