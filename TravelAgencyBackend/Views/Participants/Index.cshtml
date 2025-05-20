@@ -117,11 +117,11 @@
                     @* 查看參與人 *@
                     @if (PermissionChecker.CanViewParticipants)
                     {
-                        <a asp-action="Details" asp-route-id="@p.ParticipantId" class="btn btn-sm btn-info">查看</a>
+                        <a asp-action="Details" asp-route-id="@p.FavoriteTravelerId" class="btn btn-sm btn-info">查看</a>
                     }
                     else
                     {
-                        <a asp-action="Details" asp-route-id="@p.ParticipantId" class="btn btn-sm btn-info disabled"
+                        <a asp-action="Details" asp-route-id="@p.FavoriteTravelerId" class="btn btn-sm btn-info disabled"
                            tabindex="-1" aria-disabled="true" onclick="return false">
                         查看
                         </a>

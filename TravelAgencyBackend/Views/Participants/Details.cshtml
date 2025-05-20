@@ -52,11 +52,11 @@
     @* 管理參與人 *@
     @if (PermissionChecker.CanManageParticipants)
     {
-        <a asp-action="Edit" asp-route-id="@Model?.ParticipantId" class="btn btn-success">修改資料</a> 
+        <a asp-action="Edit" asp-route-id="@Model?.FavoriteTravelerId" class="btn btn-success">修改資料</a>
     }
     else
     {
-        <a asp-action="Edit" asp-route-id="@Model?.ParticipantId" class="btn btn-success disabled"
+        <a asp-action="Edit" asp-route-id="@Model?.FavoriteTravelerId" class="btn btn-success disabled"
         tabindex="-1" aria-disabled="true" onclick="return false;">
             修改資料
         </a>
@@ -95,9 +95,9 @@
     }
 
 </div>
-<form asp-action="Delete" asp-route-id="@Model?.ParticipantId" method="post" onsubmit="return confirm('確定要刪除嗎？')">
+<form asp-action="Delete" asp-route-id="@Model?.FavoriteTravelerId" method="post" onsubmit="return confirm('確定要刪除嗎？')">
     @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="ParticipantId" />
+    <input type="hidden" asp-for="FavoriteTravelerId" />
 
     @* 管理參與人 *@
     @if (PermissionChecker.CanManageParticipants)
