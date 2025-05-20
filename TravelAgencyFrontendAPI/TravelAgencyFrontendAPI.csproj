@@ -18,11 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\Uploads\chat\" />
+    <ProjectReference Include="..\TravelAgency.Shared\TravelAgency.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TravelAgency.Shared\TravelAgency.Shared.csproj" />
+    <Folder Include="wwwroot\Uploads\chat\" />
   </ItemGroup>
 
 </Project>

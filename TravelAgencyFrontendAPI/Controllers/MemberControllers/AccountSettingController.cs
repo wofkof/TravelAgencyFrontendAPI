@@ -1,0 +1,87 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using TravelAgency.Shared.Data;
+using TravelAgency.Shared.Models;
+using TravelAgencyFrontendAPI.DTOs.MemberDTOs;
+
+namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AccountSettingController : ControllerBase
+    {
+        private readonly AppDbContext _context;
+
+        public AccountSettingController(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        // GET: api/AccountSetting/profile?memberId=123
+        [HttpGet("profile")]
+        public async Task<ActionResult<AccountSetting>> GetProfile([FromQuery] int memberId)
+        {
+            var member = await _context.Members.FindAsync(memberId);
+            if (member == null)
+                return NotFound("找不到會員資料");
+
+            var dto = new AccountSetting
+            {
+                MemberId = member.MemberId,
+                Name = member.Name,
+                Birthday = member.Birthday,
+                Email = member.Email,
+                Phone = member.Phone,
+                IdNumber = member.IdNumber,
+                Address = member.Address,
+                Nationality = member.Nationality,
+                Gender = member.Gender?.ToString(),
+                PassportSurname = member.PassportSurname,
+                PassportGivenName = member.PassportGivenName,
+                PassportExpireDate = member.PassportExpireDate,
+                DocumentType = member.DocumentType?.ToString(),
+                DocumentNumber = member.DocumentNumber,
+                ProfileImage = member.ProfileImage,
+                Note = member.Note,
+                UpdatedAt = member.UpdatedAt
+            };
+
+            return Ok(dto);
+        }
+
+        // PUT: api/AccountSetting/profile
+        [HttpPut("profile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] AccountSetting dto)
+        {
+            var member = await _context.Members.FindAsync(dto.MemberId);
+            if (member == null)
+                return NotFound("找不到會員資料");
+
+            // Email 不可更新
+            member.Name = dto.Name;
+            member.Birthday = dto.Birthday;
+            member.Phone = dto.Phone;
+            member.IdNumber = dto.IdNumber;
+            member.Address = dto.Address;
+            member.Nationality = dto.Nationality;
+
+            if (Enum.TryParse<GenderType>(dto.Gender, out var gender))
+                member.Gender = gender;
+
+            if (Enum.TryParse<DocumentType>(dto.DocumentType, out var docType))
+                member.DocumentType = docType;
+
+            member.PassportSurname = dto.PassportSurname;
+            member.PassportGivenName = dto.PassportGivenName;
+            member.PassportExpireDate = dto.PassportExpireDate;
+            member.DocumentNumber = dto.DocumentNumber;
+            member.ProfileImage = dto.ProfileImage;
+            member.Note = dto.Note;
+            member.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+    }
+}

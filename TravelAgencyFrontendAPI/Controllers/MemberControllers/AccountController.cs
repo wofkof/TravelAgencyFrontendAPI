@@ -17,9 +17,12 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
     public class AccountController : ControllerBase
     {
         private readonly AppDbContext _context;
-        public AccountController(AppDbContext context)
+        private readonly EmailService _emailService;
+
+        public AccountController(AppDbContext context, EmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         // POST: api/Account/signup 
@@ -70,6 +73,26 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
             {
                 return ValidationProblem(ModelState);
             }
+            // 🔐 比對驗證碼
+            var verification = await _context.EmailVerificationCodes
+            .FirstOrDefaultAsync(e => e.Email == dto.Email &&
+                                  e.VerificationType == EmailVerificationCode.VerificationTypeEnum.SignUp &&
+                                  !e.IsVerified);
+
+            if (verification == null)
+            {
+                ModelState.AddModelError("EmailVerificationCode", "請先發送驗證碼");
+                return ValidationProblem(ModelState);
+            }
+
+            if (verification.VerificationCode != dto.EmailVerificationCode || verification.ExpireAt < DateTime.Now)
+            {
+                ModelState.AddModelError("EmailVerificationCode", "驗證碼錯誤或已過期");
+                return ValidationProblem(ModelState);
+            }
+
+            // 標記驗證成功
+            verification.IsVerified = true;
 
             // 密碼雜湊處理
             PasswordHasher.CreatePasswordHash(dto.Password, out string hash, out string salt);
@@ -82,12 +105,13 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 PasswordHash = hash,
                 PasswordSalt = salt,
                 RegisterDate = DateTime.Now,
-                Status = MemberStatus.Active
+                Status = MemberStatus.Active,
+                IsEmailVerified = true
+
             };
 
             _context.Members.Add(member);
-            await _context.SaveChangesAsync();
-
+            await _context.SaveChangesAsync();          
             return Ok("註冊成功，確定後將跳轉回登入頁");
         }
 
@@ -131,7 +155,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
             {
                 return Unauthorized("帳號或密碼錯誤");
             }
-
+            
             return Ok(new
             {
                 name = member.Name,
@@ -139,5 +163,75 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
             });
         }
 
+        // POST: api/Account/send-email-code
+        [HttpPost("send-email-code")]
+        public async Task<IActionResult> SendEmailVerificationCode([FromBody] SendVerificationCodeDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Email))
+                return BadRequest("Email 為必填欄位");
+
+            if (await _context.Members.AnyAsync(m => m.Email == dto.Email))
+                return BadRequest("此 Email 已被註冊");
+
+            var code = new Random().Next(100000, 999999).ToString();
+
+            // 新增或更新驗證碼
+            var existing = await _context.EmailVerificationCodes
+                .FirstOrDefaultAsync(e => e.Email == dto.Email && e.VerificationType == EmailVerificationCode.VerificationTypeEnum.SignUp
+);
+
+            if (existing != null)
+            {
+                existing.VerificationCode = code;
+                existing.CreatedAt = DateTime.Now;
+                existing.ExpireAt = DateTime.Now.AddMinutes(10);
+                existing.IsVerified = false;
+            }
+            else
+            {
+                _context.EmailVerificationCodes.Add(new EmailVerificationCode
+                {
+                    Email = dto.Email,
+                    VerificationCode = code,
+                    VerificationType = EmailVerificationCode.VerificationTypeEnum.SignUp,
+                    CreatedAt = DateTime.Now,
+                    ExpireAt = DateTime.Now.AddMinutes(10),
+                    IsVerified = false
+                });
+            }
+
+            await _context.SaveChangesAsync();
+
+            await _emailService.SendEmailAsync(
+                dto.Email,
+                "歡迎註冊會員 - 驗證碼通知",
+                $@"
+                <div style='font-family:Arial,sans-serif; font-size:16px; color:#333; line-height:1.8'>
+                  <div style='text-align:center; margin-bottom:20px'>
+                    <img src='https://i.postimg.cc/kgC50Qfb/logo.png' alt='嶼你同行 LOGO' width='180' />
+                  </div>
+
+                  <p>親愛的旅客您好，</p>
+                  <p>感謝您註冊 <strong>嶼你同行</strong>，以下是您的 Email 驗證碼：</p>
+
+                  <div style='text-align:center; margin:20px 0'>
+                    <span style='font-size:28px; font-weight:bold; color:#1d4ed8'>{code}</span>
+                  </div>
+
+                  <p>請於 <strong>10 分鐘</strong> 內完成註冊流程。</p>
+
+                  <hr style='margin:30px 0; border:none; border-top:1px solid #ddd' />
+
+                 <p style='font-size:14px; color:#888'>
+                  若您並未申請註冊，請忽略此信件。<br>
+                  此為系統自動發送的通知信件，請勿直接回覆。
+                </p>
+                  <p>嶼你同行 客服中心 敬上</p>
+                </div>
+                "
+            );
+
+            return Ok("驗證碼已寄出");
+        }
     }
 }
