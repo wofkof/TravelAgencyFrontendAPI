@@ -60,7 +60,7 @@ namespace TravelAgencyBackend.ViewModels
     public class ParticipantEditViewModel
     {
         [Required]
-        public int ParticipantId { get; set; }
+        public int FavoriteTravelerId { get; set; }
 
         [DisplayName("會員編號")]
         [Required]
@@ -82,23 +82,18 @@ namespace TravelAgencyBackend.ViewModels
         [StringLength(10, MinimumLength = 10)]
         public string Phone { get; set; } = null!;
 
-        [DisplayName("護照號碼")]
-        [Required(ErrorMessage = "請輸入參與人護照號碼")]
-        [RegularExpression(@"^[A-Z]{1}\d{8}$", ErrorMessage = "護照號碼格式不正確")]
-        [StringLength(9, MinimumLength = 9)]
-        public string PassportNumber { get; set; } = null!;
+        [DisplayName("證件類別")]
+        public DocumentType? DocumentType { get; set; }
+        [DisplayName("證件號碼")]
+        public string? DocumentNumber { get; set; }
+        [DisplayName("護照英文姓")]
+        public string? PassportSurname { get; set; }
+        [DisplayName("護照英文名")]
+        public string? PassportGivenName { get; set; }
 
-        [DisplayName("發照地")]
-        [Required(ErrorMessage = "請選擇發照地")]
-        public string IssuedPlace { get; set; } = null!;
-
-        [DisplayName("護照效期起日")]
-        [Required(ErrorMessage = "請輸入護照效期")]
-        public DateTime? PassportIssueDate { get; set; }
-
-        [DisplayName("英文姓名")]
-        [Required(ErrorMessage = "請輸入參與人英文姓名")]
-        public string EnglishName { get; set; } = null!;
+        [DisplayName("護照效期截止日")]
+        [Required(ErrorMessage = "護照效期截止日")]
+        public DateTime? PassportExpireDate { get; set; }
 
         [DisplayName("生日")]
         [Required(ErrorMessage = "請輸入生日")]
@@ -107,6 +102,9 @@ namespace TravelAgencyBackend.ViewModels
         [DisplayName("性別")]
         public GenderType Gender { get; set; } = GenderType.Other;
 
+        [DisplayName("狀態")]
+        public FavoriteStatus Status { get; set; }
+
         [DisplayName("備註")]
         public string? Note { get; set; }
     }
@@ -114,7 +112,7 @@ namespace TravelAgencyBackend.ViewModels
     // 🔍 詳細資料顯示用
     public class ParticipantDetailViewModel
     {
-        public int ParticipantId { get; set; }
+        public int FavoriteTravelerId { get; set; }
 
         public int MemberId { get; set; }
 
@@ -143,7 +141,7 @@ namespace TravelAgencyBackend.ViewModels
     // 📋 列表中的每一筆資料
     public class ParticipantListItemViewModel
     {
-        public int ParticipantId { get; set; }
+        public int FavoriteTravelerId { get; set; }
 
         public string Name { get; set; } = null!;
 

@@ -44,6 +44,8 @@ namespace TravelAgencyBackend.ViewModels
         [DisplayName("會員名稱")]
         public string MemberName { get; set; } = null!;
 
+        public int MemberId { get; set; }
+
         [DisplayName("狀態")]
         public ChatStatus Status { get; set; }
 

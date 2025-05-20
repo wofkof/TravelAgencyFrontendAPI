@@ -26,7 +26,6 @@ namespace TravelAgency.Shared.Data.Configurations
             entity.HasOne(e => e.OfficialTravelDetail)
                     .WithMany(d => d.GroupTravels)
                     .HasForeignKey(e => e.OfficialTravelDetailId);
-
         }
     }
 
