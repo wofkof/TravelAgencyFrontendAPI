@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TravelAgencyFrontendAPI.Hubs;
 using TravelAgency.Shared.Data;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 //新增 Swagger 設定
@@ -13,12 +14,20 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "https://localhost:7107" , "https://localhost:7258")
+        policy.WithOrigins("https://localhost:3000", "https://localhost:7107", "https://localhost:7258", "https://192.168.1.122:3000")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
     });
 });
+
+//builder.WebHost.ConfigureKestrel(options =>
+//{
+//    options.ListenAnyIP(7265, listenOptions =>
+//    {
+//        listenOptions.UseHttps("certs/travel-api.pfx", "1234");
+//    });
+//});
 
 builder.Services.AddSignalR();
 builder.Services.AddControllers();
@@ -44,6 +53,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "Uploads")),
+    RequestPath = "/Uploads"
+});
 
 app.UseRouting();               
 

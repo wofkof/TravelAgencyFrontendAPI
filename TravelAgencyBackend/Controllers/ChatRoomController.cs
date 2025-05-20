@@ -105,7 +105,7 @@ namespace TravelAgencyBackend.Controllers
             if (check != null) return check;
 
             // TODO: 目前登入員工 ID
-            int emoployeeId = 1;
+            int emoployeeId = GetCurrentEmployeeId();
             //int.Parse(User.FindFirst("EmployeeId").Value);
             var chatRooms = _context.ChatRooms
                 .Where(c => c.EmployeeId == emoployeeId)
@@ -200,7 +200,7 @@ namespace TravelAgencyBackend.Controllers
                 return View(vm);
             }
 
-            int employeeId = 1; // TODO: 從登入取得
+            int employeeId = GetCurrentEmployeeId(); // TODO: 從登入取得
 
             var existingChat = _context.ChatRooms
                 .FirstOrDefault(c => c.EmployeeId == employeeId && c.MemberId == vm.MemberId);
