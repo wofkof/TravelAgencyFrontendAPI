@@ -4,12 +4,13 @@ using TravelAgency.Shared.Models;
 
 namespace TravelAgencyBackend.ViewModels
 {
-    // ➕ 建立會員用
+    // 建立會員用
     public class MemberCreateViewModel
     {
-        [Required(ErrorMessage = "請輸入帳號")]
-        [DisplayName("帳號")]
-        public string Account { get; set; } = null!;
+        [Required(ErrorMessage = "請輸入信箱")]
+        [DisplayName("信箱")]
+        [EmailAddress(ErrorMessage = "格式不正確")]
+        public string Email { get; set; } = null!;
 
         [Required(ErrorMessage = "請輸入密碼")]
         [DisplayName("密碼")]
@@ -18,11 +19,6 @@ namespace TravelAgencyBackend.ViewModels
         [Required(ErrorMessage = "請輸入姓名")]
         [DisplayName("姓名")]
         public string Name { get; set; } = null!;
-
-        [Required(ErrorMessage = "請輸入信箱")]
-        [DisplayName("信箱")]
-        [EmailAddress(ErrorMessage = "格式不正確")]
-        public string Email { get; set; } = null!;
 
         [Required(ErrorMessage = "請輸入手機")]
         [DisplayName("手機")]
@@ -52,6 +48,22 @@ namespace TravelAgencyBackend.ViewModels
         [StringLength(10, MinimumLength = 10)]
         public string Phone { get; set; } = null!;
 
+        [DisplayName("性別")]
+        public GenderType Gender { get; set; }
+        [DisplayName("生日")]
+        public DateTime? Birthday { get; set; }
+        [DisplayName("國籍")]
+        public string? Nationality { get; set; }
+        [DisplayName("護照姓")]
+        public string? PassportSurname { get; set; }
+        [DisplayName("護照名")]
+        public string? PassportGivenName { get; set; }
+        [DisplayName("身分證")]
+        [RegularExpression(@"^[A-Z]{1}\d{9}$", ErrorMessage = "身分證格式不正確")]
+        public string? IdNumber { get; set; }
+        [DisplayName("地址")]
+        public string? Address { get; set; }
+
         [DisplayName("狀態")]
         public MemberStatus Status { get; set; } = MemberStatus.Active;
 
@@ -76,6 +88,20 @@ namespace TravelAgencyBackend.ViewModels
 
         [DisplayName("手機")]
         public string Phone { get; set; } = null!;
+        [DisplayName("性別")]
+        public GenderType Gender { get; set; }
+        [DisplayName("生日")]
+        public DateTime? Birthday { get; set; }
+        [DisplayName("國籍")]
+        public string? Nationality { get; set; }
+        [DisplayName("護照姓")]
+        public string? PassportSurname { get; set; }
+        [DisplayName("護照名")]
+        public string? PassportGivenName { get; set; }
+        [DisplayName("身分證")]
+        public string? IdNumber { get; set; }
+        [DisplayName("地址")]
+        public string? Address { get; set; }
 
         [DisplayName("狀態")]
         public MemberStatus Status { get; set; }

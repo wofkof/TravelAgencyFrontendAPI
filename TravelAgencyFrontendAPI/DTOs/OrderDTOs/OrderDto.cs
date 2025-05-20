@@ -25,9 +25,9 @@ namespace TravelAgencyFrontendAPI.DTOs.OrderDTOs
         public int MemberId { get; set; }
 
         // Orderer Snapshot Info
-        //public string OrdererName { get; set; }
-        //public string OrdererPhone { get; set; }
-        //public string OrdererEmail { get; set; }
+        public string OrdererName { get; set; }
+        public string OrdererPhone { get; set; }
+        public string OrdererEmail { get; set; }
 
         public decimal TotalAmount { get; set; }
         public string? PaymentMethod { get; set; } // Enum to string

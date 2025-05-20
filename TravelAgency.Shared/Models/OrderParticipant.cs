@@ -10,8 +10,8 @@
         public DateTime BirthDate { get; set; }
         public string? IdNumber { get; set; }
         public GenderType Gender { get; set; }
-        public string Phone { get; set; } = null!;
-        public string Email { get; set; } = null!;
+        public string? Phone { get; set; } = null!;
+        public string? Email { get; set; } = null!;
         public DocumentType DocumentType { get; set; }
         public string? DocumentNumber { get; set; }
         public string? PassportSurname { get; set; }

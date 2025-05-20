@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.16" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.15" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.15">
@@ -17,11 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\Uploads\chat\" />
+    <ProjectReference Include="..\TravelAgency.Shared\TravelAgency.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TravelAgency.Shared\TravelAgency.Shared.csproj" />
+    <Folder Include="wwwroot\Uploads\chat\" />
   </ItemGroup>
 
 </Project>

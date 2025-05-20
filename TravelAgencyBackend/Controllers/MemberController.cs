@@ -24,6 +24,15 @@ namespace TravelAgencyBackend.Controllers
             _perm = perm;
         }
 
+        private void ValidateDuplicateContact(string email, string phone, int? excludeId = null)
+        {
+            if (_context.Members.Any(m => m.Email == email && (!excludeId.HasValue || m.MemberId != excludeId)))
+                ModelState.AddModelError("Email", "此信箱已被註冊");
+
+            if (_context.Members.Any(m => m.Phone == phone && (!excludeId.HasValue || m.MemberId != excludeId)))
+                ModelState.AddModelError("Phone", "此手機號碼已被註冊");
+        }
+
         // 修改密碼（GET）
         public IActionResult ChangePassword(int id)
         {
@@ -34,7 +43,7 @@ namespace TravelAgencyBackend.Controllers
             if (member == null) return NotFound($"找不到 ID 為 {id} 的會員");
 
             ViewBag.MemberId = id;
-            ViewBag.Account = member.Email;
+            ViewBag.Email = member.Email;
             return View();
         }
 
@@ -56,7 +65,10 @@ namespace TravelAgencyBackend.Controllers
             var member = _context.Members.Find(id);
             if (member == null) return NotFound($"找不到 ID 為 {id} 的會員");
 
-            member.PasswordHash = PasswordHasher.Hash(newPassword);
+            PasswordHasher.CreatePasswordHash(newPassword, out string hash, out string salt);
+
+            member.PasswordHash = hash;
+            member.PasswordSalt = salt;
             member.UpdatedAt = DateTime.Now;
             _context.SaveChanges();
 
@@ -123,17 +135,17 @@ namespace TravelAgencyBackend.Controllers
             var check = CheckPermissionOrForbid("管理會員");
             if (check != null) return check;
 
-            if (_context.Members.Any(m => m.Email == vm.Email))
-                ModelState.AddModelError("Email", "此信箱已被註冊");
-
-            if (_context.Members.Any(m => m.Phone == vm.Phone))
-                ModelState.AddModelError("Phone", "此手機已被註冊");
+            ValidateDuplicateContact(vm.Email, vm.Phone);
 
             if (!ModelState.IsValid)
                 return View(vm);
 
+            PasswordHasher.CreatePasswordHash(vm.Password, out string hash, out string salt);
+
             var member = _mapper.Map<Member>(vm);
-            member.PasswordHash = PasswordHasher.Hash(vm.Password);
+            member.PasswordHash = hash;
+            member.PasswordSalt = salt;
+            member.RegisterDate = DateTime.Now;
             member.UpdatedAt = DateTime.Now;
             member.Status = MemberStatus.Active;
 
@@ -154,7 +166,7 @@ namespace TravelAgencyBackend.Controllers
             var vm = _mapper.Map<MemberEditViewModel>(member);
             return View(vm);
         }
-
+       
         // 編輯會員（POST）
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -165,11 +177,7 @@ namespace TravelAgencyBackend.Controllers
 
             if (id != vm.MemberId) return BadRequest("參數錯誤：id 不一致");
 
-            if (_context.Members.Any(m => m.Email == vm.Email && m.MemberId != vm.MemberId))
-                ModelState.AddModelError("Email", "該信箱已被註冊");
-
-            if (_context.Members.Any(m => m.Phone == vm.Phone && m.MemberId != vm.MemberId))
-                ModelState.AddModelError("Phone", "該手機號碼已被註冊");
+            ValidateDuplicateContact(vm.Email, vm.Phone, vm.MemberId);
 
             if (!ModelState.IsValid) return View(vm);
 
@@ -179,6 +187,13 @@ namespace TravelAgencyBackend.Controllers
             member.Name = vm.Name;
             member.Email = vm.Email;
             member.Phone = vm.Phone;
+            member.Gender = vm.Gender;
+            member.Birthday = vm.Birthday;
+            member.Nationality = vm.Nationality;
+            member.PassportSurname = vm.PassportSurname;
+            member.PassportGivenName = vm.PassportGivenName;
+            member.IdNumber = vm.IdNumber;
+            member.Address = vm.Address;
             member.Status = vm.Status;
             member.Note = vm.Note;
             member.UpdatedAt = DateTime.Now;

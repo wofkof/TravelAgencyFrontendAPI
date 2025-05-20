@@ -62,6 +62,12 @@ namespace TravelAgency.Shared.Data.Configurations
                         .IsRequired()
                         .HasMaxLength(50);
 
+            builder.Property(o => o.ECPayTradeNo)
+                   .HasMaxLength(20);
+
+            builder.Property(o => o.MerchantTradeNo)
+                   .HasMaxLength(20);
+
             builder.HasOne(o => o.Member)
                    .WithMany(m => m.Orders)
                    .HasForeignKey(o => o.MemberId)

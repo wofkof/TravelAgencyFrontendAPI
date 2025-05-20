@@ -153,23 +153,13 @@ namespace TravelAgencyBackend.Controllers
             var check = CheckPermissionOrForbid("管理參與人");
             if (check != null) return check;
 
-            if (id != vm.ParticipantId) return NotFound($"找不到 ID 為 {id} 的參與人");
+            if (id != vm.FavoriteTravelerId) return NotFound($"找不到 ID 為 {id} 的參與人");
 
-            if (_context.MemberFavoriteTravelers.Any(p => p.IdNumber == vm.IdNumber && p.FavoriteTravelerId != vm.ParticipantId))
+            if (_context.MemberFavoriteTravelers.Any(p => p.IdNumber == vm.IdNumber && p.FavoriteTravelerId != vm.FavoriteTravelerId))
                 ModelState.AddModelError("IdNumber", "身分證號已存在");
 
-            if (_context.MemberFavoriteTravelers.Any(p => p.Phone == vm.Phone && p.FavoriteTravelerId != vm.ParticipantId))
+            if (_context.MemberFavoriteTravelers.Any(p => p.Phone == vm.Phone && p.FavoriteTravelerId != vm.FavoriteTravelerId))
                 ModelState.AddModelError("Phone", "手機已存在");
-
-            if (!string.IsNullOrEmpty(vm.PassportNumber) && _context.MemberFavoriteTravelers.Any
-                (p => p.DocumentNumber == vm.PassportNumber && p.FavoriteTravelerId != vm.ParticipantId))
-                ModelState.AddModelError("PassportNumber", "護照號碼已存在");
-
-            if (!ModelState.IsValid)
-            {
-                SetFormOptions(vm.MemberId, vm.IssuedPlace);
-                return View(vm);
-            }
 
             var participant = _context.MemberFavoriteTravelers.Find(id);
             if (participant == null) return NotFound();
