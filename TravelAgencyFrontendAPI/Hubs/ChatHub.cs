@@ -35,12 +35,26 @@ namespace TravelAgencyFrontendAPI.Hubs
             _context.Messages.Add(message);
             await _context.SaveChangesAsync();
 
+            // 查詢發送者名稱
+            string senderName;
+            if (message.SenderType == SenderType.Employee)
+            {
+                var emp = await _context.Employees.FindAsync(message.SenderId);
+                senderName = emp?.Name ?? "未知員工";
+            }
+            else
+            {
+                var mem = await _context.Members.FindAsync(message.SenderId);
+                senderName = mem?.Name ?? "未知會員";
+            }
+
             await Clients.Group(dto.ChatRoomId.ToString()).SendAsync("ReceiveMessage", new MessageDto
             {
                 MessageId = message.MessageId,
                 ChatRoomId = message.ChatRoomId,
                 SenderType = message.SenderType.ToString(),
                 SenderId = message.SenderId,
+                SenderName = senderName,
                 MessageType = message.MessageType.ToString(),
                 Content = message.Content,
                 SentAt = message.SentAt,
