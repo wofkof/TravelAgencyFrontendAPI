@@ -66,12 +66,8 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                 // 最後 GroupBy 移除重複行程
                 var result = await query
                 .GroupBy(x => new {
-                    x.OfficialTravelId,
-                    x.Title,
-                    x.Description,
-                    x.CoverPath,
-                    x.AdultPrice,
-                    x.OfficialTravelDetailId
+                    x.OfficialTravelId
+                    
                 })
                 .Select(g => g
                     .OrderBy(x => x.DepartureDate)
@@ -121,9 +117,12 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                         Cover = t.CoverPath,
                         Country = t.Region.Country,
                         Region = t.Region.Name,
+                        Number = d.TravelNumber,
                         Price = d.AdultPrice,
                         Departure = g.DepartureDate,
-                        Return = g.ReturnDate
+                        Return = g.ReturnDate,
+                        TotalSeats = g.TotalSeats,
+                        AvailableSeats =g.TotalSeats-g.SoldSeats
                     }
                 ).FirstOrDefaultAsync();
                 return Ok(travel);
@@ -148,11 +147,14 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                     select new GetGroups
                     {
                         GroupId = g.GroupTravelId,
+                        DetailId = g.OfficialTravelDetailId,
                         Departure = g.DepartureDate,
                         Return = g.ReturnDate,
                         TotalSeats = g.TotalSeats,
                         AvailableSeats = g.TotalSeats - g.SoldSeats,
-                        GroupStatus = g.GroupStatus
+                        GroupStatus = g.GroupStatus,
+                        Price = d.AdultPrice,
+                        Number = d.TravelNumber
                     }
                     ).ToListAsync();
 
@@ -161,11 +163,14 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                     .Select(g => new GetGroups
                     {
                         GroupId = g.Key.GroupId,
+                        DetailId = g.FirstOrDefault().DetailId,
                         Departure = g.FirstOrDefault().Departure,
                         Return = g.FirstOrDefault().Return,
                         TotalSeats = g.FirstOrDefault().TotalSeats,
-                        AvailableSeats = g.Sum(x => x.AvailableSeats),
-                        GroupStatus = g.FirstOrDefault().GroupStatus
+                        AvailableSeats = g.FirstOrDefault().AvailableSeats,
+                        GroupStatus = g.FirstOrDefault().GroupStatus,
+                        Price = g.FirstOrDefault().Price,
+                        Number = g.FirstOrDefault().Number
                     }
                     ).ToList();
 
@@ -179,13 +184,14 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
             }
         }
 
-        [HttpGet("GetSchedule/{detailId}")]
-        public async Task<ActionResult> GetSchedule(int detailId)
+        [HttpGet("GetScheduleList/{detailId}")]
+        public async Task<ActionResult> GetScheduleList(int detailId)
         {
             try
             {
                 var schedule = await (
                     from s in _context.OfficialTravelSchedules
+                    where s.OfficialTravelDetailId == detailId
                     select new GetSchedule
                     {
                         ScheduleId = s.OfficialTravelScheduleId,
