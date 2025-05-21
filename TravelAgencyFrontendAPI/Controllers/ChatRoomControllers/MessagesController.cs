@@ -70,7 +70,6 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
             return Ok(messageDtos);
         }
 
-
         // POST: api/Messages
         [HttpPost]
         public async Task<ActionResult<MessageDto>> SendMessage(MessageDto dto)

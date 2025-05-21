@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Newtonsoft.Json.Linq;
+using System.Xml.Linq;
 using TravelAgency.Shared.Models;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace TravelAgencyBackend.Helpers
 {
@@ -42,14 +45,10 @@ namespace TravelAgencyBackend.Helpers
             },
             [typeof(DocumentType)] = new()
             {
-                ["ID_CARD_TW"] = "身分證",
+                ["ID_CARD_TW"] = "身分證 (台灣)",
                 ["PASSPORT"] = "護照",
-                ["ResidencePermit"] = "居留證",
-                ["EntryPermit"] = "入台證"
-               
-                
-                //ARC = 2,
-                //ENTRY_PERMIT = 3,
+                ["ARC"] = "居留證",
+                ["ENTRY_PERMIT"] = "入台證"
             },
             [typeof(AnnouncementStatus)] = new()
             {
