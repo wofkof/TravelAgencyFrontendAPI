@@ -8,6 +8,7 @@
         public string? Cover { get; set; }
         public string Country { get; set; }
         public string Region { get; set; }
-
     }
+
+    
 }
