@@ -21,7 +21,8 @@ namespace TravelAgencyBackend.Helpers
                 .Cast<T>()
                 .Select(e => new SelectListItem
                 {
-                    Value = e.ToString(),
+                    //Value = e.ToString(),
+                    Value = Convert.ToInt32(e).ToString(),
                     Text = GetDisplayName(e)
                 }).ToList();
         }
