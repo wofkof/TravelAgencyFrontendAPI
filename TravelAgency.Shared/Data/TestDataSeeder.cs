@@ -38,6 +38,7 @@ namespace TravelAgency.Shared.Data
             await SeedCustomTravelContentAsync();
             await SeedPermissionsAsync();
             await SeedRolePermissionsAsync();
+            await SeedMemberFavoriteTravelerAsync();
         }
 
         private async Task SeedRolesAsync()
@@ -118,7 +119,54 @@ namespace TravelAgency.Shared.Data
                 await _context.SaveChangesAsync();
             }
         }
-        
+        //新增測試常用旅客
+        private async Task SeedMemberFavoriteTravelerAsync()
+        {
+            if (!_context.MemberFavoriteTravelers.Any())
+            {
+                _context.MemberFavoriteTravelers.AddRange(
+                    new MemberFavoriteTraveler
+                    {
+                        MemberId = 11110,
+                        Name = "陳小華",
+                        Phone = "0938987153",
+                        IdNumber = "A228370009",
+                        BirthDate = new DateTime(1996, 4, 1),
+                        Gender = GenderType.Female,
+                        Email = "Hua27@gmail.com",
+                        DocumentType = DocumentType.ID_CARD_TW,
+                        Nationality = "TW"
+
+                    },
+                    new MemberFavoriteTraveler
+                    {
+                        MemberId = 11110,
+                        Name = "葉宣",
+                        Phone = "0926733461",
+                        IdNumber = "S245876990",
+                        BirthDate = new DateTime(2003, 3, 16),
+                        Gender = GenderType.Female,
+                        Email = "Xuan2003@gmail.com",
+                        DocumentType = DocumentType.ID_CARD_TW,
+                        Nationality = "TW"
+                    },
+                    new MemberFavoriteTraveler
+                    {
+                        MemberId = 11110,
+                        Name = "葉廷",
+                        Phone = "0938992091",
+                        IdNumber = "S136756120",
+                        BirthDate = new DateTime(2003, 3, 17),
+                        Gender = GenderType.Male,
+                        Email = "Ting0317@gmail.com",
+                        DocumentType = DocumentType.ID_CARD_TW,
+                        Nationality = "TW"
+                    }
+                    );
+                await _context.SaveChangesAsync();
+            }
+        }
+
         private async Task SeedChatRoomsAsync()
         {
             if (!_context.ChatRooms.Any())
@@ -291,7 +339,7 @@ namespace TravelAgency.Shared.Data
             if (!_context.Regions.Any())
             {
                 _context.Regions.AddRange(
-                    new Region { Country = "日本",Name = "北海道" },
+                    new Region { Country = "日本", Name = "北海道" },
                     new Region { Country = "日本", Name = "東北" },
                     new Region { Country = "日本", Name = "關東" },
                     new Region { Country = "日本", Name = "沖繩" },
@@ -301,19 +349,19 @@ namespace TravelAgency.Shared.Data
                     new Region { Country = "日本", Name = "九州" },
                     new Region { Country = "日本", Name = "中部" }
                 );
-              await _context.SaveChangesAsync();
-             }
-         }
-      
+                await _context.SaveChangesAsync();
+            }
+        }
+
         private async Task SeedCustomTravelAsync()
         {
             if (!_context.CustomTravels.Any())
             {
                 _context.CustomTravels.AddRange(
-                    new CustomTravel 
-                    { 
+                    new CustomTravel
+                    {
                         MemberId = _context.Members.First().MemberId,
-                        ReviewEmployeeId =_context.Employees.First().EmployeeId,
+                        ReviewEmployeeId = _context.Employees.First().EmployeeId,
                         CreatedAt = DateTime.Now,
                         UpdatedAt = DateTime.Now,
                         DepartureDate = DateTime.Parse("2025-05-11"),
@@ -819,7 +867,7 @@ namespace TravelAgency.Shared.Data
                         Note1 = "這是郵輪旅行行程第二天的備註1",
                         Note2 = "這是郵輪旅行行程第二天的備註2"
                     });
-                     await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
             }
         }
 
