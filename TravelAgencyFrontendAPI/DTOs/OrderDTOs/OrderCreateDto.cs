@@ -29,5 +29,11 @@ namespace TravelAgencyFrontendAPI.DTOs.OrderDTOs
         [Required(ErrorMessage = "必須提供購物車商品")]
         [MinLength(1, ErrorMessage = "購物車至少需要一項商品")]
         public List<CartItemInputDto> CartItems { get; set; } = new();
+
+        public bool UpdateMemberProfile { get; set; }
+
+        public MemberProfileUpdateDataDto? MemberProfileToUpdate { get; set; } // 允許為 null
+
+        public int MemberId { get; set; }
     }
 }
