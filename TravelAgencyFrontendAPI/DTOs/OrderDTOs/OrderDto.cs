@@ -45,6 +45,9 @@ namespace TravelAgencyFrontendAPI.DTOs.OrderDTOs
         public string? InvoiceBillingAddress { get; set; }
         // public bool IsInvoiceDonated { get; set; } (if you added this field)
 
+
+
+
         public List<OrderParticipantDto> Participants { get; set; } = new List<OrderParticipantDto>();
         public List<OrderDetailItemDto> OrderDetails { get; set; } = new List<OrderDetailItemDto>();
 
