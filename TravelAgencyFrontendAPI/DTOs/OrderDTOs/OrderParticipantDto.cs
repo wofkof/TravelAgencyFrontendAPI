@@ -24,22 +24,22 @@ namespace TravelAgencyFrontendAPI.DTOs.OrderDTOs
         [Required(ErrorMessage = "旅客生日為必填")]
         public DateTime BirthDate { get; set; }
 
-        [Required(ErrorMessage = "旅客身分證號/證件號碼為必填")]
+        //[Required(ErrorMessage = "旅客身分證號/證件號碼為必填")]
         [StringLength(50)]
-        public string IdNumber { get; set; } // 根據 DocumentType 可能對應不同證件號碼
+        public string? IdNumber { get; set; } // 根據 DocumentType 可能對應不同證件號碼
 
         [Required(ErrorMessage = "旅客性別為必填")]
         public GenderType Gender { get; set; }
 
-        [Required(ErrorMessage = "旅客手機為必填")]
-        [Phone(ErrorMessage = "請輸入有效的手機號碼")]
+        //[Required(ErrorMessage = "旅客手機為必填")]
+        //[Phone(ErrorMessage = "請輸入有效的手機號碼")]
         [StringLength(20)]
-        public string Phone { get; set; }
+        public string? Phone { get; set; }
 
-        [Required(ErrorMessage = "旅客電子信箱為必填")]
-        [EmailAddress(ErrorMessage = "請輸入有效的電子信箱")]
+        //[Required(ErrorMessage = "旅客電子信箱為必填")]
+        //[EmailAddress(ErrorMessage = "請輸入有效的電子信箱")]
         [StringLength(255)]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [Required(ErrorMessage = "旅客證件類型為必填")]
         public DocumentType DocumentType { get; set; } // Passport, ResidencePermit, EntryPermit

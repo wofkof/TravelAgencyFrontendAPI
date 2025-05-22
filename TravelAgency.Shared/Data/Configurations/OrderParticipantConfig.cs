@@ -24,21 +24,20 @@ namespace TravelAgency.Shared.Data.Configurations
                   .IsRequired();
 
             entity.Property(e => e.IdNumber)
-                  .IsRequired()
+                  .IsRequired(false)
                   .HasMaxLength(20);
-            entity.HasIndex(e => e.IdNumber).IsUnique();
 
             entity.Property(e => e.Gender)
                   .IsRequired()
                   .HasMaxLength(10);
 
             entity.Property(e => e.Phone)
-                  .IsRequired()
+                  .IsRequired(false)
                   .HasMaxLength(20);
             entity.HasIndex(e => e.Phone).IsUnique();
 
             entity.Property(e => e.Email)
-                  .IsRequired()
+                  .IsRequired(false)
                   .HasMaxLength(100);
             entity.HasIndex(e => e.Email).IsUnique();
 

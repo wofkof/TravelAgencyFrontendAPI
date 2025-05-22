@@ -23,7 +23,7 @@ namespace TravelAgency.Shared.Data.Configurations
             entity.Property(p => p.Email).HasMaxLength(100).IsRequired(false);
             entity.HasIndex(p => p.Email).IsUnique();
 
-            entity.Property(p => p.DocumentType).HasMaxLength(20).HasConversion<string>().HasDefaultValue(DocumentType.Passport).IsRequired(false);
+            entity.Property(p => p.DocumentType).HasMaxLength(20).HasConversion<string>().HasDefaultValue(DocumentType.PASSPORT).IsRequired(false);
             entity.Property(p => p.DocumentNumber).HasMaxLength(50).IsRequired(false);
 
             entity.Property(p => p.PassportSurname).HasMaxLength(50).IsRequired(false);
@@ -38,7 +38,7 @@ namespace TravelAgency.Shared.Data.Configurations
             entity.Property(p => p.Note).HasMaxLength(255).IsRequired(false);
             entity.Property(p => p.Status).HasMaxLength(20).HasDefaultValue(FavoriteStatus.Active).HasConversion<string>().IsRequired();
 
-            entity.Property(p => p.IdNumber).HasMaxLength(20).IsRequired();
+            entity.Property(p => p.IdNumber).HasMaxLength(20).IsRequired(false);
             entity.HasIndex(p => p.IdNumber).IsUnique();
 
             entity.Property(p => p.BirthDate).HasColumnType("date").IsRequired();

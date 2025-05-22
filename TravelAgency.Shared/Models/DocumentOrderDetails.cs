@@ -3,13 +3,13 @@
     public class DocumentOrderDetails
     {
         public int DocumentOrderId { get; set; }
-
+        public int MemberId { get; set; }
         public int ApplicationId { get; set; }
         public byte PickupMethodId { get; set; }
         public int? PickupInfoId { get; set; }
         public ushort AgencyCode { get; set; }
 
-        public ApplicationType ApplicationType { get; set; } 
+        //public ApplicationType ApplicationType { get; set; } 
         public string RequiredData { get; set; } = null!;
         public string SubmissionMethod { get; set; } = null!;
         public string Notes { get; set; } = null!;
@@ -27,6 +27,8 @@
         public PickupMethod PickupMethod { get; set; } = null!;
         public PickupInformation? PickupInformation { get; set; }
         public Agency Agency { get; set; } = null!;
+
+        public Member Member { get; set; } = null!;
     }
 
 }

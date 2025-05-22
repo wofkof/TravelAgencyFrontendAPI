@@ -16,9 +16,10 @@
 <div id="chatArea" class="border p-3 bg-light mb-4" style="max-height: 400px; overflow-y: auto;"></div>
 
 <!-- 訊息輸入與送出 -->
-<div class="mb-3 d-flex gap-2">
+<div class="mb-3 d-flex gap-2 align-items-center">
     <input id="messageInput" class="form-control" placeholder="輸入訊息..." />
     <input type="file" id="fileInput" accept="image/*" />
+    <button id="recordBtn" class="btn btn-warning" type="button">🎤 錄音</button>
     @if (PermissionChecker.CanManageChatRooms)
     {
         <button id="sendBtn" class="btn btn-primary">送出</button>
@@ -28,6 +29,7 @@
         <button class="btn btn-primary disabled" disabled>送出</button>
     }
 </div>
+<audio id="audioPreview" controls style="display: none;"></audio>
 
 <!-- 通話按鈕 -->
 <div class="mb-3">
@@ -66,17 +68,21 @@
         const chatRoomId = @Model.ChatRoomId;
         const senderType = "Employee";
         const senderId = @senderId;
+        const api = "https://localhost:7265";
+        // const api = "https:travel-api.local:7265"
 
         let connection, localStream, remoteConnectionId, peer, incomingOffer;
         let callTimerInterval, callStartTime;
+        let mediaRecorder, audioChunks = [], audioBlob = null, audioDuration = 0;
 
         document.getElementById("sendBtn")?.addEventListener("click", sendMessage);
+        document.getElementById("recordBtn").addEventListener("click", handleRecording);
 
         setupConnection();
 
         async function setupConnection() {
             connection = new signalR.HubConnectionBuilder()
-                .withUrl(`https://localhost:7265/chathub?userId=${senderId}&userType=${senderType}`)
+                .withUrl(api + `/chathub?userId=${senderId}&userType=${senderType}`)
                 .withAutomaticReconnect()
                 .build();
 
@@ -109,27 +115,94 @@
         }
 
         async function sendMessage() {
-            const content = document.getElementById("messageInput").value.trim();
-            const payload = {
-                      chatRoomId: @Model.ChatRoomId,
-                      senderType: "Employee",
-                      senderId: @ViewBag.EmployeeId,
-                      messageType: "text", 
-                      content: document.getElementById("messageInput").value
-                    };
-            if (!content) return;
+            const messageInput = document.getElementById("messageInput");
+            const fileInput = document.getElementById("fileInput");
+            const audioPreview = document.getElementById("audioPreview");
+            const text = messageInput.value.trim();
+            const file = fileInput.files[0];
 
-            await fetch("https://localhost:7265/api/Messages", {
+            if (!text && !file && !audioBlob) {
+                alert("請輸入訊息或上傳圖片／語音");
+                return;
+            }
+
+            if (file) {
+                const formData = new FormData();
+                formData.append("ChatRoomId", chatRoomId);
+                formData.append("SenderType", senderType);
+                formData.append("SenderId", senderId);
+                formData.append("File", file);
+                await fetch(api + "/api/messageupload/upload-image", {
+                    method: "POST",
+                    body: formData
+                });
+                fileInput.value = "";
+            }
+
+            if (audioBlob) {
+                const formData = new FormData();
+                formData.append("ChatRoomId", chatRoomId);
+                formData.append("SenderType", senderType);
+                formData.append("SenderId", senderId);
+                formData.append("File", audioBlob, "recording.webm");
+                formData.append("DurationInSeconds", isFinite(audioDuration) ? Math.floor(audioDuration) : 0);
+                await fetch(api + "/api/messageupload/upload-audio", {
+                    method: "POST",
+                    body: formData
+                });
+                URL.revokeObjectURL(audioPreview.src);
+                audioPreview.style.display = "none";
+                audioPreview.src = "";
+                audioBlob = null;
+                audioDuration = 0;
+            }
+
+            if (text) {
+                const payload = {
+                    chatRoomId: chatRoomId,
+                    senderType: senderType,
+                    senderId: senderId,
+                    messageType: "text",
+                    content: text
+                };
+                await fetch(api + "/api/Messages", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
                 });
+                messageInput.value = "";
+            }
+        }
 
-            document.getElementById("messageInput").value = "";
+        function handleRecording() {
+            const btn = document.getElementById("recordBtn");
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop();
+                btn.textContent = "🎤 錄音";
+                return;
+            }
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const preview = document.getElementById("audioPreview");
+                    preview.src = audioUrl;
+                    preview.style.display = "block";
+                    const temp = new Audio(audioUrl);
+                    temp.addEventListener("loadedmetadata", () => {
+                        audioDuration = temp.duration;
+                    });
+                };
+                mediaRecorder.start();
+                btn.textContent = "⏹️ 停止";
+            });
         }
 
         async function loadMessages() {
-            const res = await fetch(`https://localhost:7265/api/Messages/${chatRoomId}`);
+            const res = await fetch(api + `/api/Messages/${chatRoomId}`);
             const messages = await res.json();
             messages.forEach(appendMessage);
         }
@@ -138,9 +211,17 @@
             const chatArea = document.getElementById("chatArea");
             const div = document.createElement("div");
             div.className = "mb-2";
+            let contentHtml = "";
+            if (msg.messageType === "image") {
+                contentHtml = `<img src="${msg.content}" alt="圖片訊息" style="max-width: 200px;" />`;
+            } else if (msg.messageType === "audio") {
+                contentHtml = `<audio src="${msg.content}" controls></audio>`;
+            } else {
+                contentHtml = msg.content;
+            }
             div.innerHTML = `
-                <strong>${msg.senderType === "Employee" ? "員工" : "會員"}：</strong>
-                ${msg.content}
+                <strong>${msg.senderName}：</strong>
+                ${contentHtml}
                 <div class="text-muted small">${new Date(msg.sentAt).toLocaleString()}</div>
             `;
             chatArea.appendChild(div);
@@ -150,7 +231,7 @@
         // 通話相關邏輯
         async function startCall(useVideo = false) {
             const targetType = "Member";
-            const targetId = 11110;
+            const targetId = parseInt("@Model.MemberId");
 
             const targetConnId = await connection.invoke("GetConnectionId", targetType, targetId);
             if (!targetConnId) return alert("對方未連線");
