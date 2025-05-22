@@ -45,10 +45,12 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                                 t.CoverPath,
                                 t.Region.Country,
                                 t.Region.Name,
+                                t.Category,
                                 d.OfficialTravelDetailId,
                                 d.AdultPrice,
                                 g.GroupTravelId,
                                 g.DepartureDate,
+                                g.ReturnDate,
                                 g.GroupStatus
                             };
 
@@ -76,11 +78,14 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                         ProjectId = x.OfficialTravelId,
                         Title = x.Title,
                         Description = x.Description,
+                        Category = x.Category,
                         Cover = x.CoverPath,
                         Price = x.AdultPrice,
                         DetailId = x.OfficialTravelDetailId,
                         GroupId = x.GroupTravelId,
                         DepartureDate = x.DepartureDate,
+                        ReturnDate = x.ReturnDate,
+                        Days = x.DepartureDate != null && x.ReturnDate != null ? (x.ReturnDate.Value - x.DepartureDate.Value).Days : 0,
                         Status = x.GroupStatus,
                         Country = x.Country,
                         Region = x.Name,

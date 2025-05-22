@@ -1,4 +1,6 @@
-﻿namespace TravelAgencyFrontendAPI.DTOs.OfficialDTOs
+﻿using TravelAgency.Shared.Models;
+
+namespace TravelAgencyFrontendAPI.DTOs.OfficialDTOs
 {
     public class baseDTO
     {
@@ -8,6 +10,7 @@
         public string? Cover { get; set; }
         public string Country { get; set; }
         public string Region { get; set; }
+        public TravelCategory Category { get; set; }
     }
 
     
