@@ -1,4 +1,5 @@
-﻿@model TravelAgencyBackend.ViewModels.MemberIndexViewModel
+﻿@using TravelAgencyBackend.Helpers
+@model TravelAgencyBackend.ViewModels.MemberIndexViewModel
 
 @{
     ViewData["Title"] = "會員列表";
@@ -25,7 +26,7 @@
     <input type="text" name="SearchText" value="@Model.SearchText" class="form-control d-inline w-auto" placeholder="搜尋姓名/電話/信箱" />
 
     <select asp-for="FilterStatus"
-    asp-items="Html.GetEnumSelectList<MemberStatus>()"
+    asp-items="EnumDisplayHelper.GetSelectList<MemberStatus>()"
     class="form-select d-inline w-auto mx-2">
         <option value="">全部狀態</option>
     </select>
@@ -148,7 +149,7 @@
                 <td>
                     <span class="badge @(item.Status == MemberStatus.Active ? "bg-success" :
                          item.Status == MemberStatus.Suspended ? "bg-danger" : "bg-secondary")">
-                        @Html.DisplayFor(modelItem => item.Status)
+						@EnumDisplayHelper.GetDisplayName(item.Status)
                     </span>
                 </td>
                 <td>

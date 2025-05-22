@@ -1,4 +1,5 @@
-﻿@model TravelAgencyBackend.ViewModels.ParticipantEditViewModel
+﻿@using TravelAgencyBackend.Helpers;
+@model TravelAgencyBackend.ViewModels.ParticipantEditViewModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -12,7 +13,7 @@
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="ParticipantId" />
+            <input type="hidden" asp-for="FavoriteTravelerId" />
             <div class="mb-3">
                 <label class="form-label">所屬會員</label>
                 <input type="text" class="form-control" value="@ViewBag.MemberName" disabled />
@@ -34,8 +35,13 @@
                 <span asp-validation-for="IdNumber" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="DocumentType" class="control-label"></label>
+                <select asp-for="DocumentType" class="form-control" asp-items="@EnumDisplayHelper.GetSelectList<DocumentType>()"></select>
+                <span asp-validation-for="DocumentType" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <label asp-for="Gender" class="control-label"></label>
-                <select asp-for="Gender" class="form-control" asp-items="Html.GetEnumSelectList<GenderType>()"></select>
+                <select asp-for="Gender" class="form-control" asp-items="@EnumDisplayHelper.GetSelectList<GenderType>()"></select>
                 <span asp-validation-for="Gender" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -44,24 +50,34 @@
                 <span asp-validation-for="BirthDate" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="EnglishName" class="control-label"></label>
-                <input asp-for="EnglishName" class="form-control" />
-                <span asp-validation-for="EnglishName" class="text-danger"></span>
+                <label asp-for="DocumentNumber" class="control-label"></label>
+                <input asp-for="DocumentNumber" class="form-control" />
+                <span asp-validation-for="DocumentNumber" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="PassportNumber" class="control-label"></label>
-                <input asp-for="PassportNumber" class="form-control" />
-                <span asp-validation-for="PassportNumber" class="text-danger"></span>
+                <label asp-for="PassportSurname" class="control-label"></label>
+                <input asp-for="PassportSurname" class="form-control" />
+                <span asp-validation-for="PassportSurname" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="IssuedPlace" class="control-label"></label>
-                <input asp-for="IssuedPlace" class="form-control" />
-                <span asp-validation-for="IssuedPlace" class="text-danger"></span>
+                <label asp-for="PassportGivenName" class="control-label"></label>
+                <input asp-for="PassportGivenName" class="form-control" />
+                <span asp-validation-for="PassportGivenName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="PassportIssueDate" class="control-label"></label>
-                <input asp-for="PassportIssueDate" class="form-control" type="date"/>
-                <span asp-validation-for="PassportIssueDate" class="text-danger"></span>
+                <label asp-for="BirthDate" class="control-label"></label>
+                <input asp-for="BirthDate" class="form-control" type="date" />
+                <span asp-validation-for="BirthDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PassportExpireDate" class="control-label"></label>
+                <input asp-for="PassportExpireDate" class="form-control" type="date" />
+                <span asp-validation-for="PassportExpireDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Status" class="control-label"></label>
+                <select asp-for="Status" class="form-control" asp-items="@EnumDisplayHelper.GetSelectList<FavoriteStatus>()"></select>
+                <span asp-validation-for="Status" class="text-danger"></span>
             </div>
             <hr>
             <div class="form-group">

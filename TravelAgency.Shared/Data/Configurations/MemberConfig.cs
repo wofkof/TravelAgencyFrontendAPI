@@ -61,7 +61,7 @@ namespace TravelAgency.Shared.Data.Configurations
 
             builder.Property(m => m.DocumentType)
                    .HasConversion<string>()
-                   .HasDefaultValue(DocumentType.Passport)
+                   .HasDefaultValue(DocumentType.PASSPORT)
                    .HasMaxLength(20)
                    .IsRequired(false);
 

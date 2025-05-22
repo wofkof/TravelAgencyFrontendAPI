@@ -22,6 +22,7 @@
 
         public ICollection<GroupTravel> GroupTravels { get; set; } = new List<GroupTravel>();
 
+        public ICollection<OfficialTravelSchedule> officialTravelSchedules { get; set; } = new List<OfficialTravelSchedule>();
     }
 
 }

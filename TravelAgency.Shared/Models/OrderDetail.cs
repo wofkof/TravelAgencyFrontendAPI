@@ -1,4 +1,6 @@
-﻿namespace TravelAgency.Shared.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace TravelAgency.Shared.Models
 {
     public enum ProductCategory
     {
@@ -22,6 +24,11 @@
         public string? Note { get; set; }
 
         public Order Order { get; set; } = null!;
+
+        [NotMapped]
+        public GroupTravel? GroupTravel { get; set; } 
+        [NotMapped]
+        public CustomTravel? CustomTravel { get; set; } 
     }
 
 }
