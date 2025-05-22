@@ -36,8 +36,8 @@ namespace TravelAgency.Shared.Data
             await SeedGroupTravelAsync();
             await SeedCustomTravelAsync();
             await SeedCustomTravelContentAsync();
-            await SeedPermissionsAsync();
-            await SeedRolePermissionsAsync();
+            //await SeedPermissionsAsync();
+            //await SeedRolePermissionsAsync();
         }
 
         private async Task SeedRolesAsync()
@@ -952,85 +952,85 @@ namespace TravelAgency.Shared.Data
             }
         }
         //權限假資料
-        private async Task SeedPermissionsAsync()
-        {
-            var predefinedPermissions = new List<Permission>
-            {
-                new() { PermissionId = 1, PermissionName = "查看會員", Caption = "可進入會員列表並查看基本資料" },
-                new() { PermissionId = 2, PermissionName = "管理會員", Caption = "可新增、編輯、刪除會員資料" },
-                new() { PermissionId = 3, PermissionName = "修改會員密碼", Caption = "可由後台變更會員密碼" },
-                new() { PermissionId = 4, PermissionName = "查看參與人", Caption = "可瀏覽所有參與人資料" },
-                new() { PermissionId = 5, PermissionName = "管理參與人", Caption = "可為會員新增/編輯/刪除參與人" },
-                new() { PermissionId = 6, PermissionName = "查看員工", Caption = "可進入員工列表頁" },
-                new() { PermissionId = 7, PermissionName = "管理員工", Caption = "可新增、編輯、刪除員工" },
-                new() { PermissionId = 8, PermissionName = "管理角色", Caption = "可管理角色與其權限" },
-                new() { PermissionId = 9, PermissionName = "設定角色權限", Caption = "可為角色指派權限" },
-                new() { PermissionId = 10, PermissionName = "管理聊天室", Caption = "可檢視聊天室、發送訊息、關閉聊天室" },
-                new() { PermissionId = 11, PermissionName = "查看公告", Caption = "可檢視公告內容" },
-                new() { PermissionId = 12, PermissionName = "發布公告", Caption = "可新增或編輯公告內容" },
-                new() { PermissionId = 13, PermissionName = "管理權限", Caption = "可 CRUD 權限表（Permission）" },
-                new() { PermissionId = 14, PermissionName = "查看客製化行程", Caption = "可進入客製化列表並查看" },
-                new() { PermissionId = 15, PermissionName = "管理客製化行程", Caption = "可新增、編輯、刪除客製化行程" },
-                new() { PermissionId = 16, PermissionName = "查看官方行程", Caption = "可進入官方列表並查看" },
-                new() { PermissionId = 17, PermissionName = "管理官方行程", Caption = "可新增、編輯、刪除官方行程" },
-                new() { PermissionId = 18, PermissionName = "查看訂單", Caption = "可進入訂單列表並查看" },
-                new() { PermissionId = 19, PermissionName = "管理訂單", Caption = "可新增、編輯、刪除管理訂單" },
-                new() { PermissionId = 20, PermissionName = "查看首頁", Caption = "可進入首頁並查看" },
-                new() { PermissionId = 21, PermissionName = "查看購物車", Caption = "可檢視購物車" },
-                new() { PermissionId = 22, PermissionName = "管理購物車", Caption = "可新增、編輯、刪除購物車" }
-            };
+        //private async Task SeedPermissionsAsync()
+        //{
+        //    var predefinedPermissions = new List<Permission>
+        //    {
+        //        new() { PermissionId = 1, PermissionName = "查看會員", Caption = "可進入會員列表並查看基本資料" },
+        //        new() { PermissionId = 2, PermissionName = "管理會員", Caption = "可新增、編輯、刪除會員資料" },
+        //        new() { PermissionId = 3, PermissionName = "修改會員密碼", Caption = "可由後台變更會員密碼" },
+        //        new() { PermissionId = 4, PermissionName = "查看參與人", Caption = "可瀏覽所有參與人資料" },
+        //        new() { PermissionId = 5, PermissionName = "管理參與人", Caption = "可為會員新增/編輯/刪除參與人" },
+        //        new() { PermissionId = 6, PermissionName = "查看員工", Caption = "可進入員工列表頁" },
+        //        new() { PermissionId = 7, PermissionName = "管理員工", Caption = "可新增、編輯、刪除員工" },
+        //        new() { PermissionId = 8, PermissionName = "管理角色", Caption = "可管理角色與其權限" },
+        //        new() { PermissionId = 9, PermissionName = "設定角色權限", Caption = "可為角色指派權限" },
+        //        new() { PermissionId = 10, PermissionName = "管理聊天室", Caption = "可檢視聊天室、發送訊息、關閉聊天室" },
+        //        new() { PermissionId = 11, PermissionName = "查看公告", Caption = "可檢視公告內容" },
+        //        new() { PermissionId = 12, PermissionName = "發布公告", Caption = "可新增或編輯公告內容" },
+        //        new() { PermissionId = 13, PermissionName = "管理權限", Caption = "可 CRUD 權限表（Permission）" },
+        //        new() { PermissionId = 14, PermissionName = "查看客製化行程", Caption = "可進入客製化列表並查看" },
+        //        new() { PermissionId = 15, PermissionName = "管理客製化行程", Caption = "可新增、編輯、刪除客製化行程" },
+        //        new() { PermissionId = 16, PermissionName = "查看官方行程", Caption = "可進入官方列表並查看" },
+        //        new() { PermissionId = 17, PermissionName = "管理官方行程", Caption = "可新增、編輯、刪除官方行程" },
+        //        new() { PermissionId = 18, PermissionName = "查看訂單", Caption = "可進入訂單列表並查看" },
+        //        new() { PermissionId = 19, PermissionName = "管理訂單", Caption = "可新增、編輯、刪除管理訂單" },
+        //        new() { PermissionId = 20, PermissionName = "查看首頁", Caption = "可進入首頁並查看" },
+        //        new() { PermissionId = 21, PermissionName = "查看購物車", Caption = "可檢視購物車" },
+        //        new() { PermissionId = 22, PermissionName = "管理購物車", Caption = "可新增、編輯、刪除購物車" }
+        //    };
 
-            var existingIds = _context.Permissions.Select(p => p.PermissionId).ToHashSet();
-            var toAdd = predefinedPermissions.Where(p => !existingIds.Contains(p.PermissionId)).ToList();
+        //    var existingIds = _context.Permissions.Select(p => p.PermissionId).ToHashSet();
+        //    var toAdd = predefinedPermissions.Where(p => !existingIds.Contains(p.PermissionId)).ToList();
 
-            if (toAdd.Any())
-            {
-                await _context.Database.OpenConnectionAsync();
-                await _context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT T_Permission ON");
+        //    if (toAdd.Any())
+        //    {
+        //        await _context.Database.OpenConnectionAsync();
+        //        await _context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT T_Permission ON");
 
-                _context.Permissions.AddRange(toAdd);
-                await _context.SaveChangesAsync();
+        //        _context.Permissions.AddRange(toAdd);
+        //        await _context.SaveChangesAsync();
 
-                await _context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT T_Permission OFF");
-                await _context.Database.CloseConnectionAsync();
-            }
-        }
+        //        await _context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT T_Permission OFF");
+        //        await _context.Database.CloseConnectionAsync();
+        //    }
+        //}
         //角色對應權限假資料
-        private async Task SeedRolePermissionsAsync()
-        {
-            var now = DateTime.Now;
-            var mappings = new List<(int RoleId, int PermissionId)>
-            {
-                (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9),
-                (1, 10), (1, 11), (1, 12), (1, 13), (1, 14), (1, 15), (1, 16), (1, 17), (1, 18), (1, 19), (1, 20), (1, 21), (1, 22),
-                (2, 1), (2, 2), (2, 20),
-                (3, 14), (3, 15), (3, 16), (3, 17), (3, 20),
-                (4, 1), (4, 2), (4, 3), (4, 4), (4, 5), (4, 10), (4, 20),
-                (5, 11), (5, 12), (5, 20),
-                (6, 1), (6, 8), (6, 9), (6, 13), (6, 20),
-                (7, 20)
-            };
+        //private async Task SeedRolePermissionsAsync()
+        //{
+        //    var now = DateTime.Now;
+        //    var mappings = new List<(int RoleId, int PermissionId)>
+        //    {
+        //        (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9),
+        //        (1, 10), (1, 11), (1, 12), (1, 13), (1, 14), (1, 15), (1, 16), (1, 17), (1, 18), (1, 19), (1, 20), (1, 21), (1, 22),
+        //        (2, 1), (2, 2), (2, 20),
+        //        (3, 14), (3, 15), (3, 16), (3, 17), (3, 20),
+        //        (4, 1), (4, 2), (4, 3), (4, 4), (4, 5), (4, 10), (4, 20),
+        //        (5, 11), (5, 12), (5, 20),
+        //        (6, 1), (6, 8), (6, 9), (6, 13), (6, 20),
+        //        (7, 20)
+        //    };
 
-            var existing = _context.RolePermissions
-                .Select(rp => new { rp.RoleId, rp.PermissionId })
-                .ToHashSet();
+        //    var existing = _context.RolePermissions
+        //        .Select(rp => new { rp.RoleId, rp.PermissionId })
+        //        .ToHashSet();
 
-            var toAdd = mappings
-                .Where(m => !existing.Contains(new { m.RoleId, m.PermissionId }))
-                .Select(m => new RolePermission
-                {
-                    RoleId = m.RoleId,
-                    PermissionId = m.PermissionId,
-                    CreatedAt = now
-                })
-                .ToList();
+        //    var toAdd = mappings
+        //        .Where(m => !existing.Contains(new { m.RoleId, m.PermissionId }))
+        //        .Select(m => new RolePermission
+        //        {
+        //            RoleId = m.RoleId,
+        //            PermissionId = m.PermissionId,
+        //            CreatedAt = now
+        //        })
+        //        .ToList();
 
-            if (toAdd.Any())
-            {
-                _context.RolePermissions.AddRange(toAdd);
-                await _context.SaveChangesAsync();
-            }
-        }
+        //    if (toAdd.Any())
+        //    {
+        //        _context.RolePermissions.AddRange(toAdd);
+        //        await _context.SaveChangesAsync();
+        //    }
+        //}
 
     }
 }
