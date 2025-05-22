@@ -23,8 +23,9 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\fonts\" />
-    <Folder Include="wwwroot\uploads\covers\" />
     <Folder Include="wwwroot\images\" />
+    <Folder Include="wwwroot\uploads\covers\" />
+    <Folder Include="wwwroot\uploads\stickers\" />
   </ItemGroup>
 
   <ItemGroup>

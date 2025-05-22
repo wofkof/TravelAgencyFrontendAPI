@@ -71,6 +71,18 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
             _context.MessageMedias.Add(media);
             await _context.SaveChangesAsync();
 
+            string senderName;
+            if (message.SenderType == SenderType.Employee)
+            {
+                var emp = await _context.Employees.FindAsync(message.SenderId);
+                senderName = emp?.Name ?? "未知員工";
+            }
+            else
+            {
+                var mem = await _context.Members.FindAsync(message.SenderId);
+                senderName = mem?.Name ?? "未知會員";
+            }
+
             // 廣播給聊天室用戶
             var msgDto = new MessageDto
             {
@@ -78,6 +90,7 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
                 ChatRoomId = message.ChatRoomId,
                 SenderType = message.SenderType.ToString(),
                 SenderId = message.SenderId,
+                SenderName = senderName,
                 MessageType = message.MessageType.ToString(),
                 Content = message.Content,
                 SentAt = message.SentAt,
@@ -137,12 +150,25 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
             _context.MessageMedias.Add(media);
             await _context.SaveChangesAsync();
 
+            string senderName;
+            if (message.SenderType == SenderType.Employee)
+            {
+                var emp = await _context.Employees.FindAsync(message.SenderId);
+                senderName = emp?.Name ?? "未知員工";
+            }
+            else
+            {
+                var mem = await _context.Members.FindAsync(message.SenderId);
+                senderName = mem?.Name ?? "未知會員";
+            }
+
             var msgDto = new MessageDto
             {
                 MessageId = message.MessageId,
                 ChatRoomId = message.ChatRoomId,
                 SenderType = message.SenderType.ToString(),
                 SenderId = message.SenderId,
+                SenderName = senderName,
                 MessageType = message.MessageType.ToString(),
                 Content = message.Content,
                 SentAt = message.SentAt,
