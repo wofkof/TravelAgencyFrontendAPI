@@ -1,5 +1,5 @@
 ﻿@model TravelAgency.Shared.Models.CustomTravel
-
+@using TravelAgencyBackend.Helpers
 
 @{
     ViewData["Title"] = "EditOrder";
@@ -15,9 +15,9 @@
             <input type="hidden" asp-for="CustomTravelId" value="@Model.CustomTravelId" />
             <div class="form-group">
                 <label asp-for="MemberId" class="control-label">會員</label>
-                <select asp-for="MemberId" class="form-control" asp-items="ViewBag.Members">
-                    <option value="">請選擇會員</option>
-                </select>
+                 @* <input value="@Model.Member.Name" class="form-control" readonly />  *@
+                <select asp-for="MemberId" class="form-control" asp-items="ViewBag.Members" disabled></select>
+                <input type="hidden" asp-for="MemberId" />
                 <span asp-validation-for="MemberId" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -28,49 +28,49 @@
                 <span asp-validation-for="ReviewEmployeeId" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="CreatedAt" class="control-label"></label>
-                <input asp-for="CreatedAt" class="form-control" />
+                <label asp-for="CreatedAt" class="control-label">新增日期</label>
+                <input asp-for="CreatedAt" class="form-control" readonly/>
                 <span asp-validation-for="CreatedAt" class="text-danger"></span>
             </div>
+            @* <div class="form-group"> *@
+            @*     <label asp-for="UpdatedAt" class="control-label"></label> *@
+            @*     <input asp-for="UpdatedAt" class="form-control" readonly/> *@
+            @*     <span asp-validation-for="UpdatedAt" class="text-danger"></span> *@
+            @* </div> *@
             <div class="form-group">
-                <label asp-for="UpdatedAt" class="control-label"></label>
-                <input asp-for="UpdatedAt" class="form-control" />
-                <span asp-validation-for="UpdatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DepartureDate" class="control-label"></label>
+                <label asp-for="DepartureDate" class="control-label">出發日期</label>
                 <input asp-for="DepartureDate" class="form-control" />
                 <span asp-validation-for="DepartureDate" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="EndDate" class="control-label"></label>
+                <label asp-for="EndDate" class="control-label">結束日期</label>
                 <input asp-for="EndDate" class="form-control" />
                 <span asp-validation-for="EndDate" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Days" class="control-label"></label>
+                <label asp-for="Days" class="control-label">天數</label>
                 <input asp-for="Days" class="form-control" />
                 <span asp-validation-for="Days" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="People" class="control-label"></label>
+                <label asp-for="People" class="control-label">人數</label>
                 <input asp-for="People" class="form-control" />
                 <span asp-validation-for="People" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="TotalAmount" class="control-label"></label>
+                <label asp-for="TotalAmount" class="control-label">總金額</label>
                 <input asp-for="TotalAmount" class="form-control" />
                 <span asp-validation-for="TotalAmount" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Note" class="control-label"></label>
+                <label asp-for="Note" class="control-label">行程名稱</label>
                 <input asp-for="Note" class="form-control" />
                 <span asp-validation-for="Note" class="text-danger"></span>
             </div>
             <div class="form-group mt-2">
-                <label asp-for="Status" class="control-label"></label>                
+                <label asp-for="Status" class="control-label">狀態</label>                
                 <select asp-for="Status"
-                asp-items="Html.GetEnumSelectList<CustomTravelStatus>()"
+                asp-items="EnumDisplayHelper.GetSelectList<CustomTravelStatus>()"
                 class="form-select d-inline w-auto mx-2">                    
                 </select>
                 <span asp-validation-for="Status" class="text-danger"></span>

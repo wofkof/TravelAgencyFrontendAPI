@@ -1,6 +1,6 @@
 ﻿namespace TravelAgencyFrontendAPI.DTOs.MemberDTOs
 {
-    public class AccountSetting
+    public class AccountSettingDto
     {
         public int MemberId { get; set; }
         public string Name { get; set; } = null!;

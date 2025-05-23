@@ -13,7 +13,7 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" name="TransportId" value="@Model.TransportId" />
             <div class="form-group">
-                <label asp-for="TransportMethod" class="control-label"></label>
+                <label asp-for="TransportMethod" class="control-label">交通方式</label>
                 <input asp-for="TransportMethod" class="form-control" />
                 <span asp-validation-for="TransportMethod" class="text-danger"></span>
             </div>
