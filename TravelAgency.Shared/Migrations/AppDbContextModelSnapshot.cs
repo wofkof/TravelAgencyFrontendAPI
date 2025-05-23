@@ -2212,57 +2212,7 @@ namespace TravelAgency.Shared.Migrations
 
                     b.Navigation("City");
                 });
-            modelBuilder.Entity("TravelAgency.Shared.Models.DocumentApplicationForm", b =>
-                {
-                    b.HasOne("TravelAgency.Shared.Models.Region", "Region")
-                        .WithMany()
-                        .HasForeignKey("RegionId")
-                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("Region");
-                });
-
-            modelBuilder.Entity("TravelAgency.Shared.Models.DocumentOrderDetails", b =>
-                {
-                    b.HasOne("TravelAgency.Shared.Models.Agency", "Agency")
-                        .WithMany()
-                        .HasForeignKey("AgencyCode")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("TravelAgency.Shared.Models.DocumentApplicationForm", "DocumentApplicationForm")
-                        .WithMany()
-                        .HasForeignKey("ApplicationId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("TravelAgency.Shared.Models.Member", "Member")
-                        .WithMany()
-                        .HasForeignKey("MemberId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("TravelAgency.Shared.Models.PickupInformation", "PickupInformation")
-                        .WithMany()
-                        .HasForeignKey("PickupInfoId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("TravelAgency.Shared.Models.PickupMethod", "PickupMethod")
-                        .WithMany()
-                        .HasForeignKey("PickupMethodId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Agency");
-
-                    b.Navigation("DocumentApplicationForm");
-
-                    b.Navigation("Member");
-
-                    b.Navigation("PickupInformation");
-
-                    b.Navigation("PickupMethod");
-                });
             modelBuilder.Entity("TravelAgency.Shared.Models.Employee", b =>
                 {
                     b.HasOne("TravelAgency.Shared.Models.Role", "Role")
