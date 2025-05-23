@@ -1799,94 +1799,94 @@ namespace TravelAgency.Shared.Data
         }
 
 
-        //public async Task SeedDocumentOrderDetailsAsync()
-        //{
-        //    if (!_context.DocumentOrderDetails.Any())
-        //    {
+        public async Task SeedDocumentOrderDetailsAsync()
+        {
+            if (!_context.DocumentOrderDetails.Any())
+            {
 
-        //        _context.DocumentOrderDetails.AddRange(
+                _context.DocumentOrderDetails.AddRange(
 
-        //            new DocumentOrderDetails
-        //            {
-        //                ApplicationId = 2,
-        //                MemberId = 11110,
-        //                PickupMethodId = 0,
-        //                PickupInfoId = 1,
-        //                AgencyCode = 1,
-        //                RequiredData = "(1)身份證正本 (1份)\r\n(2)舊護照 (1份)\r\n(3)六個月內正面拍攝之2吋白色背景彩色照片(背面請填妥申請人姓名且照片規格請參閱備註欄) (1份)\r\n(4)未婚且未滿18歲者，附上監護人的身分證正本詳情及規格請參閱備註欄) (1份)\r\n(5)委任書 (1份)",
-        //                SubmissionMethod = "以掛號寄到【104台北市中山區民生東路三段49號2樓／易遊網客服中心收（信封上請註記訂單編號）】，或送交易遊網各門市客服人員代為物流到台北總公司辦理\r\n* 客服人員將於收件後一個工作日內和您確認。",
-        //                Notes = "文件下載區\r\n• 申請人本人委任旅行社委任書⭐D式範例\r\n• 申請人委託代送件(受委任人)複委託委任書，另需檢附雙方關係證明(如下)⭐E式範例\r\n(註) 雙方關係證明需含有照片之相關證件(如同學代送提供雙方學生證影本)\r\n(註) 受委任人限親屬(三等親內)、配偶、同事、同學\r\n(註) 未滿18歲者若使用本人委任書，簽名欄位除本人簽名外，旁邊須簽上同所需提供資料第5點之監護人之簽名\r\n(註) 人在國外請務必用E式委任書\r\n•已過期舊護照不用交\r\n• 護照申請需知\r\n• 照片規格說明\r\n•照片補件，需兩張實體照片\r\n•戶謄不退\r\n\r\n首次申請\r\n1.須先至戶政事務所辦理人別確認後，始得委託代理人續向外交部代為申請\r\n2.未婚且未滿18歲申請人，首次申請須由父或母或監護人簽署護照同意書/委任陪同書\r\n3.經外交部查驗為首次申請但未做人別確認需撤件（照片及申請書不退還），需重新送件及工作天重新計算\r\n\r\n其他注意事項\r\n• 年滿十四歲者應申請初領國民身分證\r\n• 未婚且未滿18歲之未成年人及受監護宣告申請護照，倘父母離婚或為受監護宣告人之監護人，父或母或監護人請提供有權行使、負擔權利義務之證明文件正本（如含詳細記事之戶口名簿或三個月內保留完整記事欄之戶籍謄本）及國民身分證正本\r\n• 更改姓氏或國民身分證號應申請換發新護照並提供三個月內所申請之詳細記事欄戶籍謄本正本\r\n• 更改中文姓名申請換發新護照，舊護照外文姓名必須列為新護照外文別名，已有外文別名者得以加簽方式辦理\r\n• 國軍人員出境應事先申請許可\r\n• 人在國外的役男無法辦理\r\n• 護照剩餘效期不足一年或所持護照非屬現行最新式樣者可申請換照\r\n• 護照污損或其他原因皆須附上聲明書正本，內容須載名更換原因並簽名\r\n• 刪除因改名被迫新增舊外文姓名至舊護照外文別名者，請A4填寫 (本人確認刪除外文別名，並了解以後取用別名須出示證明文件並簽名)\r\n• 舊護照外文名字音節中間無短橫，於護照申請書填寫外文姓名或別名欄位，格式請如右(姓氏, 名△字)並且於三角形下方簽名\r\n• 新增外文別名，習用之外文別名（如Peter Lin、等）免附有關證件，但以後都不可修改和刪除。倘為特殊姓名者，須出示證明文件正本（國外護照或國外畢業證書或國外出生證明）\r\n\r\n僑居身分移（加）簽須檢附\r\n(1) 原護照加簽僑居沿用需填寫僑居加簽申請書\r\n(2) 首次辦理加簽僑居者須提供，僑務委員會核准公函\r\n(3) 原已辦理僑居身分加簽之舊護照\r\n(4) 僑居國有效護照或永久居留證件\r\n\r\n• 辦事處有權依照申請個案之需要對申請人提出額外相關文件的要求\r\n• 辦事處依簽證主管判斷給予簽證，辦事處有權拒絕解釋拒給簽證之理由\r\n• 申請書上所填內容、檢附證件及照片請確實無訛，如有不實將產生法律責任\r\n• 已送件訂單不得改辦及撤件\r\n• 送件後需補件不補件或遭辦證處拒件者或一般件改急件(須詢問辦件人員)，收取手續費200元",
-        //                DepartureDate = new DateTime(2025, 7, 10),
-        //                ProcessingCount = 1,
-        //                ChineseLastName = "王",
-        //                ChineseFirstName = "愛麗絲",
-        //                EnglishLastName = "Wang",
-        //                EnglishFirstName = "Alice",
-        //                BirthDate = new DateTime(1992, 3, 20)
-        //            }
-        //        );
-        //        await _context.SaveChangesAsync();
-        //    }
+                    new DocumentOrderDetails
+                    {
+                        ApplicationId = 1,
+                        MemberId = 11110,
+                        PickupMethodId = 0,
+                        PickupInfoId = 1,
+                        AgencyCode = 1,
+                        RequiredData = "(1)身份證正本 (1份)\r\n(2)舊護照 (1份)\r\n(3)六個月內正面拍攝之2吋白色背景彩色照片(背面請填妥申請人姓名且照片規格請參閱備註欄) (1份)\r\n(4)未婚且未滿18歲者，附上監護人的身分證正本詳情及規格請參閱備註欄) (1份)\r\n(5)委任書 (1份)",
+                        SubmissionMethod = "以掛號寄到【104台北市中山區民生東路三段49號2樓／易遊網客服中心收（信封上請註記訂單編號）】，或送交易遊網各門市客服人員代為物流到台北總公司辦理\r\n* 客服人員將於收件後一個工作日內和您確認。",
+                        Notes = "文件下載區\r\n• 申請人本人委任旅行社委任書⭐D式範例\r\n• 申請人委託代送件(受委任人)複委託委任書，另需檢附雙方關係證明(如下)⭐E式範例\r\n(註) 雙方關係證明需含有照片之相關證件(如同學代送提供雙方學生證影本)\r\n(註) 受委任人限親屬(三等親內)、配偶、同事、同學\r\n(註) 未滿18歲者若使用本人委任書，簽名欄位除本人簽名外，旁邊須簽上同所需提供資料第5點之監護人之簽名\r\n(註) 人在國外請務必用E式委任書\r\n•已過期舊護照不用交\r\n• 護照申請需知\r\n• 照片規格說明\r\n•照片補件，需兩張實體照片\r\n•戶謄不退\r\n\r\n首次申請\r\n1.須先至戶政事務所辦理人別確認後，始得委託代理人續向外交部代為申請\r\n2.未婚且未滿18歲申請人，首次申請須由父或母或監護人簽署護照同意書/委任陪同書\r\n3.經外交部查驗為首次申請但未做人別確認需撤件（照片及申請書不退還），需重新送件及工作天重新計算\r\n\r\n其他注意事項\r\n• 年滿十四歲者應申請初領國民身分證\r\n• 未婚且未滿18歲之未成年人及受監護宣告申請護照，倘父母離婚或為受監護宣告人之監護人，父或母或監護人請提供有權行使、負擔權利義務之證明文件正本（如含詳細記事之戶口名簿或三個月內保留完整記事欄之戶籍謄本）及國民身分證正本\r\n• 更改姓氏或國民身分證號應申請換發新護照並提供三個月內所申請之詳細記事欄戶籍謄本正本\r\n• 更改中文姓名申請換發新護照，舊護照外文姓名必須列為新護照外文別名，已有外文別名者得以加簽方式辦理\r\n• 國軍人員出境應事先申請許可\r\n• 人在國外的役男無法辦理\r\n• 護照剩餘效期不足一年或所持護照非屬現行最新式樣者可申請換照\r\n• 護照污損或其他原因皆須附上聲明書正本，內容須載名更換原因並簽名\r\n• 刪除因改名被迫新增舊外文姓名至舊護照外文別名者，請A4填寫 (本人確認刪除外文別名，並了解以後取用別名須出示證明文件並簽名)\r\n• 舊護照外文名字音節中間無短橫，於護照申請書填寫外文姓名或別名欄位，格式請如右(姓氏, 名△字)並且於三角形下方簽名\r\n• 新增外文別名，習用之外文別名（如Peter Lin、等）免附有關證件，但以後都不可修改和刪除。倘為特殊姓名者，須出示證明文件正本（國外護照或國外畢業證書或國外出生證明）\r\n\r\n僑居身分移（加）簽須檢附\r\n(1) 原護照加簽僑居沿用需填寫僑居加簽申請書\r\n(2) 首次辦理加簽僑居者須提供，僑務委員會核准公函\r\n(3) 原已辦理僑居身分加簽之舊護照\r\n(4) 僑居國有效護照或永久居留證件\r\n\r\n• 辦事處有權依照申請個案之需要對申請人提出額外相關文件的要求\r\n• 辦事處依簽證主管判斷給予簽證，辦事處有權拒絕解釋拒給簽證之理由\r\n• 申請書上所填內容、檢附證件及照片請確實無訛，如有不實將產生法律責任\r\n• 已送件訂單不得改辦及撤件\r\n• 送件後需補件不補件或遭辦證處拒件者或一般件改急件(須詢問辦件人員)，收取手續費200元",
+                        DepartureDate = new DateTime(2025, 7, 10),
+                        ProcessingCount = 1,
+                        ChineseLastName = "王",
+                        ChineseFirstName = "愛麗絲",
+                        EnglishLastName = "Wang",
+                        EnglishFirstName = "Alice",
+                        BirthDate = new DateTime(1992, 3, 20)
+                    }
+                );
+                await _context.SaveChangesAsync();
+}
 
-        //}
+        }
 
-        //public async Task SeedPickMethodAsync()
-        //{
-        //    if (!_context.PickupMethods.Any())
-        //    {
-        //        _context.PickupMethods.AddRange(
+        public async Task SeedPickMethodAsync()
+        {
+            if (!_context.PickupMethods.Any())
+            {
+                _context.PickupMethods.AddRange(
 
-        //            new PickupMethod
-        //            {
-        //                PickupMethodName = PickupMethodName .SelfPickup,
-        //            }
-        //        );
-        //        //await _context.SaveChangesAsync();
-        //    }
+                    new PickupMethod
+                    {
+                        PickupMethodName = PickupMethodName.SelfPickup,
+                    }
+                );
+                //await _context.SaveChangesAsync();
+            }
 
-        //}
+        }
 
-        // public async Task SeedPickupInformationAsync()
-        // {
-        //    if (!_context.PickupInformations.Any())
-        //    {
+        public async Task SeedPickupInformationAsync()
+        {
+            if (!_context.PickupInformations.Any())
+            {
 
-        //        _context.PickupInformations.AddRange(
+                _context.PickupInformations.AddRange(
 
-        //            new PickupInformation
-        //            {
-        //                City = "高雄市",
-        //                District = "前金區",
-        //                PostalCode = "郵遞區號801",
-        //                DetailedAddress = "中正四路211號8號樓之1"
-        //            }
-        //        );
-        //        await _context.SaveChangesAsync();
-        //    }
+                    new PickupInformation
+                    {
+                        City = "高雄市",
+                        District = "前金區",
+                        PostalCode = "郵遞區號801",
+                        DetailedAddress = "中正四路211號8號樓之1"
+                    }
+                );
+                await _context.SaveChangesAsync();
+            }
 
-        // }
+        }
 
 
-        //public async Task SeedAgencyAsync()
-        //{
-        //    if (!_context.Agencies.Any())
-        //    {
+        public async Task SeedAgencyAsync()
+        {
+            if (!_context.Agencies.Any())
+            {
 
-        //        _context.Agencies.AddRange(
+                _context.Agencies.AddRange(
 
-        //            new Agency
-        //            {
-        //                AgencyName = "資展國際",
-        //                ContactPerson = "張小姐",
-        //                ContactEmail = "abc123@gmail.com",
-        //                ContactPhone = "0987654321",
-        //                Address = "高雄市中正四路211號8樓之1",
-        //                ServiceDescription = "代辦簽證與護照服務"
-        //            }
-        //        );
-        //        await _context.SaveChangesAsync();
-        //    }
+                    new Agency
+                    {
+                        AgencyName = "資展國際",
+                        ContactPerson = "張小姐",
+                        ContactEmail = "abc123@gmail.com",
+                        ContactPhone = "0987654321",
+                        Address = "高雄市中正四路211號8樓之1",
+                        ServiceDescription = "代辦簽證與護照服務"
+                    }
+                );
+                await _context.SaveChangesAsync();
+            }
 
-        //}
+        }
     }
 }
