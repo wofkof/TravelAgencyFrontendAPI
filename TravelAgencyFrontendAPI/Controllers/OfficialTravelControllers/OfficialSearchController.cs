@@ -16,111 +16,6 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
             _context = context;
         }
 
-        [HttpGet("detail/{projectId}/{detailId}/{groupId}")]
-        public async Task<ActionResult> Detail(int projectId, int detailId, int groupId)
-        {
-            try
-            {
-                var raw = await (
-                    from t in _context.OfficialTravels
-                    where t.OfficialTravelId == projectId && t.Status == TravelStatus.Active
-                    from d in t.OfficialTravelDetails
-                    where d.OfficialTravelDetailId == detailId
-                    from s in d.officialTravelSchedules
-                    where s.OfficialTravelDetailId == detailId
-                    from g in d.GroupTravels
-                    where g.GroupTravelId == groupId
-                    orderby g.DepartureDate
-                    select new DetailDTO
-                    {
-                        ProjectId = t.OfficialTravelId,
-                        Title = t.Title,
-                        Description = t.Description,
-                        Cover = t.CoverPath,
-                        DetailId = d.OfficialTravelDetailId,
-                        Number = d.TravelNumber,
-                        AdultPrice = d.AdultPrice,
-                        GroupTravelId = g.GroupTravelId,
-                        DepartureDate = g.DepartureDate,
-                        ReturnDate = g.ReturnDate,
-                        AvailableSeats = g.TotalSeats - g.SoldSeats,
-                        TotalSeats = g.TotalSeats,
-                        ScheduleId = s.OfficialTravelScheduleId,
-                        ScheduleDescription = s.Description,
-                        Day = s.Day,
-                        Breakfast = s.Breakfast,
-                        Lunch = s.Lunch,
-                        Dinner = s.Dinner,
-                        Hotel = s.Hotel,
-                        Attraction1 = s.Attraction1,
-                        Attraction2 = s.Attraction2,
-                        Attraction3 = s.Attraction3,
-                        Attraction4 = s.Attraction4,
-                        Attraction5 = s.Attraction5,
-                    }
-                ).ToListAsync();
-
-                var result = raw
-                    .GroupBy(x => new { x.ProjectId, x.DetailId, x.GroupTravelId }) // 確保每一組唯一行程
-                    .Select(g => new TravelDetailResultDto
-                    {
-                        ProjectId = g.Key.ProjectId,
-                        DetailId = g.Key.DetailId,
-                        Title = g.First().Title,
-                        Description = g.First().Description,
-                        Cover = g.First().Cover,
-                        Number = g.First().Number,
-                        AdultPrice = g.First().AdultPrice,
-                        GroupTravelId = g.Key.GroupTravelId,
-                        DepartureDate = g.First().DepartureDate,
-                        ReturnDate = g.First().ReturnDate,
-                        AvailableSeats = g.First().AvailableSeats,
-                        TotalSeats = g.First().TotalSeats,
-                        Schedules = g
-                            .OrderBy(s => s.Day)
-                            .Select(s => new TravelScheduleDto
-                            {
-                                ScheduleId = s.ScheduleId,
-                                Day = s.Day,
-                                ScheduleDescription = s.ScheduleDescription,
-                                Breakfast = s.Breakfast,
-                                Lunch = s.Lunch,
-                                Dinner = s.Dinner,
-                                Hotel = s.Hotel,
-                                Attraction1 = s.Attraction1,
-                                Attraction2 = s.Attraction2,
-                                Attraction3 = s.Attraction3,
-                                Attraction4 = s.Attraction4,
-                                Attraction5 = s.Attraction5
-                            }).ToList(),
-                        GroupTravels = g
-                            .Select(g => new GroupTravelDto
-                            {
-                                GroupTravelId = g.GroupTravelId,
-                                DepartureDate = g.DepartureDate,
-                                ReturnDate = g.ReturnDate,
-                                AvailableSeats = g.TotalSeats - g.SoldSeats,
-                                TotalSeats = g.TotalSeats,
-                                Price = g.AdultPrice,
-                                StatusText = g.GroupStatus
-                            }).ToList()
-                    })
-                    .FirstOrDefault(); // 因為只有一筆 groupTravelId，直接取第一筆即可
-
-
-                if (result == null)
-                {
-                    return NotFound(new { message = "找不到對應專案" });
-                }
-
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Search API Error: " + ex.ToString());
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
 
         [HttpGet("search")]
         public async Task<ActionResult> SearchBox([FromQuery] SearchInput dto)
@@ -150,10 +45,12 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                                 t.CoverPath,
                                 t.Region.Country,
                                 t.Region.Name,
+                                t.Category,
                                 d.OfficialTravelDetailId,
                                 d.AdultPrice,
                                 g.GroupTravelId,
                                 g.DepartureDate,
+                                g.ReturnDate,
                                 g.GroupStatus
                             };
 
@@ -171,12 +68,8 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                 // 最後 GroupBy 移除重複行程
                 var result = await query
                 .GroupBy(x => new {
-                    x.OfficialTravelId,
-                    x.Title,
-                    x.Description,
-                    x.CoverPath,
-                    x.AdultPrice,
-                    x.OfficialTravelDetailId
+                    x.OfficialTravelId
+                    
                 })
                 .Select(g => g
                     .OrderBy(x => x.DepartureDate)
@@ -185,11 +78,14 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                         ProjectId = x.OfficialTravelId,
                         Title = x.Title,
                         Description = x.Description,
+                        Category = x.Category,
                         Cover = x.CoverPath,
                         Price = x.AdultPrice,
                         DetailId = x.OfficialTravelDetailId,
-                        GroupTravelId = x.GroupTravelId,
+                        GroupId = x.GroupTravelId,
                         DepartureDate = x.DepartureDate,
+                        ReturnDate = x.ReturnDate,
+                        Days = x.DepartureDate != null && x.ReturnDate != null ? (x.ReturnDate.Value - x.DepartureDate.Value).Days : 0,
                         Status = x.GroupStatus,
                         Country = x.Country,
                         Region = x.Name,
@@ -206,38 +102,126 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
             }
         }
 
-        private AttractionDto? MapAttraction(int? id, List<OfficialAttraction> allAttractions)
+        [HttpGet("getMainInfo/{projectId}/{detailId}/{groupId}")]
+        public async Task<ActionResult> GetMainInfo(int projectId,int detailId, int groupId)
         {
-            if (id == null) return null;
-
-            var a = allAttractions.FirstOrDefault(x => x.AttractionId == id.Value);
-            if (a == null) return null;
-
-            return new AttractionDto
-            {
-                AttractionId = a.AttractionId,
-                Name = a.Name,
-                Description = a.Description,
-                Longitude = a.Longitude,
-                Latitude = a.Latitude
-            };
+            try 
+            { 
+                var travel = await(
+                    from t in _context.OfficialTravels
+                    where t.OfficialTravelId == projectId && t.Status == TravelStatus.Active
+                    from d in t.OfficialTravelDetails
+                    where d.OfficialTravelDetailId == detailId
+                    from g in d.GroupTravels
+                    where g.GroupTravelId == groupId
+                    select new GetMainInfo
+                    {
+                        ProjectId = t.OfficialTravelId,
+                        Title = t.Title,
+                        Description = t.Description,
+                        Cover = t.CoverPath,
+                        Country = t.Region.Country,
+                        Region = t.Region.Name,
+                        Number = d.TravelNumber,
+                        Price = d.AdultPrice,
+                        Departure = g.DepartureDate,
+                        Return = g.ReturnDate,
+                        TotalSeats = g.TotalSeats,
+                        AvailableSeats =g.TotalSeats-g.SoldSeats
+                    }
+                ).FirstOrDefaultAsync();
+                return Ok(travel);
+            }
+            catch (Exception ex) 
+            { 
+                Console.WriteLine("GetMainInfo API Error: " + ex.ToString());
+                return StatusCode(500, new { message = ex.Message }); 
+            }
         }
 
-        private HotelDto? MapHotel(int id, List<OfficialAccommodation> allHotels)
+        [HttpGet("getGrouplist/{projectId}")]
+        public async Task<ActionResult> GetGrouplist(int projectId)
         {
-            var h = allHotels.FirstOrDefault(x => x.AccommodationId == id);
-            if (h == null) return null;
-
-            return new HotelDto
+            try
             {
-                AccommodationId = h.AccommodationId,
-                Name = h.Name,
-                Description = h.Description,
-                Longitude = h.Longitude,
-                Latitude = h.Latitude
-            };
+                var groups = await(
+                    from g in _context.GroupTravels
+                    from d in _context.OfficialTravelDetails
+                    from t in _context.OfficialTravels
+                    where g.OfficialTravelDetailId == d.OfficialTravelDetailId && d.OfficialTravelId == projectId
+                    select new GetGroups
+                    {
+                        GroupId = g.GroupTravelId,
+                        DetailId = g.OfficialTravelDetailId,
+                        Departure = g.DepartureDate,
+                        Return = g.ReturnDate,
+                        TotalSeats = g.TotalSeats,
+                        AvailableSeats = g.TotalSeats - g.SoldSeats,
+                        GroupStatus = g.GroupStatus,
+                        Price = d.AdultPrice,
+                        Number = d.TravelNumber
+                    }
+                    ).ToListAsync();
+
+                var result = groups
+                    .GroupBy(x => new { x.GroupId})
+                    .Select(g => new GetGroups
+                    {
+                        GroupId = g.Key.GroupId,
+                        DetailId = g.FirstOrDefault().DetailId,
+                        Departure = g.FirstOrDefault().Departure,
+                        Return = g.FirstOrDefault().Return,
+                        TotalSeats = g.FirstOrDefault().TotalSeats,
+                        AvailableSeats = g.FirstOrDefault().AvailableSeats,
+                        GroupStatus = g.FirstOrDefault().GroupStatus,
+                        Price = g.FirstOrDefault().Price,
+                        Number = g.FirstOrDefault().Number
+                    }
+                    ).ToList();
+
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("GetGroup API Error: " + ex.ToString());
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
 
+        [HttpGet("GetScheduleList/{detailId}")]
+        public async Task<ActionResult> GetScheduleList(int detailId)
+        {
+            try
+            {
+                var schedule = await (
+                    from s in _context.OfficialTravelSchedules
+                    where s.OfficialTravelDetailId == detailId
+                    select new GetSchedule
+                    {
+                        ScheduleId = s.OfficialTravelScheduleId,
+                        Day = s.Day,
+                        Description = s.Description,
+                        Breakfast = s.Breakfast,
+                        Lunch = s.Lunch,
+                        Dinner = s.Dinner,
+                        Hotel = s.Hotel,
+                        Attraction1 = s.Attraction1,
+                        Attraction2 = s.Attraction2,
+                        Attraction3 = s.Attraction3,
+                        Attraction4 = s.Attraction4,
+                        Attraction5 = s.Attraction5
+                    }
+                    ).ToListAsync();
+                return Ok(schedule);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("GetSchedule API Error: " + ex.ToString());
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
 
+        
     }
 }
