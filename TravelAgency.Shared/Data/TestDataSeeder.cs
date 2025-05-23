@@ -158,7 +158,27 @@ namespace TravelAgency.Shared.Data
             {
                 _context.Cities.AddRange(
                     new City { CityName = "臺北市" },
-                    new City { CityName = "新北市" }
+                    new City { CityName = "新北市" },
+                    new City { CityName = "臺南市" },
+                    new City { CityName = "高雄市" },
+                    new City { CityName = "嘉義市" },
+                    new City { CityName = "嘉義縣" },
+                    new City { CityName = "屏東縣" },
+                    new City { CityName = "新竹市" },
+                    new City { CityName = "新竹縣" },
+                    new City { CityName = "桃園市" },
+                    new City { CityName = "臺中市" },
+                    new City { CityName = "苗栗縣" },
+                    new City { CityName = "南投縣" },
+                    new City { CityName = "彰化縣" },
+                    new City { CityName = "雲林縣" },
+                    new City { CityName = "基隆市" },
+                    new City { CityName = "宜蘭縣" },
+                    new City { CityName = "花蓮縣" },
+                    new City { CityName = "臺東縣" },
+                    new City { CityName = "澎湖縣" },
+                    new City { CityName = "金門縣" },
+                    new City { CityName = "連江縣" }
                     );
                 await _context.SaveChangesAsync();
             }
@@ -181,8 +201,208 @@ namespace TravelAgency.Shared.Data
                     },
                     new District
                     {
+                        CityId = _context.Cities.First().CityId,
+                        DistrictName = "中正區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.First().CityId,
+                        DistrictName = "松山區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.First().CityId,
+                        DistrictName = "大同區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.First().CityId,
+                        DistrictName = "大安區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.First().CityId,
+                        DistrictName = "萬華區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.First().CityId,
+                        DistrictName = "士林區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.First().CityId,
+                        DistrictName = "北投區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.First().CityId,
+                        DistrictName = "內湖區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.First().CityId,
+                        DistrictName = "南港區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.First().CityId,
+                        DistrictName = "文山區"
+                    },
+                    new District
+                    {
                         CityId = _context.Cities.Skip(1).First().CityId,
                         DistrictName = "淡水區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(1).First().CityId,
+                        DistrictName = "板橋區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(1).First().CityId,
+                        DistrictName = "永和區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(1).First().CityId,
+                        DistrictName = "烏來區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(1).First().CityId,
+                        DistrictName = "三峽區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(1).First().CityId,
+                        DistrictName = "樹林區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(1).First().CityId,
+                        DistrictName = "鶯歌區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(1).First().CityId,
+                        DistrictName = "三重區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(1).First().CityId,
+                        DistrictName = "新莊區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(1).First().CityId,
+                        DistrictName = "三芝區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(2).First().CityId,
+                        DistrictName = "中西區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(2).First().CityId,
+                        DistrictName = "東區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(2).First().CityId,
+                        DistrictName = "南區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(2).First().CityId,
+                        DistrictName = "安平區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(2).First().CityId,
+                        DistrictName = "永康區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(2).First().CityId,
+                        DistrictName = "仁德區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(2).First().CityId,
+                        DistrictName = "鹽水區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(2).First().CityId,
+                        DistrictName = "七股區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(2).First().CityId,
+                        DistrictName = "北區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(2).First().CityId,
+                        DistrictName = "善化區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(3).First().CityId,
+                        DistrictName = "前金區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(3).First().CityId,
+                        DistrictName = "鹽埕區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(3).First().CityId,
+                        DistrictName = "鼓山區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(3).First().CityId,
+                        DistrictName = "旗津區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(3).First().CityId,
+                        DistrictName = "左營區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(3).First().CityId,
+                        DistrictName = "三民區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(3).First().CityId,
+                        DistrictName = "美濃區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(3).First().CityId,
+                        DistrictName = "旗山區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(3).First().CityId,
+                        DistrictName = "鳳山區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(3).First().CityId,
+                        DistrictName = "橋頭區"
+                    },
+                    new District
+                    {
+                        CityId = _context.Cities.Skip(3).First().CityId,
+                        DistrictName = "小港區"
                     }
                     );
                 await _context.SaveChangesAsync();
@@ -213,6 +433,251 @@ namespace TravelAgency.Shared.Data
                     {
                         DistrictId = _context.Districts.Skip(2).First().DistrictId,
                         AttractionName = "淡水老街"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        AttractionName = "赤崁樓"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        AttractionName = "原林百貨"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        AttractionName = "台南市美術館2館"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        AttractionName = "神農街"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        AttractionName = "水仙宮"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        AttractionName = "臺灣祀典武廟"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        AttractionName = "國定古蹟臺南地方法院(司法博物館)"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        AttractionName = "臺灣府城隍廟"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(23).First().DistrictId,
+                        AttractionName = "南紡購物中心"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(23).First().DistrictId,
+                        AttractionName = "台南文化創意產業園區"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(23).First().DistrictId,
+                        AttractionName = "知事官邸生活館"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(23).First().DistrictId,
+                        AttractionName = "東門巴克禮紀念教會"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(24).First().DistrictId,
+                        AttractionName = "藍晒圖文創園區"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(24).First().DistrictId,
+                        AttractionName = "水交社文化園區"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(24).First().DistrictId,
+                        AttractionName = "黃金海岸"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(24).First().DistrictId,
+                        AttractionName = "鯤喜灣文化園區"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(24).First().DistrictId,
+                        AttractionName = "臺南市客家文化會館"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(24).First().DistrictId,
+                        AttractionName = "黑橋牌香腸博物館"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AttractionName = "安平古堡"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AttractionName = "億載金城 (二鯤鯓砲台)"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AttractionName = "知事官邸生活館"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AttractionName = "原英商德記洋行"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AttractionName = "安平蚵灰窯文化館"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AttractionName = "台南運河博物館"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AttractionName = "孔廟文化園區「臺南孔子廟」"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AttractionName = "安平樹屋"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AttractionName = "觀夕平台"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AttractionName = "安平老街(延平老街)"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AttractionName = "安平天后宮(開臺天后宮)"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AttractionName = "台南運河遊船"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AttractionName = "安平遊憩碼頭"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AttractionName = "虱目魚主題館"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(26).First().DistrictId,
+                        AttractionName = "四草綠色隧道"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(26).First().DistrictId,
+                        AttractionName = "鹿耳門天后宮"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(26).First().DistrictId,
+                        AttractionName = "台江文化中心"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(26).First().DistrictId,
+                        AttractionName = "國立臺灣歷史博物館"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(26).First().DistrictId,
+                        AttractionName = "布袋嘴寮代天府(百年魚木)"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(27).First().DistrictId,
+                        AttractionName = "奇美博物館"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(27).First().DistrictId,
+                        AttractionName = "十鼓文創園區"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(27).First().DistrictId,
+                        AttractionName = "台南都會公園"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(27).First().DistrictId,
+                        AttractionName = "亞力山大蝴蝶生態教育農場"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(27).First().DistrictId,
+                        AttractionName = "臺南家具產業博物館"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(29).First().DistrictId,
+                        AttractionName = "七股鹽山"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(29).First().DistrictId,
+                        AttractionName = "紅樹林賞鳥區"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(29).First().DistrictId,
+                        AttractionName = "黑面琵鷺生態展示館（原黑面琵鷺研究及保育管理中心）"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(29).First().DistrictId,
+                        AttractionName = "七股觀海樓"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(29).First().DistrictId,
+                        AttractionName = "曾文溪口濕地"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(29).First().DistrictId,
+                        AttractionName = "南灣碼頭遊憩區"
+                    },
+                    new Attraction
+                    {
+                        DistrictId = _context.Districts.Skip(30).First().DistrictId,
+                        AttractionName = "花園夜市"
                     }
                     );
                 await _context.SaveChangesAsync();
@@ -243,6 +708,116 @@ namespace TravelAgency.Shared.Data
                     {
                         DistrictId = _context.Districts.Skip(2).First().DistrictId,
                         RestaurantName = "米特食堂"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        RestaurantName = "邱家小卷米粉"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        RestaurantName = "富盛號"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        RestaurantName = "保安路米糕"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        RestaurantName = "鼎富發豬油拌飯"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        RestaurantName = "矮仔成蝦仁飯"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        RestaurantName = "一味品碗粿魚羹"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        RestaurantName = "小豪洲沙茶爐"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        RestaurantName = "阿明豬心冬粉"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        RestaurantName = "集品蝦仁飯"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        RestaurantName = "度小月擔仔麵"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        RestaurantName = "阿堂鹹粥"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        RestaurantName = "老厝1933"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        RestaurantName = "懷舊小棧杏仁豆腐冰"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        RestaurantName = "冰鄉"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(23).First().DistrictId,
+                        RestaurantName = "周氏蝦捲台南總店"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(23).First().DistrictId,
+                        RestaurantName = "阿財牛肉湯"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(23).First().DistrictId,
+                        RestaurantName = "同記安平豆花"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(23).First().DistrictId,
+                        RestaurantName = "文章牛肉湯"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(23).First().DistrictId,
+                        RestaurantName = "屋裏的湯"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(23).First().DistrictId,
+                        RestaurantName = "王氏魚皮"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(23).First().DistrictId,
+                        RestaurantName = "捌伍貳冰室"
+                    },
+                    new Restaurant
+                    {
+                        DistrictId = _context.Districts.Skip(23).First().DistrictId,
+                        RestaurantName = "滿玥軒"
                     }
                     );
                 await _context.SaveChangesAsync();
@@ -268,6 +843,86 @@ namespace TravelAgency.Shared.Data
                     {
                         DistrictId = _context.Districts.Skip(2).First().DistrictId,
                         AccommodationName = "將捷金鬱金香酒店"
+                    },
+                    new Accommodation
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        AccommodationName = "台南晶英酒店"
+                    },
+                    new Accommodation
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        AccommodationName = "台南大飯店"
+                    },
+                    new Accommodation
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        AccommodationName = "煙波大飯店台南館"
+                    },
+                    new Accommodation
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        AccommodationName = "康橋商旅"
+                    },
+                    new Accommodation
+                    {
+                        DistrictId = _context.Districts.Skip(22).First().DistrictId,
+                        AccommodationName = "台南富驛時尚酒店"
+                    },
+                    new Accommodation
+                    {
+                        DistrictId = _context.Districts.Skip(23).First().DistrictId,
+                        AccommodationName = "台南老爺行旅"
+                    },
+                    new Accommodation
+                    {
+                        DistrictId = _context.Districts.Skip(23).First().DistrictId,
+                        AccommodationName = "台南遠東香格里拉"
+                    },
+                    new Accommodation
+                    {
+                        DistrictId = _context.Districts.Skip(23).First().DistrictId,
+                        AccommodationName = "台糖長榮酒店"
+                    },
+                    new Accommodation
+                    {
+                        DistrictId = _context.Districts.Skip(23).First().DistrictId,
+                        AccommodationName = "路徒行旅"
+                    },
+                    new Accommodation
+                    {
+                        DistrictId = _context.Districts.Skip(23).First().DistrictId,
+                        AccommodationName = "塔木德酒店"
+                    },
+                    new Accommodation
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AccommodationName = "VIVA漁樂活台南安平民宿"
+                    },
+                    new Accommodation
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AccommodationName = "台南大員皇冠假日酒店"
+                    },
+                    new Accommodation
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AccommodationName = "安平留飯店"
+                    },
+                    new Accommodation
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AccommodationName = "臺邦商旅"
+                    },
+                    new Accommodation
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AccommodationName = "福爾摩沙遊艇酒店"
+                    },
+                    new Accommodation
+                    {
+                        DistrictId = _context.Districts.Skip(25).First().DistrictId,
+                        AccommodationName = "樹屋文旅"
                     }
                     );
                 await _context.SaveChangesAsync();
@@ -280,7 +935,19 @@ namespace TravelAgency.Shared.Data
             {
                 _context.Transports.AddRange(
                     new Transport { TransportMethod = "遊覽車" },
-                    new Transport { TransportMethod = "租車" }
+                    new Transport { TransportMethod = "租車" },
+                    new Transport { TransportMethod = "汽車" },
+                    new Transport { TransportMethod = "騎車" },
+                    new Transport { TransportMethod = "客運" },
+                    new Transport { TransportMethod = "台鐵" },
+                    new Transport { TransportMethod = "高鐵" },
+                    new Transport { TransportMethod = "捷運" },
+                    new Transport { TransportMethod = "自行車" },
+                    new Transport { TransportMethod = "步行" },
+                    new Transport { TransportMethod = "公車" },
+                    new Transport { TransportMethod = "計程車" },
+                    new Transport { TransportMethod = "接駁車" },
+                    new Transport { TransportMethod = "包車服務" }
                     );
                 await _context.SaveChangesAsync();
             }
@@ -316,41 +983,13 @@ namespace TravelAgency.Shared.Data
                         ReviewEmployeeId =_context.Employees.First().EmployeeId,
                         CreatedAt = DateTime.Now,
                         UpdatedAt = DateTime.Now,
-                        DepartureDate = DateTime.Parse("2025-05-11"),
-                        EndDate = DateTime.Parse("2025-05-13"),
-                        Days = 3,
-                        People = 3,
-                        TotalAmount = 30000,
-                        Status = CustomTravelStatus.Pending,
-                        Note = "測試行程",
-                    },
-                    new CustomTravel
-                    {
-                        MemberId = _context.Members.First().MemberId,
-                        ReviewEmployeeId = _context.Employees.First().EmployeeId,
-                        CreatedAt = DateTime.Now,
-                        UpdatedAt = DateTime.Now,
-                        DepartureDate = DateTime.Parse("2025-06-11"),
-                        EndDate = DateTime.Parse("2025-06-12"),
+                        DepartureDate = DateTime.Parse("2025-07-11"),
+                        EndDate = DateTime.Parse("2025-07-12"),
                         Days = 2,
                         People = 3,
-                        TotalAmount = 20000,
-                        Status = CustomTravelStatus.Approved,
-                        Note = "測試行程1",
-                    },
-                    new CustomTravel
-                    {
-                        MemberId = _context.Members.First().MemberId,
-                        ReviewEmployeeId = _context.Employees.First().EmployeeId,
-                        CreatedAt = DateTime.Now,
-                        UpdatedAt = DateTime.Now,
-                        DepartureDate = DateTime.Parse("2025-05-11"),
-                        EndDate = DateTime.Parse("2025-05-11"),
-                        Days = 1,
-                        People = 2,
                         TotalAmount = 10000,
                         Status = CustomTravelStatus.Completed,
-                        Note = "測試行程2",
+                        Note = "台南旅遊",
                     },
                     new CustomTravel
                     {
@@ -358,14 +997,15 @@ namespace TravelAgency.Shared.Data
                         ReviewEmployeeId = _context.Employees.First().EmployeeId,
                         CreatedAt = DateTime.Now,
                         UpdatedAt = DateTime.Now,
-                        DepartureDate = DateTime.Parse("2025-05-13"),
-                        EndDate = DateTime.Parse("2025-05-13"),
+                        DepartureDate = DateTime.Parse("2025-06-22"),
+                        EndDate = DateTime.Parse("2025-06-22"),
                         Days = 1,
-                        People = 3,
-                        TotalAmount = 20000,
+                        People = 1,
+                        TotalAmount = 1500,
                         Status = CustomTravelStatus.Rejected,
-                        Note = "測試行程3",
-                    });
+                        Note = "一人放空行程",
+                    }
+                    );
                 await _context.SaveChangesAsync();
             }
         }
@@ -851,8 +1491,8 @@ namespace TravelAgency.Shared.Data
                         CustomTravelId = _context.CustomTravels.First().CustomTravelId,
                         ItemId = _context.Accommodations.First().AccommodationId,
                         Category = TravelItemCategory.Accommodation,
-                        Day = 3,
-                        Time = "12:00",
+                        Day = 2,
+                        Time = "16:00",
                         AccommodationName = "測試2"
                     },
                     new CustomTravelContent
@@ -861,7 +1501,7 @@ namespace TravelAgency.Shared.Data
                         ItemId = _context.Transports.First().TransportId,
                         Category = TravelItemCategory.Transport,
                         Day = 1,
-                        Time = "12:00",
+                        Time = "10:00",
                         AccommodationName = "1測試"
                     },
                     new CustomTravelContent
@@ -869,27 +1509,9 @@ namespace TravelAgency.Shared.Data
                         CustomTravelId = _context.CustomTravels.Skip(1).First().CustomTravelId,
                         ItemId = _context.Accommodations.First().AccommodationId,
                         Category = TravelItemCategory.Accommodation,
-                        Day = 2,
+                        Day = 1,
                         Time = "12:00",
                         AccommodationName = "1測試1"
-                    },
-                    new CustomTravelContent
-                    {
-                        CustomTravelId = _context.CustomTravels.Skip(2).First().CustomTravelId,
-                        ItemId = _context.Restaurants.First().RestaurantId,
-                        Category = TravelItemCategory.Restaurant,
-                        Day = 1,
-                        Time = "12:00",
-                        AccommodationName = "2測試"
-                    },
-                    new CustomTravelContent
-                    {
-                        CustomTravelId = _context.CustomTravels.Skip(3).First().CustomTravelId,
-                        ItemId = _context.Accommodations.First().AccommodationId,
-                        Category = TravelItemCategory.Accommodation,
-                        Day = 1,
-                        Time = "12:00",
-                        AccommodationName = "3測試"
                     }
                     );
                 await _context.SaveChangesAsync();
