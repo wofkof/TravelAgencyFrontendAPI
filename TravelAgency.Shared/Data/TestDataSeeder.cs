@@ -1808,7 +1808,7 @@ namespace TravelAgency.Shared.Data
 
                     new DocumentOrderDetails
                     {
-                        ApplicationId = 2,
+                        ApplicationId = 1,
                         MemberId = 11110,
                         PickupMethodId = 0,
                         PickupInfoId = 1,
