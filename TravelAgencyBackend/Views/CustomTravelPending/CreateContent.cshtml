@@ -1,5 +1,5 @@
 ﻿@model TravelAgencyBackend.ViewModels.CustomTravelPendingViewModel 
-
+@using TravelAgencyBackend.Helpers
 
 @{
     ViewData["Title"] = "CreateContent";
@@ -12,13 +12,22 @@
     <div class="col-md-4">
         <form asp-action="CreateContent" method="post">
 
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>            
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group"> 
-                <label asp-for="NewContent.CustomTravelId" class="control-label"></label>
+                <label asp-for="NewContent.CustomTravelId" class="control-label">行程內容編號</label>
                 <input asp-for="NewContent.CustomTravelId" class="form-control" readonly />
                 <span asp-validation-for="NewContent.CustomTravelId" class="text-danger"></span>
             </div> 
             <div class="form-group">
+                <label asp-for="NewContent.Category" class="control-label">分類項目</label>
+                <select asp-for="NewContent.Category"
+                        asp-items="EnumDisplayHelper.GetSelectList<TravelItemCategory>()"
+                        class="form-select d-inline w-auto mx-2" id="NewContent_Category">
+                    <option selected disabled value="">請選擇類別</option>
+                </select>
+                <span asp-validation-for="NewContent.Category" class="text-danger"></span>
+            </div>
+            <div id="location-selects" class="form-group">
                 <label asp-for="SelectedCityId" class="control-label">縣市</label>
                 <select asp-for="SelectedCityId" class="form-select">
                     <option selected disabled value="">請選擇縣市</option>
@@ -26,7 +35,6 @@
                     {
                         <option value="@t.CityId">@t.CityName</option>
                     }  
-
                 </select>
                 <label asp-for="SelectedDistrictId" class="control-label">區</label>
                 <select asp-for="SelectedDistrictId" class="form-select">
@@ -35,27 +43,17 @@
                     {
                         <option value="@t.DistrictId" data-city="@t.CityId">@t.DistrictName</option>
                     }
-
                 </select>
                 <span asp-validation-for="SelectedDistrictId" class="text-danger"></span>
-            </div>
+            </div>            
             <div class="form-group">
-                <label asp-for="NewContent.Category"  class="control-label"></label>
-                <select asp-for="NewContent.Category" 
-                asp-items="Html.GetEnumSelectList<TravelItemCategory>()"
-                class="form-select d-inline w-auto mx-2" id="NewContent_Category">
-                    <option selected disabled value="">請選擇類別</option>
-                </select>
-                <span asp-validation-for="NewContent.Category" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="NewContent.ItemId" class="control-label"></label>                
+                <label asp-for="NewContent.ItemId" class="control-label">項目內容</label>                
                 <select asp-for="NewContent.ItemId" class="form-select" required id="NewContent_ItemId">
                     <option selected disabled value="">請選擇項目</option>
                     @{                       
                         foreach (var t in Model.Attraction)
                         {
-                            <option data-category="3" data-district="@t.DistrictId" value="@t.AttractionId" hidden>@t.AttractionName</option>
+                            <option data-category="1" data-district="@t.DistrictId" value="@t.AttractionId" hidden>@t.AttractionName</option>
                         }
 
                         foreach (var t in Model.Restaurant)
@@ -70,7 +68,7 @@
 
                         foreach (var t in Model.Transportation)
                         {
-                            <option data-category="1" value="@t.TransportId" hidden>@t.TransportMethod</option>
+                            <option data-category="3" value="@t.TransportId" hidden>@t.TransportMethod</option>
                         }
 
                     }
@@ -78,17 +76,17 @@
                 <span asp-validation-for="NewContent.ItemId" class="text-danger"></span>
             </div>            
             <div class="form-group">
-                <label asp-for="NewContent.Day" class="control-label"></label>
+                <label asp-for="NewContent.Day" class="control-label">日程</label>
                 <input asp-for="NewContent.Day" class="form-control" />
                 <span asp-validation-for="NewContent.Day" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="NewContent.Time" class="control-label"></label>
+                <label asp-for="NewContent.Time" class="control-label">時間</label>
                 <input asp-for="NewContent.Time" class="form-control" />
                 <span asp-validation-for="NewContent.Time" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="NewContent.AccommodationName" class="control-label"></label>
+                <label asp-for="NewContent.AccommodationName" class="control-label">備註</label>
                 <input asp-for="NewContent.AccommodationName" class="form-control" />
                 <span asp-validation-for="NewContent.AccommodationName" class="text-danger"></span>
             </div>
@@ -146,7 +144,7 @@
             allItems.forEach(opt => {
                 const categoryMatch = opt.getAttribute("data-category") === selectedCategory;
                 let districtMatch = true;
-                if(selectedCategory !== "1"){
+                if(selectedCategory !== "3"){
                     districtMatch = opt.getAttribute("data-district") === selectedDistrict;
                 }
                 opt.hidden = !(categoryMatch && districtMatch);
@@ -154,17 +152,40 @@
             itemSelect.value = "";
         }
 
+        function toggleLocationFields() {
+                const selectedCategory = categorySelect.value;
+                const locationSection = document.getElementById("location-selects");
+
+                if (selectedCategory === "3") {
+                    locationSection.style.display = "none";
+                    citySelect.removeAttribute("required");
+                    districtSelect.removeAttribute("required");
+                    citySelect.removeAttribute("data-val");
+                    districtSelect.removeAttribute("data-val");
+                } else {
+                    locationSection.style.display = "block";
+                    citySelect.setAttribute("required", "required");
+                    districtSelect.setAttribute("required", "required");
+                    citySelect.setAttribute("data-val", "true");
+                    districtSelect.setAttribute("data-val", "true");
+                }
+            }
+
         citySelect.addEventListener("change", () => {
             filterDistrictsByCity();
             filterItemsByDistrictAndCategory(); // 避免地區改變後項目殘留
         });
 
         districtSelect.addEventListener("change", filterItemsByDistrictAndCategory);
-        categorySelect.addEventListener("change", filterItemsByDistrictAndCategory);
+        categorySelect.addEventListener("change", () => {
+                filterItemsByDistrictAndCategory();
+                toggleLocationFields();
+            });
 
         // 頁面一進來就初始化一次
         filterDistrictsByCity();
         filterItemsByDistrictAndCategory();
+        toggleLocationFields();
         });
     </script>
 }
