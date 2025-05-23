@@ -1,10 +1,8 @@
-﻿ namespace TravelAgency.Shared.Models
+﻿namespace TravelAgencyFrontendAPI.DTOs.OfficialDTOs
 {
-    public class OfficialTravelSchedule
+    public class GetSchedule
     {
-        public int OfficialTravelScheduleId { get; set; }
-        public int OfficialTravelDetailId { get; set; }
-
+        public int ScheduleId { get; set; }
         public int Day { get; set; }
         public string? Description { get; set; }
         public string? Breakfast { get; set; }
@@ -17,11 +15,5 @@
         public int? Attraction3 { get; set; }
         public int? Attraction4 { get; set; }
         public int? Attraction5 { get; set; }
-
-        public string? Note1 { get; set; }
-        public string? Note2 { get; set; }
-
-        public OfficialTravelDetail OfficialTravelDetail { get; set; }
     }
-
 }

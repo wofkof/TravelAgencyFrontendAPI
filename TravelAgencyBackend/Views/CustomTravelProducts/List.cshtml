@@ -54,10 +54,12 @@
     <table class="table table-bordered table-striped table-hover">
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.City.First().CityId)
+                @* @Html.DisplayNameFor(model => model.City.First().CityId) *@
+                縣市編號
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.City.First().CityName)
+                @* @Html.DisplayNameFor(model => model.City.First().CityName) *@
+                縣市名稱
             </th>
             <th>修改</th>
             <th>刪除</th>
@@ -103,13 +105,16 @@
     <table class="table table-bordered table-striped table-hover">
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.District.First().DistrictId)
+                @* @Html.DisplayNameFor(model => model.District.First().DistrictId) *@
+                區編號
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.District.First().CityId)
+                @* @Html.DisplayNameFor(model => model.District.First().CityId) *@
+                縣市名稱
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.District.First().DistrictName)
+                @* @Html.DisplayNameFor(model => model.District.First().DistrictName) *@
+                區名稱
             </th>
             <th>修改</th>
             <th>刪除</th>
@@ -123,7 +128,8 @@
                             @Html.DisplayFor(modelItem => item.DistrictId)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.CityId)
+                            @*@Html.DisplayFor(modelItem => item.CityId)*@
+                            @item.City?.CityName
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.DistrictName)
@@ -159,13 +165,16 @@
     <table class="table table-bordered table-striped table-hover">
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Attraction.First().AttractionId)
+                @* @Html.DisplayNameFor(model => model.Attraction.First().AttractionId) *@
+                景點編號
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Attraction.First().DistrictId)
+                @* @Html.DisplayNameFor(model => model.Attraction.First().DistrictId) *@
+                區名稱
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Attraction.First().AttractionName)
+                @* @Html.DisplayNameFor(model => model.Attraction.First().AttractionName) *@
+                景點名稱
             </th>
             <th>修改</th>
             <th>刪除</th>
@@ -179,7 +188,8 @@
                             @Html.DisplayFor(modelItem => item.AttractionId)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.DistrictId)
+                            @*@Html.DisplayFor(modelItem => item.DistrictId)*@
+                            @item.District?.DistrictName
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.AttractionName)
@@ -215,13 +225,16 @@
     <table class="table table-bordered table-striped table-hover">
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Restaurant.First().RestaurantId)
+                @* @Html.DisplayNameFor(model => model.Restaurant.First().RestaurantId) *@
+                餐廳編號
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Restaurant.First().DistrictId)
+                @* @Html.DisplayNameFor(model => model.Restaurant.First().DistrictId) *@
+                區名稱
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Restaurant.First().RestaurantName)
+                @* @Html.DisplayNameFor(model => model.Restaurant.First().RestaurantName) *@
+                餐廳名稱
             </th>
             <th>修改</th>
             <th>刪除</th>
@@ -235,7 +248,8 @@
                             @Html.DisplayFor(modelItem => item.RestaurantId)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.DistrictId)
+                            @*@Html.DisplayFor(modelItem => item.DistrictId)*@
+                            @item.District?.DistrictName
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.RestaurantName)
@@ -271,13 +285,16 @@
     <table class="table table-bordered table-striped table-hover">
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Hotel.First().AccommodationId)
+                @* @Html.DisplayNameFor(model => model.Hotel.First().AccommodationId) *@
+                住宿編號
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Hotel.First().DistrictId)
+                @* @Html.DisplayNameFor(model => model.Hotel.First().DistrictId) *@
+                區名稱
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Hotel.First().AccommodationName)
+                @* @Html.DisplayNameFor(model => model.Hotel.First().AccommodationName) *@
+                住宿名稱
             </th>
             <th>修改</th>
             <th>刪除</th>
@@ -291,7 +308,8 @@
                             @Html.DisplayFor(modelItem => item.AccommodationId)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.DistrictId)
+                            @*@Html.DisplayFor(modelItem => item.DistrictId)*@
+                            @item.District?.DistrictName
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.AccommodationName)
@@ -327,10 +345,12 @@
     <table class="table table-bordered table-striped table-hover">
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Transportation.First().TransportId)
+                @* @Html.DisplayNameFor(model => model.Transportation.First().TransportId) *@
+                交通編號
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Transportation.First().TransportMethod)
+                @* @Html.DisplayNameFor(model => model.Transportation.First().TransportMethod) *@
+                交通方式
             </th>            
             <th>修改</th>
             <th>刪除</th>
