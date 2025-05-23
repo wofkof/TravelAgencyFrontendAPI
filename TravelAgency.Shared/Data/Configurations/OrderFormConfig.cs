@@ -26,7 +26,7 @@ namespace TravelAgency.Shared.Data.Configurations
                   .HasForeignKey(e => e.DocumentMenuId)
                   .OnDelete(DeleteBehavior.Restrict);
 
-            entity.Property(e => e.DepartureDate).HasColumnName("departure_date");
+            entity.Property(e => e.DepartureDate).HasColumnName("departure_date").HasColumnType("datetime");
 
             entity.Property(e => e.ProcessingQuantity)
                   .HasColumnName("processing_quantity");
@@ -56,6 +56,7 @@ namespace TravelAgency.Shared.Data.Configurations
 
             entity.Property(e => e.BirthDate)
                   .HasColumnName("birth_date")
+                  .HasColumnType("datetime")
                   .IsRequired();
 
             entity.Property(e => e.ContactPersonName)
@@ -104,6 +105,7 @@ namespace TravelAgency.Shared.Data.Configurations
 
             entity.Property(e => e.OrderCreationTime)
                   .HasColumnName("order_creation_time")
+                  .HasColumnType("datetime")
                   .IsRequired();
         }
     }
