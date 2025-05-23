@@ -1,0 +1,96 @@
+﻿@model IEnumerable<TravelAgency.Shared.Models.Sticker>
+@{
+    ViewData["Title"] = "貼圖管理";
+}
+<h2>貼圖管理</h2>
+
+<form id="uploadForm" enctype="multipart/form-data" method="post">
+    <div>
+        <label>選擇貼圖：</label>
+        <input type="file" name="file" required />
+    </div>
+    <div>
+        <label>分類：</label>
+        <input type="text" name="category" required />
+    </div>
+    <button type="submit">上傳貼圖</button>
+</form>
+
+<hr />
+
+<table border="1" style="width: 100%; margin-top: 20px;">
+    <thead>
+        <tr>
+            <th>圖片</th>
+            <th>分類</th>
+            <th>修改分類</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody id="stickerTable">
+        @foreach (var sticker in Model)
+        {
+            <tr id="row-@sticker.StickerId">
+                <td><img src="@sticker.ImagePath" style="width: 80px;" /></td>
+                <td>@sticker.Category</td>
+                <td>
+                    <input type="text" value="@sticker.Category" id="edit-@sticker.StickerId" />
+                    <button type="button" onclick="editCategory(@sticker.StickerId)">儲存</button>
+                </td>
+                <td>
+                    <button onclick="deleteSticker(@sticker.StickerId)">刪除</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        document.getElementById("uploadForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const form = new FormData(this);
+
+            const res = await fetch("/Stickers/Create", {
+                method: "POST",
+                body: form
+            });
+
+            if (res.ok) {
+                location.reload();
+            } else {
+                alert("上傳失敗");
+            }
+        });
+
+        async function deleteSticker(id) {
+            if (!confirm("確定要刪除這個貼圖嗎？")) return;
+
+            const res = await fetch(`/Stickers/Delete/${id}`, {
+                method: "POST"
+            });
+
+            if (res.ok) {
+                document.getElementById(`row-${id}`).remove();
+            } else {
+                alert("刪除失敗");
+            }
+        }
+
+        async function editCategory(id) {
+            const newCategory = document.getElementById(`edit-${id}`).value;
+
+            const res = await fetch(`/Stickers/EditCategory/${id}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ category: newCategory })
+            });
+
+            if (!res.ok) {
+                alert("更新失敗");
+            } else {
+                location.reload();
+            }
+        }
+    </script>
+}

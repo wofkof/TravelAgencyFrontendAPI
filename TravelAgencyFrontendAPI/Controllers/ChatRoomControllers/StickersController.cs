@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.EntityFrameworkCore;
+using TravelAgency.Shared.Data;
+using TravelAgencyFrontendAPI.DTOs.ChatRoomDTOs;
 
 namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
 {
@@ -8,36 +9,53 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
     [ApiController]
     public class StickersController : ControllerBase
     {
-        // GET: api/<StickersController>
+        private readonly AppDbContext _context;
+
+        public StickersController(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        // GET: api/stickers
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IActionResult GetStickers()
         {
-            return new string[] { "value1", "value2" };
+            var stickers = _context.Stickers
+                .Select(s => new StickerDto
+                {
+                    Id = s.StickerId,
+                    Url = s.ImagePath
+                })
+                .ToList();
+
+            return Ok(stickers);
         }
 
-        // GET api/<StickersController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        // GET: api/stickers/by-category
+        [HttpGet("by-category")]
+        public IActionResult GetByCategory(string category)
         {
-            return "value";
+            var stickers = _context.Stickers
+                .Where(s => s.Category == category)
+                .Select(s => new StickerDto
+                {
+                    Id = s.StickerId,
+                    Url = s.ImagePath
+                }).ToList();
+
+            return Ok(stickers);
         }
 
-        // POST api/<StickersController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        // GET: api/stickers/all-categories
+        [HttpGet("all-categories")]
+        public IActionResult GetAllCategories()
         {
-        }
+            var categories = _context.Stickers
+                .Select(s => s.Category)
+                .Distinct()
+                .ToList();
 
-        // PUT api/<StickersController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<StickersController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            return Ok(categories);
         }
     }
 }

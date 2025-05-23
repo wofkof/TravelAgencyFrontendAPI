@@ -12,11 +12,13 @@ namespace TravelAgency.Shared.Data.Configurations
 
             entity.HasKey(e => e.DocumentOrderId);
 
-            entity.Property(e => e.ApplicationType)
-                .IsRequired()
-                .HasMaxLength(10);
+            entity.Property(e => e.MemberId).IsRequired();
+
+            //entity.Property(e => e.ApplicationType)
+            //    .IsRequired()
+            //    .HasMaxLength(10);
             entity.Property(e => e.RequiredData).HasColumnType("text");
-            entity.Property(e => e.SubmissionMethod).HasMaxLength(50);
+            entity.Property(e => e.SubmissionMethod).HasMaxLength(500);
             entity.Property(e => e.Notes).HasColumnType("text");
             entity.Property(e => e.DepartureDate).HasColumnType("date");
             entity.Property(e => e.ProcessingCount).IsRequired();
@@ -26,10 +28,10 @@ namespace TravelAgency.Shared.Data.Configurations
             entity.Property(e => e.EnglishFirstName).HasMaxLength(50);
             entity.Property(e => e.BirthDate).HasColumnType("date");
 
-            entity.Property(e => e.ApplicationType)
-                .HasConversion<string>()
-                .HasMaxLength(10)
-                .IsRequired();
+            //entity.Property(e => e.ApplicationType)
+            //    .HasConversion<string>()
+            //    .HasMaxLength(10)
+            //    .IsRequired();
 
             entity.HasOne(e => e.DocumentApplicationForm)
                 .WithMany()
@@ -49,6 +51,11 @@ namespace TravelAgency.Shared.Data.Configurations
             entity.HasOne(e => e.Agency)
                 .WithMany()
                 .HasForeignKey(e => e.AgencyCode)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Member)
+                .WithMany()
+                .HasForeignKey(e => e.MemberId)
                 .OnDelete(DeleteBehavior.Restrict);
 
         }
