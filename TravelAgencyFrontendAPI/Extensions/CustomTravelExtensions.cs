@@ -8,9 +8,9 @@ namespace TravelAgencyFrontendAPI.Extensions
         private static readonly Dictionary<CustomTravelStatus, string> _statusTexts = new()
         {
             { CustomTravelStatus.Pending, "待審核" },
-            { CustomTravelStatus.Approved, "審核中" },
+            { CustomTravelStatus.Approved, "已通過" },
             { CustomTravelStatus.Rejected, "已取消" },
-            { CustomTravelStatus.Completed, "審核完成" }
+            { CustomTravelStatus.Completed, "已完成" }
         };
 
         public static string ToChinese(this CustomTravelStatus status)

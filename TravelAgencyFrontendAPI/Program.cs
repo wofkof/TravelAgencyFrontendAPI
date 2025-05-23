@@ -4,6 +4,9 @@ using TravelAgency.Shared.Data;
 using TravelAgencyFrontendAPI.Helpers;
 using Microsoft.Extensions.FileProviders;
 
+using TravelAgencyFrontendAPI.ECPay.Models; // 引入 ECPayConfiguration
+using TravelAgencyFrontendAPI.ECPay.Services; // 引入 ECPayService
+
 //using Microsoft.AspNetCore.Authentication.JwtBearer;
 //using Microsoft.IdentityModel.Tokens;
 //using System.Text;
@@ -25,7 +28,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("https://localhost:3000", "https://localhost:7107", "https://localhost:7258", "https://192.168.1.122:3000", "https://172.18.132.158:3000")
+        policy.WithOrigins("https://localhost:3000", "https://localhost:7107", "https://localhost:7258", "https://192.168.1.122:3000", "https://172.18.132.158:3000", "https://9621-49-159-210-217.ngrok-free.app")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -81,7 +84,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 //    };
 //});
 
-//builder.Services.AddAuthorization();
+builder.Services.AddAuthorization();
+
+
+builder.Services.Configure<ECPayConfiguration>(builder.Configuration.GetSection("ECPaySettings"));
+builder.Services.AddScoped<ECPayService>();
+
 
 
 var app = builder.Build();
@@ -120,5 +128,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<ChatHub>("/chathub");
+
 
 app.Run();
