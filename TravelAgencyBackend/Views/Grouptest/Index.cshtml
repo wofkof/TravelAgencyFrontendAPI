@@ -1,0 +1,95 @@
+﻿@model IEnumerable<TravelAgency.Shared.Models.GroupTravel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.DepartureDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ReturnDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalSeats)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SoldSeats)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.OrderDeadline)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MinimumParticipants)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.GroupStatus)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedAt)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UpdatedAt)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RecordStatus)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.OfficialTravelDetail)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.DepartureDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ReturnDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TotalSeats)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SoldSeats)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.OrderDeadline)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MinimumParticipants)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.GroupStatus)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedAt)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UpdatedAt)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RecordStatus)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.OfficialTravelDetail.OfficialTravelDetailId)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.GroupTravelId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.GroupTravelId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.GroupTravelId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
