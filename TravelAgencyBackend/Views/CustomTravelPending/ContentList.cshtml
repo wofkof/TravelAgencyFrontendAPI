@@ -1,4 +1,5 @@
 ﻿@model TravelAgencyBackend.ViewModels.CustomTravelPendingViewModel
+@using TravelAgencyBackend.Helpers
 
 @{
 	ViewData["Title"] = "ContentList";
@@ -6,32 +7,40 @@
 
 <h2>訂單行程內容</h2>
 
-<p>
-	<a asp-action="CreateContent" asp-route-id="@ViewBag.CoustomTravelId" class="btn btn-outline-success">新增內容</a>
-</p>
+<div class="d-flex my-4">
+	<a asp-action="CreateContent" asp-route-id="@ViewBag.CoustomTravelId" class="btn btn-outline-success ">新增內容</a>
+	<a asp-action="List" class="btn btn-secondary ms-auto">返回</a>
+</div>
 <table class="table">
 	<thead>
 		<tr>
 			<th>
-				@Html.DisplayNameFor(model => model.Content.First().ContentId)
+				@* @Html.DisplayNameFor(model => model.Content.First().ContentId) *@
+				行程內容編號
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.Content.First().CustomTravelId)
+				@* @Html.DisplayNameFor(model => model.Content.First().CustomTravelId) *@
+				自訂行程編號
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.Content.First().Category)
+				@* @Html.DisplayNameFor(model => model.Content.First().Category) *@
+				分類項目
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.Content.First().ItemId)
+				@* @Html.DisplayNameFor(model => model.Content.First().ItemId) *@
+				項目內容
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.Content.First().Day)
+				@* @Html.DisplayNameFor(model => model.Content.First().Day) *@
+				日程
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.Content.First().Time)
+				@* @Html.DisplayNameFor(model => model.Content.First().Time) *@
+				時間
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.Content.First().AccommodationName)
+				@* @Html.DisplayNameFor(model => model.Content.First().AccommodationName) *@
+				備註
 			</th>
 			<th>修改</th>
 			<th>刪除</th>
@@ -49,7 +58,8 @@
 						@Html.DisplayFor(modelItem => item.CustomTravelId)
 					</td>
 					<td>
-						@Html.DisplayFor(modelItem => item.Category)
+						@*@Html.DisplayFor(modelItem => item.Category)*@
+						@EnumDisplayHelper.GetDisplayName(item.Category)
 					</td>
 					<td>
 						@{

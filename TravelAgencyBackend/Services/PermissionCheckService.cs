@@ -7,35 +7,66 @@ namespace TravelAgencyBackend.Services
     {
         private readonly AppDbContext _context;
         private readonly IHttpContextAccessor _httpContext;
-        
+
         public PermissionCheckService(AppDbContext context, IHttpContextAccessor httpContext)
         {
             _context = context;
             _httpContext = httpContext;
         }
 
-        private int? CurrentEmployeeId
+        //private int? CurrentEmployeeId
+        //{
+        //    get => _httpContext.HttpContext?.Session.GetInt32("EmployeeId");
+        //    set
+        //    {
+        //        if (_httpContext.HttpContext != null)
+        //        {
+        //            _httpContext.HttpContext.Session.SetInt32("EmployeeId", value ?? 0);
+        //        }
+        //    }
+        //}
+
+        //public bool HasPermission(string permissionName)
+        //{
+        //    var employee = _context.Employees
+        //        .Include(e => e.Role)
+        //            .ThenInclude(r => r.RolePermissions)
+        //            .ThenInclude(rp => rp.Permission)
+        //        .FirstOrDefault(e => e.EmployeeId == CurrentEmployeeId);
+
+        //    return employee?.Role.RolePermissions
+        //        .Any(rp => rp.Permission.PermissionName == permissionName) ?? false;
+        //}
+        private Dictionary<string, bool>? _permissionCache;
+
+
+        private int? CurrentEmployeeId =>
+        _httpContext.HttpContext?.Session.GetInt32("EmployeeId");
+
+        // 查詢一次所有權限並快取
+        private void EnsurePermissionsLoaded()
         {
-            get => _httpContext.HttpContext?.Session.GetInt32("EmployeeId");
-            set
-            {
-                if (_httpContext.HttpContext != null)
-                {
-                    _httpContext.HttpContext.Session.SetInt32("EmployeeId", value ?? 0);
-                }
-            }
+            if (_permissionCache != null) return;
+
+            var permissions = _context.Employees
+                .AsNoTracking() // 提升效能且避免追蹤
+                .Include(e => e.Role)
+                    .ThenInclude(r => r.RolePermissions)
+                    .ThenInclude(rp => rp.Permission)
+                .FirstOrDefault(e => e.EmployeeId == CurrentEmployeeId)?
+                .Role.RolePermissions
+                .Select(rp => rp.Permission.PermissionName)
+                .ToList();
+
+            _permissionCache = permissions?
+                .Distinct()
+                .ToDictionary(name => name, _ => true) ?? new();
         }
 
         public bool HasPermission(string permissionName)
         {
-            var employee = _context.Employees
-                .Include(e => e.Role)
-                    .ThenInclude(r => r.RolePermissions)
-                    .ThenInclude(rp => rp.Permission)
-                .FirstOrDefault(e => e.EmployeeId == CurrentEmployeeId);
-
-            return employee?.Role.RolePermissions
-                .Any(rp => rp.Permission.PermissionName == permissionName) ?? false;
+            EnsurePermissionsLoaded();
+            return _permissionCache!.ContainsKey(permissionName);
         }
 
         // 權限屬性

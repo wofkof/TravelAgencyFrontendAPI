@@ -1,4 +1,4 @@
-﻿namespace TravelAgency.Shared.Models
+﻿ namespace TravelAgency.Shared.Models
 {
     public class OfficialTravelSchedule
     {

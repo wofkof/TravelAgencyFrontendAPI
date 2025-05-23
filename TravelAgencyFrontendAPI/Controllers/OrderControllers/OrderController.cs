@@ -1,12 +1,11 @@
-// File: Controllers/OrderController.cs
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore; // For ToListAsync, Include, etc.
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using TravelAgency.Shared.Data;
 using TravelAgency.Shared.Models;
-using TravelAgencyFrontendAPI.DTOs.OrderDTOs; // Your Order DTOs namespace
-using System.Security.Claims; // For HttpContext.User to get MemberId
-using Microsoft.AspNetCore.Authorization; // If you want to protect this endpoint
+using TravelAgencyFrontendAPI.DTOs.OrderDTOs;
+
 
 namespace TravelAgencyFrontendAPI.Controllers
 {
@@ -34,22 +33,20 @@ namespace TravelAgencyFrontendAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var currentUserId = GetCurrentUserId();
-            if (currentUserId == null)
+            var memberIdFromDto = orderCreateDto.MemberId;
+            var member = await _context.Members.FirstOrDefaultAsync(m => m.MemberId == memberIdFromDto);
+            if (member == null)
             {
-                return Unauthorized("使用者未登入或無法識別身份。");
-            }
-
-            var memberExists = await _context.Members.AnyAsync(m => m.MemberId == currentUserId.Value);
-            if (!memberExists)
-            {
-                return NotFound($"會員 ID {currentUserId.Value} 不存在。");
+                _logger.LogWarning("CreateOrder 找不到會員，會員 ID (來自前端DTO): {MemberId}", memberIdFromDto);
+                // 返回明確的錯誤，告知前端提供的 MemberId 找不到對應的會員
+                ModelState.AddModelError(nameof(orderCreateDto.MemberId), $"提供的會員 ID {memberIdFromDto} 不存在。");
+                return BadRequest(ModelState);
             }
 
             // 初始化 Order 物件
             var order = new Order
             {
-                MemberId = currentUserId.Value,
+                MemberId = member.MemberId,
 
                 OrdererName = orderCreateDto.OrdererInfo.Name, // 訂購人姓名
                 OrdererPhone = NormalizePhoneNumber(orderCreateDto.OrdererInfo.MobilePhone), // 訂購人電話
@@ -71,7 +68,11 @@ namespace TravelAgencyFrontendAPI.Controllers
             };
 
             decimal calculatedServerTotalAmount = 0;
-
+            if (orderCreateDto.CartItems == null || !orderCreateDto.CartItems.Any())
+            {
+                ModelState.AddModelError("CartItems", "購物車中沒有商品。");
+                return BadRequest(ModelState);
+            }
             // --- 核心修改：根據前端傳來的 CartItems 生成 OrderDetails ---
             foreach (var cartItemDto in orderCreateDto.CartItems)
             {
@@ -177,7 +178,7 @@ namespace TravelAgencyFrontendAPI.Controllers
             if (Math.Abs(calculatedServerTotalAmount - orderCreateDto.TotalAmount) > 0.01m) // 允許0.01的誤差
             {
                 _logger.LogWarning("訂單總金額不一致。會員ID {MemberId}。伺服器計算: {CalculatedTotal}, 前端提供: {DtoTotal}.",
-                    currentUserId.Value, calculatedServerTotalAmount, orderCreateDto.TotalAmount);
+                member.MemberId, calculatedServerTotalAmount, orderCreateDto.TotalAmount);
             }
 
             // 4. 處理旅客列表 (OrderParticipants)
@@ -231,7 +232,7 @@ namespace TravelAgencyFrontendAPI.Controllers
                     // 嘗試從常用旅客讀取資料
                     var favoriteTraveler = await _context.MemberFavoriteTravelers
                         .FirstOrDefaultAsync(ft => ft.FavoriteTravelerId == participantDto.FavoriteTravelerId.Value &&
-                                                   ft.MemberId == currentUserId.Value && // 確保是該會員的常用旅客
+                                                   ft.MemberId == member.MemberId && // 確保是該會員的常用旅客
                                                    ft.Status == FavoriteStatus.Active); // 確保常用旅客是有效的
 
                     if (favoriteTraveler == null)
@@ -256,6 +257,36 @@ namespace TravelAgencyFrontendAPI.Controllers
 
                 }
                 order.OrderParticipants.Add(participant);
+            }
+
+            // 步驟 6: 【核心修改】如果需要，更新會員資料
+            if (orderCreateDto.UpdateMemberProfile)
+            {
+                if (orderCreateDto.MemberProfileToUpdate != null)
+                {
+                    var profileData = orderCreateDto.MemberProfileToUpdate;
+                    _logger.LogInformation("準備更新會員資料，會員 ID: {MemberId}", member.MemberId);
+
+                    // 更新 Member 實體的屬性
+
+                    member.Name = profileData.Name; 
+                    member.Phone = NormalizePhoneNumber(profileData.MobilePhone);
+                    member.Email = profileData.Email; // 注意：如果 Email 是登入帳號，修改時需謹慎，可能涉及驗證或唯一性檢查
+
+                    member.Nationality = profileData.Nationality;
+                    member.DocumentType = profileData.DocumentType; // 你的 Member.DocumentType 應與 DTO 的 DocumentType? 相容
+                    member.DocumentNumber = profileData.DocumentNumber;
+
+
+                    member.UpdatedAt = DateTime.UtcNow; // 記錄最後修改時間
+
+                    _context.Members.Update(member); 
+                }
+                else
+                {
+                    // 如果前端說要更新，但沒給資料，可以記錄一個警告
+                    _logger.LogWarning("前端要求更新會員資料 (UpdateMemberProfile=true)，但 MemberProfileToUpdate 物件為 null。會員 ID: {MemberId}", member.MemberId);
+                }
             }
 
             // 在嘗試儲存到資料庫之前，再次檢查 ModelState，包括剛才添加的自定義錯誤
@@ -296,35 +327,32 @@ namespace TravelAgencyFrontendAPI.Controllers
                 OrderStatus = order.Status.ToString(),
                 TotalAmount = order.TotalAmount,
                 SelectedPaymentMethod = order.PaymentMethod?.ToString(),
-                // 您可能還需要回傳一個專門給支付閘道使用的 token 或重新導向 URL 的參數
-                // PaymentGatewayRedirectUrl = ... (這需要根據支付閘道API決定)
-                // PaymentReference = ...
-            };
 
-            // 使用 CreatedAtAction 回傳 201 Created，並提供新資源的 URI 和內容
-            // 您需要有一個 GetOrder(int id) 的方法來讓 CreatedAtAction 正常運作
-            // 為簡化，這裡先直接回傳 Ok 或 Created (不帶 Location Header)
-            // return CreatedAtAction(nameof(GetOrderById), new { id = order.OrderId }, orderSummary);
+            };
             return Created($"/api/Order/{order.OrderId}", orderSummary); // 假設之後會有GET api/Order/{id}
         }
 
 
         // 輔助方法：獲取當前登入使用者的 MemberId
         // 實際實作會根據您的身份驗證設定而有所不同
+
         private int? GetCurrentUserId()
         {
-            return 11110;
-            //var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier); 
-            //if (int.TryParse(userIdClaim, out int userId))
-            //{
-            //    return userId;
-            //}
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (int.TryParse(userIdClaim, out int userId))
+                {
+                    return userId;
+                }
+                _logger.LogWarning("GetCurrentUserId (parameterless): 已認證，但無法從 Claims 中解析 UserId。ClaimValue: '{ClaimValue}'", userIdClaim);
+            }
+            else
+            {
+                _logger.LogWarning("GetCurrentUserId (parameterless): User 未認證或 User.Identity 為 null。");
+            }
 
-            //// var memberIdClaim = User.FindFirstValue("MemberId");
-            //// if (int.TryParse(memberIdClaim, out int memberId)) return memberId;
-
-            //_logger.LogWarning("無法從 Claims 中解析 UserId。");
-            //return null;
+            return null;
         }
 
         // GET: api/Order/{id} (範例，用於 CreatedAtAction 和前端查詢訂單)
@@ -378,12 +406,13 @@ namespace TravelAgencyFrontendAPI.Controllers
 
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<OrderDto>> GetOrderById(int id) //  OrderDto 用於顯示訂單詳情
+        public async Task<ActionResult<OrderDto>> GetOrderById(int id, [FromQuery] int? memberId)
         {
-            var currentUserId = GetCurrentUserId();
-            if (currentUserId == null)
+            if (memberId == null || memberId.Value <= 0)
             {
-                return Unauthorized();
+                _logger.LogWarning("GetOrderById 請求中未提供有效的 memberId。訂單ID: {OrderId}", id);
+                // 返回 BadRequest，告知前端需要提供 memberId
+                return BadRequest("查詢訂單詳情需要提供有效的 memberId。");
             }
 
             var orderData = await _context.Orders
@@ -392,7 +421,7 @@ namespace TravelAgencyFrontendAPI.Controllers
                 //    .ThenInclude(od => od.GroupTravel) // 如果需要在訂單詳情中顯示 GroupTravel 的資訊
                 //.Include(o => o.OrderDetails)
                 //    .ThenInclude(od => od.CustomTravel)   // 如果需要在訂單詳情中顯示 CustomTravel 的資訊
-                .FirstOrDefaultAsync(o => o.OrderId == id && o.MemberId == currentUserId.Value);
+                .FirstOrDefaultAsync(o => o.OrderId == id && o.MemberId == memberId.Value);
 
             if (orderData == null)
             {

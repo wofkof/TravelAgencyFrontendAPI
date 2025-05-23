@@ -233,9 +233,9 @@ namespace TravelAgency.Shared.Migrations
 
                     b.HasKey("ChatRoomId");
 
-                    b.HasIndex("EmployeeId");
+                    b.HasIndex("MemberId");
 
-                    b.HasIndex("MemberId")
+                    b.HasIndex("EmployeeId", "MemberId")
                         .IsUnique();
 
                     b.ToTable("T_ChatRoom", (string)null);
@@ -526,16 +526,24 @@ namespace TravelAgency.Shared.Migrations
                         .HasColumnType("nvarchar(10)")
                         .HasColumnName("case_type");
 
+<<<<<<< HEAD
                     b.Property<string>("DocumentValidityPeriod")
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)")
                         .HasColumnName("document_validity_period");
+=======
+                    b.Property<string>("ExpiryDate")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+>>>>>>> a7c7afec2394ef0d0b650d05a09607d618e1e9ed
 
                     b.Property<string>("Fee")
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)")
                         .HasColumnName("fee");
 
+<<<<<<< HEAD
                     b.Property<string>("ForeignVisaOption")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
@@ -545,6 +553,10 @@ namespace TravelAgency.Shared.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)")
                         .HasColumnName("processing_days");
+=======
+                    b.Property<byte>("ProcessingDays")
+                        .HasColumnType("tinyint");
+>>>>>>> a7c7afec2394ef0d0b650d05a09607d618e1e9ed
 
                     b.Property<string>("ProcessingItem")
                         .HasMaxLength(100)
@@ -557,6 +569,7 @@ namespace TravelAgency.Shared.Migrations
                         .HasColumnName("roc_passport_option");
 
                     b.Property<string>("StayDuration")
+<<<<<<< HEAD
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)")
                         .HasColumnName("stay_duration");
@@ -564,6 +577,96 @@ namespace TravelAgency.Shared.Migrations
                     b.HasKey("MenuId");
 
                     b.ToTable("T_DocumentMenu", (string)null);
+=======
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("ApplicationId");
+
+                    b.HasIndex("RegionId");
+
+                    b.ToTable("T_DocumentApplicationForm", (string)null);
+                });
+
+            modelBuilder.Entity("TravelAgency.Shared.Models.DocumentOrderDetails", b =>
+                {
+                    b.Property<int>("DocumentOrderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DocumentOrderId"));
+
+                    b.Property<int>("AgencyCode")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ApplicationId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("BirthDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("ChineseFirstName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ChineseLastName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("DepartureDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("EnglishFirstName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("EnglishLastName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("MemberId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("PickupInfoId")
+                        .HasColumnType("int");
+
+                    b.Property<byte>("PickupMethodId")
+                        .HasColumnType("tinyint");
+
+                    b.Property<byte>("ProcessingCount")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("RequiredData")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubmissionMethod")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("DocumentOrderId");
+
+                    b.HasIndex("AgencyCode");
+
+                    b.HasIndex("ApplicationId");
+
+                    b.HasIndex("MemberId");
+
+                    b.HasIndex("PickupInfoId");
+
+                    b.HasIndex("PickupMethodId");
+
+                    b.ToTable("T_DocumentOrderDetails", (string)null);
+>>>>>>> a7c7afec2394ef0d0b650d05a09607d618e1e9ed
                 });
 
             modelBuilder.Entity("TravelAgency.Shared.Models.EmailVerificationCode", b =>
@@ -2121,8 +2224,8 @@ namespace TravelAgency.Shared.Migrations
                         .IsRequired();
 
                     b.HasOne("TravelAgency.Shared.Models.Member", "Member")
-                        .WithOne("ChatRoom")
-                        .HasForeignKey("TravelAgency.Shared.Models.ChatRoom", "MemberId")
+                        .WithMany("ChatRooms")
+                        .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -2213,6 +2316,61 @@ namespace TravelAgency.Shared.Migrations
                     b.Navigation("City");
                 });
 
+<<<<<<< HEAD
+=======
+            modelBuilder.Entity("TravelAgency.Shared.Models.DocumentApplicationForm", b =>
+                {
+                    b.HasOne("TravelAgency.Shared.Models.Region", "Region")
+                        .WithMany()
+                        .HasForeignKey("RegionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Region");
+                });
+
+            modelBuilder.Entity("TravelAgency.Shared.Models.DocumentOrderDetails", b =>
+                {
+                    b.HasOne("TravelAgency.Shared.Models.Agency", "Agency")
+                        .WithMany()
+                        .HasForeignKey("AgencyCode")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgency.Shared.Models.DocumentApplicationForm", "DocumentApplicationForm")
+                        .WithMany()
+                        .HasForeignKey("ApplicationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgency.Shared.Models.Member", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgency.Shared.Models.PickupInformation", "PickupInformation")
+                        .WithMany()
+                        .HasForeignKey("PickupInfoId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("TravelAgency.Shared.Models.PickupMethod", "PickupMethod")
+                        .WithMany()
+                        .HasForeignKey("PickupMethodId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Agency");
+
+                    b.Navigation("DocumentApplicationForm");
+
+                    b.Navigation("Member");
+
+                    b.Navigation("PickupInformation");
+
+                    b.Navigation("PickupMethod");
+                });
+
+>>>>>>> a7c7afec2394ef0d0b650d05a09607d618e1e9ed
             modelBuilder.Entity("TravelAgency.Shared.Models.Employee", b =>
                 {
                     b.HasOne("TravelAgency.Shared.Models.Role", "Role")
@@ -2494,7 +2652,7 @@ namespace TravelAgency.Shared.Migrations
 
             modelBuilder.Entity("TravelAgency.Shared.Models.Member", b =>
                 {
-                    b.Navigation("ChatRoom");
+                    b.Navigation("ChatRooms");
 
                     b.Navigation("MemberFavoriteTravelers");
 

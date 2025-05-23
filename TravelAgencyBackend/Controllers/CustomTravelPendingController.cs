@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using TravelAgency.Shared.Data;
 using TravelAgency.Shared.Models;
 using TravelAgencyBackend.Services;
@@ -23,21 +24,35 @@ namespace TravelAgencyBackend.Controllers
             var check = CheckPermissionOrForbid("查看客製化行程");
             if (check != null) return check;
 
-            IEnumerable<CustomTravel> CustomTravel = null;
-            if (string.IsNullOrEmpty(p.txtKeyword))
+            //IEnumerable<CustomTravel> CustomTravel = null;
+            //if (string.IsNullOrEmpty(p.txtKeyword))
+            //{
+            //    CustomTravel = from d in _context.CustomTravels
+            //                   select d;
+            //}
+            //else
+            //    CustomTravel = _context.CustomTravels.Where(d =>
+            //    d.MemberId.ToString().Contains(p.txtKeyword)
+            //    || d.ReviewEmployeeId.ToString().Contains(p.txtKeyword)
+            //    );
+            //var datas = new CustomTravelPendingViewModel
+            //{
+            //    CustomTravel = CustomTravel
+            //};
+            IQueryable<CustomTravel> query = _context.CustomTravels
+        .Include(x => x.Member)
+        .Include(x => x.ReviewEmployee);
+
+            if (!string.IsNullOrEmpty(p.txtKeyword))
             {
-                CustomTravel = from d in _context.CustomTravels
-                               select d;
+                query = query.Where(d =>
+                    d.MemberId.ToString().Contains(p.txtKeyword) ||
+                    d.ReviewEmployeeId.ToString().Contains(p.txtKeyword));
             }
-            else
-                CustomTravel = _context.CustomTravels.Where(d =>
-                d.MemberId.ToString().Contains(p.txtKeyword)
-                || d.MemberId.ToString().Contains(p.txtKeyword)
-                || d.ReviewEmployeeId.ToString().Contains(p.txtKeyword)
-                );
+
             var datas = new CustomTravelPendingViewModel
             {
-                CustomTravel = CustomTravel
+                CustomTravel = query.ToList()
             };
             return View(datas);
         }
@@ -86,7 +101,7 @@ namespace TravelAgencyBackend.Controllers
             dbCustomTravel.MemberId = uiCustomTravel.MemberId;
             dbCustomTravel.ReviewEmployeeId = uiCustomTravel.ReviewEmployeeId;
             dbCustomTravel.CreatedAt = uiCustomTravel.CreatedAt;
-            dbCustomTravel.UpdatedAt = uiCustomTravel.UpdatedAt;
+            dbCustomTravel.UpdatedAt = DateTime.Now;
             dbCustomTravel.DepartureDate = uiCustomTravel.DepartureDate;
             dbCustomTravel.EndDate = uiCustomTravel.EndDate;
             dbCustomTravel.Days = uiCustomTravel.Days;
@@ -149,10 +164,10 @@ namespace TravelAgencyBackend.Controllers
             if (check != null) return check;
 
             var id = _context.CustomTravelContents.FirstOrDefault()?.CustomTravelId;
-            
+
             var datas = new CustomTravelPendingViewModel
             {
-                NewContent = new CustomTravelContent { CustomTravelId = id.Value },                
+                NewContent = new CustomTravelContent { CustomTravelId = id.Value },
                 Content = _context.CustomTravelContents.ToList(),
                 City = _context.Cities.ToList(),
                 District = _context.Districts.ToList(),
@@ -232,9 +247,9 @@ namespace TravelAgencyBackend.Controllers
             dbContent.Day = t.EditContent.Day;
             dbContent.Time = t.EditContent.Time;
             dbContent.AccommodationName = t.EditContent.AccommodationName;
-                        
+
             _context.SaveChanges();
-            
+
             return RedirectToAction("ContentList", new { id = dbContent.CustomTravelId });
         }
     }

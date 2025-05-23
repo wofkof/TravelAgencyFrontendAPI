@@ -170,6 +170,22 @@
                                 </a>
                             }
                         </li>
+                        <li>
+                            @* 管理聊天室 *@
+                            @if (PermissionChecker.CanManageChatRooms)
+                            {
+                                <a asp-controller="Stickers" asp-action="Manage">
+                                    <i class="metismenu-icon fas fa-image"></i> 管理貼圖
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Stickers" asp-action="Manage"
+                                   class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false">
+                                    <i class="metismenu-icon fas fa-image"></i> 管理貼圖
+                                </a>
+                            }
+                        </li>
                     </ul>
                 </li>
                 @* 購物車 *@

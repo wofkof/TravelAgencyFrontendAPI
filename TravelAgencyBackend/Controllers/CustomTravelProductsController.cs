@@ -36,34 +36,54 @@ namespace TravelAgencyBackend.Controllers
             IEnumerable<District> District = null;
             if (string.IsNullOrEmpty(p.txtKeywordDistrict))
             {
-                District = _context.Districts.OrderBy(d => d.DistrictId).ToList();
+                District = _context.Districts
+                    .Include(d => d.City)
+                    .OrderBy(d => d.DistrictId).ToList();
             }
             else
-                District = _context.Districts.Where(d => d.DistrictName.Contains(p.txtKeywordDistrict)).OrderBy(d => d.DistrictId).ToList();
+                District = _context.Districts
+                    .Include(d => d.City)
+                    .Where(d => d.DistrictName.Contains(p.txtKeywordDistrict))
+                    .OrderBy(d => d.DistrictId).ToList();
 
             IEnumerable<Attraction> Attraction = null;
             if (string.IsNullOrEmpty(p.txtKeywordAttraction))
             {
-                Attraction = _context.Attractions.OrderBy(d => d.DistrictId).ToList();
+                Attraction = _context.Attractions
+                    .Include(d => d.District)
+                    .OrderBy(d => d.DistrictId).ToList();
             }
             else
-                Attraction = _context.Attractions.Where(d => d.AttractionName.Contains(p.txtKeywordAttraction)).OrderBy(d => d.DistrictId).ToList();
+                Attraction = _context.Attractions
+                    .Include(d => d.District)
+                    .Where(d => d.AttractionName.Contains(p.txtKeywordAttraction))
+                    .OrderBy(d => d.DistrictId).ToList();
 
             IEnumerable<Restaurant> Restaurant = null;
             if (string.IsNullOrEmpty(p.txtKeywordRestaurant))
             {
-                Restaurant = _context.Restaurants.OrderBy(d => d.DistrictId).ToList();
+                Restaurant = _context.Restaurants
+                    .Include(d => d.District)
+                    .OrderBy(d => d.DistrictId).ToList();
             }
             else
-                Restaurant = _context.Restaurants.Where(d => d.RestaurantName.Contains(p.txtKeywordRestaurant)).OrderBy(d => d.DistrictId).ToList();
+                Restaurant = _context.Restaurants
+                    .Include(d => d.District)
+                    .Where(d => d.RestaurantName.Contains(p.txtKeywordRestaurant))
+                    .OrderBy(d => d.DistrictId).ToList();
 
             IEnumerable<Accommodation> Hotel = null;
             if (string.IsNullOrEmpty(p.txtKeywordHotel))
             {
-                Hotel = _context.Accommodations.OrderBy(d => d.DistrictId).ToList();
+                Hotel = _context.Accommodations
+                    .Include(d => d.District)
+                    .OrderBy(d => d.DistrictId).ToList();
             }
             else
-                Hotel = _context.Accommodations.Where(d => d.AccommodationName.Contains(p.txtKeywordHotel)).OrderBy(d => d.DistrictId).ToList();
+                Hotel = _context.Accommodations
+                    .Include(d => d.District)
+                    .Where(d => d.AccommodationName.Contains(p.txtKeywordHotel))
+                    .OrderBy(d => d.DistrictId).ToList();
 
             IEnumerable<Transport> Transportation = null;
             if (string.IsNullOrEmpty(p.txtKeywordTransportation))
