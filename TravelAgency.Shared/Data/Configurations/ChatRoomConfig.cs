@@ -22,9 +22,12 @@ namespace TravelAgency.Shared.Data.Configurations
                   .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(c => c.Member)
-                  .WithOne(m => m.ChatRoom)
-                  .HasForeignKey<ChatRoom>(c => c.MemberId)
+                  .WithMany(m => m.ChatRooms)
+                  .HasForeignKey(c => c.MemberId)
                   .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(c => new { c.EmployeeId, c.MemberId })
+                  .IsUnique();
         }
     }
 

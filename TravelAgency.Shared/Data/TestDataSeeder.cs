@@ -1771,7 +1771,6 @@ namespace TravelAgency.Shared.Data
                 await _context.SaveChangesAsync();
             }
         }
-
         //富成 固態假資料
         //表示非同步操作的關鍵
         public async Task SeedDocumentApplicationFormsAsync()
@@ -1835,7 +1834,6 @@ namespace TravelAgency.Shared.Data
         {
             if (!_context.PickupMethods.Any())
             {
-
                 _context.PickupMethods.AddRange(
 
                     new PickupMethod

@@ -1,4 +1,5 @@
-﻿@model IEnumerable<TravelAgencyBackend.ViewModels.ChatRoomViewModel>
+﻿@using TravelAgencyBackend.Helpers
+@model IEnumerable<TravelAgencyBackend.ViewModels.ChatRoomViewModel>
 
 @{
     ViewData["Title"] = "Index";
@@ -27,7 +28,9 @@
                     }
                 </td>
                 <td>@item.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                <td>@Html.DisplayFor(modelItem => item.Status)</td>
+                <td>
+                    @EnumDisplayHelper.GetDisplayName(item.Status)
+                </td>
                 <td>
 
                     @* 管理聊天室 *@

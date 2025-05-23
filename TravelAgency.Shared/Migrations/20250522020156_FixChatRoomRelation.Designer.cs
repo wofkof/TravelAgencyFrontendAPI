@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TravelAgency.Shared.Data;
 
@@ -11,9 +12,11 @@ using TravelAgency.Shared.Data;
 namespace TravelAgency.Shared.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250522020156_FixChatRoomRelation")]
+    partial class FixChatRoomRelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -498,13 +501,14 @@ namespace TravelAgency.Shared.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<string>("ExpiryDate")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("date");
 
                     b.Property<decimal>("Fee")
                         .HasColumnType("decimal(6,2)");
+
+                    b.Property<int>("MemberId")
+                        .HasColumnType("int");
 
                     b.Property<byte>("ProcessingDays")
                         .HasColumnType("tinyint");
@@ -524,6 +528,8 @@ namespace TravelAgency.Shared.Migrations
 
                     b.HasKey("ApplicationId");
 
+                    b.HasIndex("MemberId");
+
                     b.HasIndex("RegionId");
 
                     b.ToTable("T_DocumentApplicationForm", (string)null);
@@ -542,6 +548,11 @@ namespace TravelAgency.Shared.Migrations
 
                     b.Property<int>("ApplicationId")
                         .HasColumnType("int");
+
+                    b.Property<string>("ApplicationType")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("date");
@@ -569,9 +580,6 @@ namespace TravelAgency.Shared.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("MemberId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Notes")
                         .IsRequired()
                         .HasColumnType("text");
@@ -591,16 +599,14 @@ namespace TravelAgency.Shared.Migrations
 
                     b.Property<string>("SubmissionMethod")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("DocumentOrderId");
 
                     b.HasIndex("AgencyCode");
 
                     b.HasIndex("ApplicationId");
-
-                    b.HasIndex("MemberId");
 
                     b.HasIndex("PickupInfoId");
 
@@ -2160,10 +2166,18 @@ namespace TravelAgency.Shared.Migrations
 
             modelBuilder.Entity("TravelAgency.Shared.Models.DocumentApplicationForm", b =>
                 {
+                    b.HasOne("TravelAgency.Shared.Models.Member", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("TravelAgency.Shared.Models.Region", "Region")
                         .WithMany()
                         .HasForeignKey("RegionId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Member");
 
                     b.Navigation("Region");
                 });
@@ -2182,12 +2196,6 @@ namespace TravelAgency.Shared.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("TravelAgency.Shared.Models.Member", "Member")
-                        .WithMany()
-                        .HasForeignKey("MemberId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("TravelAgency.Shared.Models.PickupInformation", "PickupInformation")
                         .WithMany()
                         .HasForeignKey("PickupInfoId")
@@ -2202,8 +2210,6 @@ namespace TravelAgency.Shared.Migrations
                     b.Navigation("Agency");
 
                     b.Navigation("DocumentApplicationForm");
-
-                    b.Navigation("Member");
 
                     b.Navigation("PickupInformation");
 

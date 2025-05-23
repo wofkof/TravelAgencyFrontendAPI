@@ -25,6 +25,7 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
         {
             var chatRooms = await _context.ChatRooms
                 .Where(c => c.MemberId == memberId)
+                .Include(c => c.Employee)
                 .Select(c => new ChatRoomDto
                 {
                     ChatRoomId = c.ChatRoomId,
@@ -32,7 +33,8 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
                     MemberId = c.MemberId,
                     IsBlocked = c.IsBlocked,
                     CreatedAt = c.CreatedAt,
-                    LastMessageAt = c.LastMessageAt
+                    LastMessageAt = c.LastMessageAt,
+                    EmployeeName = c.Employee.Name
                 })
                 .ToListAsync();
 
@@ -88,5 +90,56 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
 
             return Ok(connId);
         }
+
+        [HttpPost("start-with-default-cs")]
+        public async Task<ActionResult<ChatRoomDto>> StartChatWithDefaultCustomerService([FromBody] StartChatRequest request)
+        {
+            var memberId = request.MemberId;
+
+            var employee = await _context.Employees
+                .FirstOrDefaultAsync(e => e.Name == "客服人員");
+
+            if (employee == null)
+                return NotFound("找不到客服人員");
+
+            var existing = await _context.ChatRooms
+                .FirstOrDefaultAsync(c => c.EmployeeId == employee.EmployeeId && c.MemberId == memberId);
+
+            if (existing != null)
+            {
+                return Ok(new ChatRoomDto
+                {
+                    ChatRoomId = existing.ChatRoomId,
+                    EmployeeId = existing.EmployeeId,
+                    MemberId = existing.MemberId,
+                    IsBlocked = existing.IsBlocked,
+                    CreatedAt = existing.CreatedAt,
+                    LastMessageAt = existing.LastMessageAt
+                });
+            }
+
+            var chatRoom = new ChatRoom
+            {
+                EmployeeId = employee.EmployeeId,
+                MemberId = memberId,
+                IsBlocked = false,
+                CreatedAt = DateTime.Now,
+                LastMessageAt = null
+            };
+
+            _context.ChatRooms.Add(chatRoom);
+            await _context.SaveChangesAsync();
+
+            return Ok(new ChatRoomDto
+            {
+                ChatRoomId = chatRoom.ChatRoomId,
+                EmployeeId = employee.EmployeeId,
+                MemberId = memberId,
+                IsBlocked = false,
+                CreatedAt = chatRoom.CreatedAt,
+                LastMessageAt = null
+            });
+        }
+
     }
 }
