@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TravelAgency.Shared.Migrations
 {
     /// <inheritdoc />
-    public partial class InitSQL : Migration
+    public partial class NewSQL : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -70,6 +70,45 @@ namespace TravelAgency.Shared.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "T_DocumentMenu",
+                columns: table => new
+                {
+                    menu_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    roc_passport_option = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    foreign_visa_option = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    application_type = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    processing_item = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    case_type = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
+                    processing_days = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
+                    document_validity_period = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
+                    stay_duration = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
+                    fee = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_DocumentMenu", x => x.menu_id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_EmailVerificationCode",
+                columns: table => new
+                {
+                    VerificationId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    VerificationCode = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    VerificationType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    IsVerified = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETDATE()"),
+                    ExpireAt = table.Column<DateTime>(type: "datetime", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_EmailVerificationCode", x => x.VerificationId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "T_Member",
                 columns: table => new
                 {
@@ -85,20 +124,20 @@ namespace TravelAgency.Shared.Migrations
                     PassportGivenName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     PassportExpireDate = table.Column<DateTime>(type: "date", nullable: true),
                     Nationality = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    DocumentType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true, defaultValue: "Passport"),
+                    DocumentType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true, defaultValue: "PASSPORT"),
                     DocumentNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     Address = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     PasswordHash = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     PasswordSalt = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     GoogleId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    RegisterDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
+                    RegisterDate = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETDATE()"),
                     Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false, defaultValue: "Active"),
                     RememberToken = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     RememberExpireTime = table.Column<DateTime>(type: "datetime", nullable: true),
                     IsBlacklisted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     Note = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "GETDATE()"),
-                    DeletedAt = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "GETDATE()"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "datetime", nullable: true),
                     ProfileImage = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     IsCustomAvatar = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     EmailVerificationCode = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
@@ -122,34 +161,6 @@ namespace TravelAgency.Shared.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_T_Permission", x => x.PermissionId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "T_PickupInformation",
-                columns: table => new
-                {
-                    PickupInfoId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    City = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    District = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    PostalCode = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    DetailedAddress = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_T_PickupInformation", x => x.PickupInfoId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "T_PickupMethod",
-                columns: table => new
-                {
-                    PickupMethodId = table.Column<byte>(type: "tinyint", nullable: false),
-                    PickupMethodName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_T_PickupMethod", x => x.PickupMethodId);
                 });
 
             migrationBuilder.CreateTable(
@@ -288,11 +299,11 @@ namespace TravelAgency.Shared.Migrations
                     MemberId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    IdNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    IdNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     BirthDate = table.Column<DateTime>(type: "date", nullable: false),
                     Gender = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true, defaultValue: "Other"),
                     Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DocumentType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true, defaultValue: "Passport"),
+                    DocumentType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true, defaultValue: "PASSPORT"),
                     DocumentNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     PassportSurname = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     PassportGivenName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
@@ -336,7 +347,9 @@ namespace TravelAgency.Shared.Migrations
                     Note = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     OrdererName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     OrdererPhone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    OrdererEmail = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                    OrdererEmail = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ECPayTradeNo = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    MerchantTradeNo = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -350,58 +363,47 @@ namespace TravelAgency.Shared.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "T_ResetPassword",
+                name: "T_OrderForm",
                 columns: table => new
                 {
-                    TokenId = table.Column<int>(type: "int", nullable: false)
+                    order_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    MemberId = table.Column<int>(type: "int", nullable: false),
-                    Token = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    CreatedTime = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETDATE()"),
-                    ExpireTime = table.Column<DateTime>(type: "datetime", nullable: false),
-                    IsUsed = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
+                    member_id = table.Column<int>(type: "int", nullable: false),
+                    document_menu_id = table.Column<int>(type: "int", nullable: false),
+                    departure_date = table.Column<DateTime>(type: "datetime", nullable: false),
+                    processing_quantity = table.Column<int>(type: "int", nullable: false),
+                    chinese_surname = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    chinese_name = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    english_surname = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    english_name = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    gender = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
+                    birth_date = table.Column<DateTime>(type: "datetime", nullable: false),
+                    contact_person_name = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
+                    contact_person_email = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: true),
+                    contact_person_phonenumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    Pickup_method_option = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    mailing_city = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    mailing_detail_address = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    store_detail_address = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Tax_ID_option = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    company_name = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    tax_id_number = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    order_creation_time = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_T_ResetPassword", x => x.TokenId);
+                    table.PrimaryKey("PK_T_OrderForm", x => x.order_id);
                     table.ForeignKey(
-                        name: "FK_T_ResetPassword_T_Member_MemberId",
-                        column: x => x.MemberId,
-                        principalTable: "T_Member",
-                        principalColumn: "MemberId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "T_DocumentApplicationForm",
-                columns: table => new
-                {
-                    ApplicationId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    MemberId = table.Column<int>(type: "int", nullable: false),
-                    RegionId = table.Column<int>(type: "int", maxLength: 10, nullable: true),
-                    ApplicationType = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    ProcessingItem = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    CaseType = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    ProcessingDays = table.Column<byte>(type: "tinyint", nullable: false),
-                    ExpiryDate = table.Column<DateTime>(type: "date", nullable: false),
-                    StayDuration = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    Fee = table.Column<decimal>(type: "decimal(6,2)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_T_DocumentApplicationForm", x => x.ApplicationId);
-                    table.ForeignKey(
-                        name: "FK_T_DocumentApplicationForm_T_Member_MemberId",
-                        column: x => x.MemberId,
-                        principalTable: "T_Member",
-                        principalColumn: "MemberId",
+                        name: "FK_T_OrderForm_T_DocumentMenu_document_menu_id",
+                        column: x => x.document_menu_id,
+                        principalTable: "T_DocumentMenu",
+                        principalColumn: "menu_id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_T_DocumentApplicationForm_T_Region_RegionId",
-                        column: x => x.RegionId,
-                        principalTable: "T_Region",
-                        principalColumn: "RegionId",
+                        name: "FK_T_OrderForm_T_Member_member_id",
+                        column: x => x.member_id,
+                        principalTable: "T_Member",
+                        principalColumn: "MemberId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -675,28 +677,21 @@ namespace TravelAgency.Shared.Migrations
                     OrderId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     BirthDate = table.Column<DateTime>(type: "date", nullable: false),
-                    IdNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    IdNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     Gender = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     DocumentType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     DocumentNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     PassportSurname = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     PassportGivenName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     PassportExpireDate = table.Column<DateTime>(type: "date", nullable: true),
                     Nationality = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    Note = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    MemberId = table.Column<int>(type: "int", nullable: false)
+                    Note = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_T_OrderParticipant", x => x.OrderParticipantId);
-                    table.ForeignKey(
-                        name: "FK_T_OrderParticipant_T_Member_MemberId",
-                        column: x => x.MemberId,
-                        principalTable: "T_Member",
-                        principalColumn: "MemberId",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_T_OrderParticipant_T_Order_OrderId",
                         column: x => x.OrderId,
@@ -706,53 +701,55 @@ namespace TravelAgency.Shared.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "T_DocumentOrderDetails",
+                name: "T_CompletedOrderDetail",
                 columns: table => new
                 {
-                    DocumentOrderId = table.Column<int>(type: "int", nullable: false)
+                    completed_order_detail_id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ApplicationId = table.Column<int>(type: "int", nullable: false),
-                    PickupMethodId = table.Column<byte>(type: "tinyint", nullable: false),
-                    PickupInfoId = table.Column<int>(type: "int", nullable: true),
-                    AgencyCode = table.Column<int>(type: "int", nullable: false),
-                    ApplicationType = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    RequiredData = table.Column<string>(type: "text", nullable: false),
-                    SubmissionMethod = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Notes = table.Column<string>(type: "text", nullable: false),
-                    DepartureDate = table.Column<DateTime>(type: "date", nullable: false),
-                    ProcessingCount = table.Column<byte>(type: "tinyint", nullable: false),
-                    ChineseLastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    ChineseFirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    EnglishLastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    EnglishFirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    BirthDate = table.Column<DateTime>(type: "date", nullable: false)
+                    document_menu_id = table.Column<int>(type: "int", nullable: false),
+                    order_form_id = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_T_DocumentOrderDetails", x => x.DocumentOrderId);
+                    table.PrimaryKey("PK_T_CompletedOrderDetail", x => x.completed_order_detail_id);
                     table.ForeignKey(
-                        name: "FK_T_DocumentOrderDetails_T_Agency_AgencyCode",
-                        column: x => x.AgencyCode,
-                        principalTable: "T_Agency",
-                        principalColumn: "AgencyCode",
+                        name: "FK_T_CompletedOrderDetail_T_DocumentMenu_document_menu_id",
+                        column: x => x.document_menu_id,
+                        principalTable: "T_DocumentMenu",
+                        principalColumn: "menu_id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_T_DocumentOrderDetails_T_DocumentApplicationForm_ApplicationId",
-                        column: x => x.ApplicationId,
-                        principalTable: "T_DocumentApplicationForm",
-                        principalColumn: "ApplicationId",
+                        name: "FK_T_CompletedOrderDetail_T_OrderForm_order_form_id",
+                        column: x => x.order_form_id,
+                        principalTable: "T_OrderForm",
+                        principalColumn: "order_id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "T_Payment",
+                columns: table => new
+                {
+                    payment_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    order_form_id = table.Column<int>(type: "int", nullable: false),
+                    document_menu_id = table.Column<int>(type: "int", nullable: false),
+                    payment_method = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_T_Payment", x => x.payment_id);
+                    table.ForeignKey(
+                        name: "FK_T_Payment_T_DocumentMenu_document_menu_id",
+                        column: x => x.document_menu_id,
+                        principalTable: "T_DocumentMenu",
+                        principalColumn: "menu_id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_T_DocumentOrderDetails_T_PickupInformation_PickupInfoId",
-                        column: x => x.PickupInfoId,
-                        principalTable: "T_PickupInformation",
-                        principalColumn: "PickupInfoId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_T_DocumentOrderDetails_T_PickupMethod_PickupMethodId",
-                        column: x => x.PickupMethodId,
-                        principalTable: "T_PickupMethod",
-                        principalColumn: "PickupMethodId",
+                        name: "FK_T_Payment_T_OrderForm_order_form_id",
+                        column: x => x.order_form_id,
+                        principalTable: "T_OrderForm",
+                        principalColumn: "order_id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -881,27 +878,6 @@ namespace TravelAgency.Shared.Migrations
                         principalTable: "T_Region",
                         principalColumn: "RegionId",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "T_Payment",
-                columns: table => new
-                {
-                    PaymentId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    DocumentOrderId = table.Column<int>(type: "int", nullable: false),
-                    PaymentDeadline = table.Column<DateTime>(type: "date", nullable: false),
-                    PaymentMethod = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_T_Payment", x => x.PaymentId);
-                    table.ForeignKey(
-                        name: "FK_T_Payment_T_DocumentOrderDetails_DocumentOrderId",
-                        column: x => x.DocumentOrderId,
-                        principalTable: "T_DocumentOrderDetails",
-                        principalColumn: "DocumentOrderId",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -1149,15 +1125,15 @@ namespace TravelAgency.Shared.Migrations
                 column: "ChatRoomId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_T_ChatRoom_EmployeeId",
+                name: "IX_T_ChatRoom_EmployeeId_MemberId",
                 table: "T_ChatRoom",
-                column: "EmployeeId");
+                columns: new[] { "EmployeeId", "MemberId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_T_ChatRoom_MemberId",
                 table: "T_ChatRoom",
-                column: "MemberId",
-                unique: true);
+                column: "MemberId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_T_Collect_MemberId_TravelType_TravelId",
@@ -1169,6 +1145,16 @@ namespace TravelAgency.Shared.Migrations
                 name: "IX_T_Comment_MemberId",
                 table: "T_Comment",
                 column: "MemberId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_CompletedOrderDetail_document_menu_id",
+                table: "T_CompletedOrderDetail",
+                column: "document_menu_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_CompletedOrderDetail_order_form_id",
+                table: "T_CompletedOrderDetail",
+                column: "order_form_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_T_CustomTravel_MemberId",
@@ -1184,36 +1170,6 @@ namespace TravelAgency.Shared.Migrations
                 name: "IX_T_CustomTravelContent_CustomTravelId",
                 table: "T_CustomTravelContent",
                 column: "CustomTravelId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_T_DocumentApplicationForm_MemberId",
-                table: "T_DocumentApplicationForm",
-                column: "MemberId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_T_DocumentApplicationForm_RegionId",
-                table: "T_DocumentApplicationForm",
-                column: "RegionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_T_DocumentOrderDetails_AgencyCode",
-                table: "T_DocumentOrderDetails",
-                column: "AgencyCode");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_T_DocumentOrderDetails_ApplicationId",
-                table: "T_DocumentOrderDetails",
-                column: "ApplicationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_T_DocumentOrderDetails_PickupInfoId",
-                table: "T_DocumentOrderDetails",
-                column: "PickupInfoId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_T_DocumentOrderDetails_PickupMethodId",
-                table: "T_DocumentOrderDetails",
-                column: "PickupMethodId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_T_Employee_Email",
@@ -1260,7 +1216,8 @@ namespace TravelAgency.Shared.Migrations
                 name: "IX_T_MemberFavoriteTraveler_IdNumber",
                 table: "T_MemberFavoriteTraveler",
                 column: "IdNumber",
-                unique: true);
+                unique: true,
+                filter: "[IdNumber] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_T_MemberFavoriteTraveler_MemberId",
@@ -1345,6 +1302,16 @@ namespace TravelAgency.Shared.Migrations
                 column: "OrderId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_T_OrderForm_document_menu_id",
+                table: "T_OrderForm",
+                column: "document_menu_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_T_OrderForm_member_id",
+                table: "T_OrderForm",
+                column: "member_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_T_OrderInvoices_InvoiceNumber",
                 table: "T_OrderInvoices",
                 column: "InvoiceNumber",
@@ -1360,18 +1327,8 @@ namespace TravelAgency.Shared.Migrations
                 name: "IX_T_OrderParticipant_Email",
                 table: "T_OrderParticipant",
                 column: "Email",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_T_OrderParticipant_IdNumber",
-                table: "T_OrderParticipant",
-                column: "IdNumber",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_T_OrderParticipant_MemberId",
-                table: "T_OrderParticipant",
-                column: "MemberId");
+                unique: true,
+                filter: "[Email] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_T_OrderParticipant_OrderId",
@@ -1382,17 +1339,18 @@ namespace TravelAgency.Shared.Migrations
                 name: "IX_T_OrderParticipant_Phone",
                 table: "T_OrderParticipant",
                 column: "Phone",
-                unique: true);
+                unique: true,
+                filter: "[Phone] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_T_Payment_DocumentOrderId",
+                name: "IX_T_Payment_document_menu_id",
                 table: "T_Payment",
-                column: "DocumentOrderId");
+                column: "document_menu_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_T_ResetPassword_MemberId",
-                table: "T_ResetPassword",
-                column: "MemberId");
+                name: "IX_T_Payment_order_form_id",
+                table: "T_Payment",
+                column: "order_form_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_T_Restaurant_DistrictId",
@@ -1418,6 +1376,9 @@ namespace TravelAgency.Shared.Migrations
                 name: "T_Accommodation");
 
             migrationBuilder.DropTable(
+                name: "T_Agency");
+
+            migrationBuilder.DropTable(
                 name: "T_Announcement");
 
             migrationBuilder.DropTable(
@@ -1433,10 +1394,16 @@ namespace TravelAgency.Shared.Migrations
                 name: "T_Comment");
 
             migrationBuilder.DropTable(
+                name: "T_CompletedOrderDetail");
+
+            migrationBuilder.DropTable(
                 name: "T_Countries");
 
             migrationBuilder.DropTable(
                 name: "T_CustomTravelContent");
+
+            migrationBuilder.DropTable(
+                name: "T_EmailVerificationCode");
 
             migrationBuilder.DropTable(
                 name: "T_MemberFavoriteTraveler");
@@ -1469,9 +1436,6 @@ namespace TravelAgency.Shared.Migrations
                 name: "T_Payment");
 
             migrationBuilder.DropTable(
-                name: "T_ResetPassword");
-
-            migrationBuilder.DropTable(
                 name: "T_Restaurant");
 
             migrationBuilder.DropTable(
@@ -1496,7 +1460,7 @@ namespace TravelAgency.Shared.Migrations
                 name: "T_Order");
 
             migrationBuilder.DropTable(
-                name: "T_DocumentOrderDetails");
+                name: "T_OrderForm");
 
             migrationBuilder.DropTable(
                 name: "S_District");
@@ -1508,16 +1472,7 @@ namespace TravelAgency.Shared.Migrations
                 name: "T_ChatRoom");
 
             migrationBuilder.DropTable(
-                name: "T_Agency");
-
-            migrationBuilder.DropTable(
-                name: "T_DocumentApplicationForm");
-
-            migrationBuilder.DropTable(
-                name: "T_PickupInformation");
-
-            migrationBuilder.DropTable(
-                name: "T_PickupMethod");
+                name: "T_DocumentMenu");
 
             migrationBuilder.DropTable(
                 name: "S_City");
