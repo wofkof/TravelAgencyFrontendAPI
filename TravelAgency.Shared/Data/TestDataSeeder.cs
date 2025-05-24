@@ -7,7 +7,7 @@ namespace TravelAgency.Shared.Data
     public class TestDataSeeder
     {
         private readonly AppDbContext _context;
-
+        
         public TestDataSeeder(AppDbContext context)
         {
             _context = context;
