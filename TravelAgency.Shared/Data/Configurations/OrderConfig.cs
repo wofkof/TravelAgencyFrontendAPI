@@ -22,7 +22,7 @@ namespace TravelAgency.Shared.Data.Configurations
                    .HasConversion<string>()
                    .IsRequired()
                    .HasMaxLength(20)
-                   .HasDefaultValue(OrderStatus.Pending);
+                   .HasDefaultValue(OrderStatus.Unpaid);
 
             builder.Property(o => o.CreatedAt)
                    .HasColumnType("datetime")

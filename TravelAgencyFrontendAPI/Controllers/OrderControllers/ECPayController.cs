@@ -70,69 +70,116 @@ namespace TravelAgencyFrontendAPI.Controllers.OrderControllers
         /// </summary>
         /// <param name="callbackData">綠界 POST 過來的表單資料會自動綁定到此模型</param>
         /// <returns>綠界要求的回覆字串 "OK"</returns>
-        [HttpPost("Callback")]
+        [HttpPost("ECPayReturn")]
         [Consumes("application/x-www-form-urlencoded")] // 指定消費的內容類型為表單數據
         [Produces("text/plain")] // 回傳純文字 "OK" 或其他訊息
-        public async Task<IActionResult> Callback(IFormCollection form)
+        public async Task<IActionResult> ECPayReturn(IFormCollection form)
         {
-            // 您已有的日誌記錄 Raw POST Form Data 可以保留或移至 Service
+            _logger.LogInformation("ECPayReturn (背景通知) 已被呼叫。");
+
             var rawFormParameters = new List<string>();
             foreach (var key in form.Keys) { rawFormParameters.Add($"{key}={form[key]}"); }
-            _logger.LogInformation($"ECPay Callback - Raw POST Form Data from IFormCollection: {string.Join("&", rawFormParameters)}");
+            _logger.LogInformation($"ECPayReturn - Raw POST Form Data from IFormCollection: {string.Join("&", rawFormParameters)}");
 
-            // 將整個 form 傳遞給 Service
-            string serviceResponse = await _ecpayService.ProcessEcPayCallback(form);
-
-            if (serviceResponse == "1|OK")
+            try
             {
-                return Content("1|OK", "text/plain");
+                // 將整個 form 傳遞給 Service 進行處理 (包含驗證 CheckMacValue、更新訂單、開立發票)
+                string serviceResponse = await _ecpayService.ProcessEcPayCallback(form);
+
+                // ProcessEcPayCallback 應該會回傳一個指示處理結果的字串，
+                // 例如 "1|OK" (綠界要求的成功回應), "0|ErrorMessage" (內部錯誤，但仍可能需回1|OK給綠界)
+                // 或者更細緻的內部狀態碼。
+
+                _logger.LogInformation($"ECPayService.ProcessEcPayCallback 處理完成，回應: '{serviceResponse}'");
+
+                // 根據綠界文件，通常無論內部處理細節如何 (除非是 CheckMacValue 這種嚴重錯誤)，
+                // 只要收到通知，都應該回傳 "1|OK" 給綠界，避免它重試。
+                // 內部的錯誤應透過日誌或其他方式記錄和處理。
+                if (serviceResponse.StartsWith("1|")) // 假設 Service 處理成功或雖有內部問題但仍決定告知綠界OK
+                {
+                    return Content(serviceResponse, "text/plain"); // 直接回傳 Service 的回應，例如 "1|OK" 或 "1|OK_InvoiceFailed"
+                }
+                else if (serviceResponse.StartsWith("0|")) // 假設 Service 判斷為嚴重錯誤，需告知綠界失敗
+                {
+                    _logger.LogError($"ECPayReturn 偵測到 Service 處理失敗: '{serviceResponse}'。將回傳此錯誤訊息給 ECPay。");
+                    return Content(serviceResponse, "text/plain"); // 例如 "0|CheckMacValue Error"
+                }
+                else // 未預期回應格式
+                {
+                    _logger.LogError($"ECPayService.ProcessEcPayCallback 返回未預期的回應格式: '{serviceResponse}'。預設回傳 1|OK 給綠界。");
+                    return Content("1|OK_UnknownServiceResponse", "text/plain");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                // 即使內部處理失敗，通常也建議回傳 "1|OK" 給綠界避免重試，錯誤已由內部日誌記錄
-                _logger.LogError($"ECPay Callback 處理出現問題，但仍返回 '1|OK' 給 ECPay。內部服務回應: '{serviceResponse}'");
-                return Content("1|OK", "text/plain");
+                _logger.LogError(ex, "處理 ECPayReturn 時發生未預期的 Controller 層例外錯誤。");
+                // 發生嚴重例外，可能無法安全回覆綠界。但通常仍建議回覆1|OK避免重試，錯誤已記錄。
+                return Content("1|OK_ControllerException", "text/plain");
             }
         }
 
         /// <summary>
-        /// [綠界呼叫] 綠界支付完成後，會將使用者瀏覽器導向此 URL (ClientRedirectURL / OrderResultURL)。
+        /// [綠界呼叫] 綠界支付完成後，會將使用者瀏覽器導向此 URL (OrderResultURL)。
         /// 這個端點主要用於將使用者重導向回前端的訂單結果頁面。
-        /// 路由：POST /api/ECPay/Return/{orderId}
+        /// 路由：POST /api/ECPay/ECPayOrderResult (確保與 ECPayService 中設定的 OrderResultURL 路徑一致)
         /// </summary>
-        /// <param name="orderId">從路由中取得的訂單 ID</param>
-        /// <param name="callbackData">綠界 POST 過來的表單資料會自動綁定到此模型</param>
-        /// <returns>重導向到前端的訂單結果頁面</returns>
-        [HttpPost("Return/{orderId}")] // <--- 請確保這裡有 [HttpPost] 屬性
-        [Consumes("application/x-www-form-urlencoded")] // 指定消費的內容類型為表單數據
-        public async Task<IActionResult> Return(int orderId, IFormCollection form) // 改為接收 IFormCollection
+        [HttpPost("ECPayOrderResult")] // **修改點：確保路由名稱與 Service 中設定的 OrderResultURL 一致**
+        [Consumes("application/x-www-form-urlencoded")]
+        public async Task<IActionResult> ECPayOrderResult(IFormCollection form) // **修改點：方法名稱建議與路由對應，orderId 通常由 form 或 CustomField 傳遞**
         {
-            _logger.LogInformation($"收到綠界 ClientReturn (OrderResultURL)。訂單 ID: {orderId}");
-            _logger.LogInformation($"ECPay ClientReturn (OrderResultURL) - Raw POST Form Data from IFormCollection: {string.Join("&", form.Select(kv => $"{kv.Key}={kv.Value}"))}");
+            // START: 修改 Return 方法 (或重命名為 ECPayOrderResult)
+            _logger.LogInformation("ECPayOrderResult (客戶端前景導向) 已被呼叫。");
+
+            // 嘗試從表單中獲取 CustomField1 (假設儲存了 orderId) 或 MerchantTradeNo
+            string orderIdFromCustomField = form.TryGetValue("CustomField1", out var cf1Val) ? cf1Val.ToString() : null;
+            string merchantTradeNoFromForm = form.TryGetValue("MerchantTradeNo", out var mtnVal) ? mtnVal.ToString() : null;
+            int orderIdForRedirect = 0;
+
+            if (!string.IsNullOrEmpty(orderIdFromCustomField) && int.TryParse(orderIdFromCustomField, out int parsedOrderId))
+            {
+                orderIdForRedirect = parsedOrderId;
+            }
+            else if (!string.IsNullOrEmpty(merchantTradeNoFromForm))
+            {
+                // 如果只有 MerchantTradeNo，你可能需要一個快速查詢來獲取 OrderId (如果前端頁面強烈依賴 OrderId)
+                // 但更簡單的做法是讓前端結果頁面能同時接受 OrderId 或 MerchantTradeNo
+                _logger.LogInformation($"ECPayOrderResult: 收到 MerchantTradeNo '{merchantTradeNoFromForm}' 但 CustomField1 (OrderId) 為空或無效。");
+                // 此處可以選擇是否根據 MTN 去資料庫反查 OrderID，或直接將 MTN 傳給前端。
+                // 為簡化，假設前端能處理 MTN，或者 GetFrontendRedirectUrlAfterPayment 內部會處理。
+            }
+            else
+            {
+                _logger.LogWarning("ECPayOrderResult: 無法從 Form 中獲取 OrderId (CustomField1) 或 MerchantTradeNo。");
+                // 導向一個通用的錯誤頁面
+                return Redirect(_ecpayConfig.FrontendFailureUrl + $"?error=missing_order_identifier_client");
+            }
+
+
+            _logger.LogInformation($"ECPayOrderResult - Raw POST Form Data: {string.Join("&", form.Select(kv => $"{kv.Key}={kv.Value}"))}");
             try
             {
-                // 記錄一下 OrderResultURL 收到的 Raw POST Data
-                var rawFormParameters = new List<string>();
-                foreach (var key in form.Keys) { rawFormParameters.Add($"{key}={form[key]}"); }
-                _logger.LogInformation($"ECPay ClientReturn (OrderResultURL) - Raw POST Form Data from IFormCollection: {string.Join("&", rawFormParameters)}");
+                // 將整個 form 傳遞給 Service，由 Service 處理 CheckMacValue (可選) 和產生重導向 URL
+                // 注意：orderIdForRedirect 是從 CustomField1 解析的，如果您的 Service 需要它，則傳入。
+                // 如果 GetFrontendRedirectUrlAfterPayment 僅依賴 form 內容，則 orderIdForRedirect 可能非必需。
+                string redirectUrl = await _ecpayService.GetFrontendRedirectUrlAfterPayment(form, orderIdForRedirect); // 傳入解析出的 orderId
 
-                // 將整個 form 傳遞給 Service
-                string redirectUrl = await _ecpayService.GetFrontendRedirectUrlAfterPayment(form, orderId);
                 _logger.LogInformation($"GetFrontendRedirectUrlAfterPayment 返回的重導向 URL: {redirectUrl}");
 
                 if (string.IsNullOrEmpty(redirectUrl))
                 {
-                    _logger.LogError($"GetFrontendRedirectUrlAfterPayment 為訂單 {orderId} 返回了空或無效的重導向 URL。導向預設失敗頁。");
-                    return Redirect(_ecpayConfig.FrontendFailureUrl + $"?orderId={orderId}&error=internal_redirect_error");
+                    _logger.LogError($"GetFrontendRedirectUrlAfterPayment 為訂單 (解析ID: {orderIdForRedirect}, MTN: {merchantTradeNoFromForm}) 返回了空或無效的重導向 URL。導向預設失敗頁。");
+                    return Redirect(_ecpayConfig.FrontendFailureUrl + $"?orderId={orderIdForRedirect}&mtn={merchantTradeNoFromForm}&error=internal_redirect_error");
                 }
                 return Redirect(redirectUrl);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"處理訂單 {orderId} 的 ClientReturn (OrderResultURL) 時發生錯誤。");
-                return Redirect(_ecpayConfig.FrontendFailureUrl + $"?orderId={orderId}&error=exception");
+                _logger.LogError(ex, $"處理訂單 (解析ID: {orderIdForRedirect}, MTN: {merchantTradeNoFromForm}) 的 ECPayOrderResult 時發生錯誤。");
+                return Redirect(_ecpayConfig.FrontendFailureUrl + $"?orderId={orderIdForRedirect}&mtn={merchantTradeNoFromForm}&error=exception_client_return");
             }
+
         }
+
         // 您也可以新增一個用於查詢訂單狀態的 API，但這通常需要綠界提供專門的查詢 API
         // [HttpGet("Query/{orderId}")]
         // public async Task<IActionResult> QueryPaymentStatus(int orderId)
