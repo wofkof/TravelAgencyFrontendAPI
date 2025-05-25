@@ -1719,10 +1719,10 @@ namespace TravelAgency.Shared.Data
 
 
             var customTravelItem1 = await _context.CustomTravels
-                .Where(ct => ct.Status == CustomTravelStatus.Approved && ct.Note == "測試行程1")
+                .Where(ct => ct.Status == CustomTravelStatus.Completed && ct.Note == "台南旅遊")
                 .OrderBy(ct => ct.CustomTravelId)
                 .FirstOrDefaultAsync();
-            if (customTravelItem1 == null) { Console.WriteLine("客製化旅遊項目1 ('測試行程1') 未找到。"); }
+            if (customTravelItem1 == null) { Console.WriteLine("客製化旅遊項目1 ('台南旅遊') 未找到。"); }
 
             var ordersToAdd = new List<Order>();
             var now = DateTime.Now;
@@ -2007,7 +2007,7 @@ namespace TravelAgency.Shared.Data
             }
         }
 
-    }
+    
 
     //private async Task SeedPermissionsAsync()
     //{
@@ -2084,29 +2084,6 @@ namespace TravelAgency.Shared.Data
                 _context.Permissions.AddRange(toAdd);
                 await _context.SaveChangesAsync();
 
-    //        await _context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT T_Permission OFF");
-    //        await _context.Database.CloseConnectionAsync();
-    //    }
-    //}
-    //角色對應權限假資料
-    //private async Task SeedRolePermissionsAsync()
-    //{
-    //    var now = DateTime.Now;
-    //    var mappings = new List<(int RoleId, int PermissionId)>
-    //    {
-    //        (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9),
-    //        (1, 10), (1, 11), (1, 12), (1, 13), (1, 14), (1, 15), (1, 16), (1, 17), (1, 18), (1, 19), (1, 20), (1, 21), (1, 22),
-    //        (2, 1), (2, 2), (2, 20),
-    //        (3, 14), (3, 15), (3, 16), (3, 17), (3, 20),
-    //        (4, 1), (4, 2), (4, 3), (4, 4), (4, 5), (4, 10), (4, 20),
-    //        (5, 11), (5, 12), (5, 20),
-    //        (6, 1), (6, 8), (6, 9), (6, 13), (6, 20),
-    //        (7, 20)
-    //    };
-
-    //    var existing = _context.RolePermissions
-    //        .Select(rp => new { rp.RoleId, rp.PermissionId })
-    //        .ToHashSet();
                 await _context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT T_Permission OFF");
                 await _context.Database.CloseConnectionAsync();
             }
@@ -2127,25 +2104,12 @@ namespace TravelAgency.Shared.Data
                 (7, 20)
             };
 
-    //    var toAdd = mappings
-    //        .Where(m => !existing.Contains(new { m.RoleId, m.PermissionId }))
-    //        .Select(m => new RolePermission
-    //        {
-    //            RoleId = m.RoleId,
-    //            PermissionId = m.PermissionId,
-    //            CreatedAt = now
-    //        })
-    //        .ToList();
+
             var existing = _context.RolePermissions
                 .Select(rp => new { rp.RoleId, rp.PermissionId })
                 .ToHashSet();
 
-    //    if (toAdd.Any())
-    //    {
-    //        _context.RolePermissions.AddRange(toAdd);
-    //        await _context.SaveChangesAsync();
-    //    }
-    //}
+
             var toAdd = mappings
                 .Where(m => !existing.Contains(new { m.RoleId, m.PermissionId }))
                 .Select(m => new RolePermission
@@ -2156,7 +2120,7 @@ namespace TravelAgency.Shared.Data
                 })
                 .ToList();
 
-}
+
 
             if (toAdd.Any())
             {
