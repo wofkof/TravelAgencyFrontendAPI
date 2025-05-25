@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Newtonsoft.Json.Linq;
+using System.Xml.Linq;
 using TravelAgency.Shared.Models;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace TravelAgencyBackend.Helpers
 {
@@ -21,7 +24,8 @@ namespace TravelAgencyBackend.Helpers
                 .Cast<T>()
                 .Select(e => new SelectListItem
                 {
-                    Value = e.ToString(),
+                    //Value = e.ToString(),
+                    Value = Convert.ToInt32(e).ToString(),
                     Text = GetDisplayName(e)
                 }).ToList();
         }
@@ -42,14 +46,10 @@ namespace TravelAgencyBackend.Helpers
             },
             [typeof(DocumentType)] = new()
             {
-                ["ID_CARD_TW"] = "身分證",
+                ["ID_CARD_TW"] = "身分證 (台灣)",
                 ["PASSPORT"] = "護照",
-                ["ResidencePermit"] = "居留證",
-                ["EntryPermit"] = "入台證"
-               
-                
-                //ARC = 2,
-                //ENTRY_PERMIT = 3,
+                ["ARC"] = "居留證",
+                ["ENTRY_PERMIT"] = "入台證"
             },
             [typeof(AnnouncementStatus)] = new()
             {
@@ -112,16 +112,6 @@ namespace TravelAgencyBackend.Helpers
                 ["Attraction"] = "景點",
                 ["Restaurant"] = "餐廳",
                 ["Transport"] = "交通"
-            },
-            [typeof(ApplicationType)] = new()
-            {
-                ["Passport"] = "護照",
-                ["Visa"] = "簽證"
-            },
-            [typeof(CaseType)] = new()
-            {
-                ["General"] = "一般",
-                ["Urgent"] = "急件"
             },
             [typeof(EmployeeStatus)] = new()
             {
@@ -206,11 +196,6 @@ namespace TravelAgencyBackend.Helpers
                 ["ElectronicInvoice"] = "電子發票",
                 ["Double"] = "二聯式",
                 ["Triplet"] = "三聯式"
-            },
-            [typeof(PickupMethodName)] = new()
-            {
-                ["SelfPickup"] = "自取",
-                ["HomeDelivery"] = "宅配"
             },
             [typeof(SupplierType)] = new()
             {

@@ -3,7 +3,7 @@
     public class Sticker
     {
         public int StickerId { get; set; }
-        public string Category { get; set; }
-        public string ImagePath { get; set; }
+        public string Category { get; set; } = string.Empty;
+        public string ImagePath { get; set; } = string.Empty;
     }
 }

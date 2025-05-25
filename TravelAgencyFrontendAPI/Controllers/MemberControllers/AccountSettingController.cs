@@ -19,13 +19,13 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
 
         // GET: api/AccountSetting/profile?memberId=123
         [HttpGet("profile")]
-        public async Task<ActionResult<AccountSetting>> GetProfile([FromQuery] int memberId)
+        public async Task<ActionResult<AccountSettingDto>> GetProfile([FromQuery] int memberId)
         {
             var member = await _context.Members.FindAsync(memberId);
             if (member == null)
                 return NotFound("找不到會員資料");
 
-            var dto = new AccountSetting
+            var dto = new AccountSettingDto
             {
                 MemberId = member.MemberId,
                 Name = member.Name,
@@ -51,7 +51,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
 
         // PUT: api/AccountSetting/profile
         [HttpPut("profile")]
-        public async Task<IActionResult> UpdateProfile([FromBody] AccountSetting dto)
+        public async Task<IActionResult> UpdateProfile([FromBody] AccountSettingDto dto)
         {
             var member = await _context.Members.FindAsync(dto.MemberId);
             if (member == null)

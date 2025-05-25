@@ -114,11 +114,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+var mvcWwwroot = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "../TravelAgencyBackend/wwwroot"));
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "Uploads")),
-    RequestPath = "/Uploads"
+    FileProvider = new PhysicalFileProvider(mvcWwwroot),
+    RequestPath = "/uploads"
 });
 
 app.UseRouting();               

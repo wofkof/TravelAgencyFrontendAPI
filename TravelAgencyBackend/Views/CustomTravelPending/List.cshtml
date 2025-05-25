@@ -1,4 +1,5 @@
 ﻿@model TravelAgencyBackend.ViewModels.CustomTravelPendingViewModel
+@using TravelAgencyBackend.Helpers
 
 @{
 	ViewData["Title"] = "List";
@@ -20,40 +21,52 @@
 	<thead>
 		<tr>
 			<th>
-				@Html.DisplayNameFor(model => model.CustomTravel.First().CustomTravelId)
+				@* @Html.DisplayNameFor(model => model.CustomTravel.First().CustomTravelId) *@
+				行程編號
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.CustomTravel.First().MemberId)
+				@* @Html.DisplayNameFor(model => model.CustomTravel.First().MemberId) *@
+				會員名稱
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.CustomTravel.First().ReviewEmployeeId)
+				@* @Html.DisplayNameFor(model => model.CustomTravel.First().ReviewEmployeeId) *@
+				員工名稱
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.CustomTravel.First().CreatedAt)
+				@* @Html.DisplayNameFor(model => model.CustomTravel.First().CreatedAt) *@
+				新增日期
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.CustomTravel.First().UpdatedAt)
+				@* @Html.DisplayNameFor(model => model.CustomTravel.First().UpdatedAt) *@
+				更新日期
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.CustomTravel.First().DepartureDate)
+				@* @Html.DisplayNameFor(model => model.CustomTravel.First().DepartureDate) *@
+				出發日期
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.CustomTravel.First().EndDate)
+				@* @Html.DisplayNameFor(model => model.CustomTravel.First().EndDate) *@
+				結束日期
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.CustomTravel.First().Days)
+				@* @Html.DisplayNameFor(model => model.CustomTravel.First().Days) *@
+				天數
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.CustomTravel.First().People)
+				@* @Html.DisplayNameFor(model => model.CustomTravel.First().People) *@
+				人數
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.CustomTravel.First().TotalAmount)
+				@* @Html.DisplayNameFor(model => model.CustomTravel.First().TotalAmount) *@
+				總金額
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.CustomTravel.First().Status)
+				@* @Html.DisplayNameFor(model => model.CustomTravel.First().Status) *@
+				狀態
 			</th>
 			<th>
-				@Html.DisplayNameFor(model => model.CustomTravel.First().Note)
+				@* @Html.DisplayNameFor(model => model.CustomTravel.First().Note) *@
+				行程名稱
 			</th>
 			<th>檢視</th>
 			<th>修改</th>
@@ -68,10 +81,10 @@
 					@Html.DisplayFor(modelItem => item.CustomTravelId)
 				</td>
 				<td>
-					@Html.DisplayFor(modelItem => item.MemberId)
+					@Html.DisplayFor(modelItem => item.Member.Name)
 				</td>
 				<td>
-					@Html.DisplayFor(modelItem => item.ReviewEmployeeId)
+					@Html.DisplayFor(modelItem => item.ReviewEmployee.Name)
 				</td>
 				<td>
 					@Html.DisplayFor(modelItem => item.CreatedAt)
@@ -80,10 +93,12 @@
 					@Html.DisplayFor(modelItem => item.UpdatedAt)
 				</td>
 				<td>
-					@Html.DisplayFor(modelItem => item.DepartureDate)
+					@* @Html.DisplayFor(modelItem => item.DepartureDate) *@
+					@item.DepartureDate?.ToString("yyyy/MM/dd")
 				</td>
 				<td>
-					@Html.DisplayFor(modelItem => item.EndDate)
+					@* @Html.DisplayFor(modelItem => item.EndDate) *@
+					@item.EndDate?.ToString("yyyy/MM/dd")
 				</td>
 				<td>
 					@Html.DisplayFor(modelItem => item.Days)
@@ -92,10 +107,12 @@
 					@Html.DisplayFor(modelItem => item.People)
 				</td>
 				<td>
-					@Html.DisplayFor(modelItem => item.TotalAmount)
+					@* @Html.DisplayFor(modelItem => item.TotalAmount) *@
+					@item.TotalAmount.ToString("C0", new System.Globalization.CultureInfo("zh-TW"))
 				</td>
 				<td>
-					@Html.DisplayFor(modelItem => item.Status)
+					@* @Html.DisplayFor(modelItem => item.Status) *@
+					@EnumDisplayHelper.GetDisplayName(item.Status)
 				</td>
 				<td>
 					@Html.DisplayFor(modelItem => item.Note)

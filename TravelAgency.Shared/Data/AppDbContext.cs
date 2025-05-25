@@ -44,14 +44,13 @@ namespace TravelAgency.Shared.Data
         public DbSet<Collect> Collects { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<OrderParticipant> OrderParticipants { get; set; }
-        public DbSet<DocumentApplicationForm> DocumentApplicationForms { get; set; }
-        public DbSet<DocumentOrderDetails> DocumentOrderDetails { get; set; }
-        public DbSet<PickupMethod> PickupMethods { get; set; }
-        public DbSet<PickupInformation> PickupInformations { get; set; }
         public DbSet<Agency> Agencies { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<OrderInvoice> OrderInvoices { get; set; }
+        public DbSet<CompletedOrderDetail> CompletedOrderDetails { get; set; }
+        public DbSet<DocumentMenu> DocumentMenus { get; set; }
+        public DbSet<OrderForm> OrderForms { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
