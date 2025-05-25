@@ -14,6 +14,10 @@
     var ratingCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.RatingCounts ?? new List<int>());
     var travelStatusLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.TravelStatusLabels ?? new List<string>());
     var travelStatusCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.TravelStatusCounts ?? new List<int>());
+    var officialTravelStatusLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.OfficialTravelStatusLabels ?? new List<string>());
+    var officialTravelStatusCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.OfficialTravelStatusCounts ?? new List<int>());
+    var officialTravelMonthLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.OfficialTravelMonthLabels ?? new List<string>());
+    var officialTravelMonthCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.OfficialTravelMonthCounts ?? new List<int>());
 }
 
 <div class="app-page-title">
@@ -43,6 +47,7 @@
 
 <div class="row">
     @await Html.PartialAsync("Partials/_TravelStatusChart")
+    @await Html.PartialAsync("Partials/_OfficialTravelChart")
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -61,6 +66,9 @@
     const ratingData = @Html.Raw(ratingCountsJson);
     const travelStatusLabels = @Html.Raw(travelStatusLabelsJson);
     const travelStatusData = @Html.Raw(travelStatusCountsJson);
+    const officialTravelStatusLabels = @Html.Raw(officialTravelStatusLabelsJson);
+    const officialTravelStatusCounts = @Html.Raw(officialTravelStatusCountsJson);
+    const officialTravelMonthLabels = @Html.Raw(officialTravelMonthLabelsJson);
+    const officialTravelMonthCounts = @Html.Raw(officialTravelMonthCountsJson);
 </script>
-<script src="~/assets/scripts/dashboard_charts.js"></script>
-
+<script src="/assets/scripts/dashboard_charts.js"></script>

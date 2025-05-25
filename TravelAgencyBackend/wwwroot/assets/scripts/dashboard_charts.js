@@ -137,4 +137,44 @@
         },
         options: { responsive: true, maintainAspectRatio: false }
     });
+
+    tryInitChart("officialTravelStatusChart", {
+        type: "pie",
+        data: {
+            labels: officialTravelStatusLabels,
+            datasets: [{
+                label: "官方行程狀態",
+                data: officialTravelStatusCounts,
+                backgroundColor: [
+                    "rgba(255, 99, 132, 0.6)",
+                    "rgba(255, 205, 86, 0.6)",
+                    "rgba(54, 162, 235, 0.6)"
+                ],
+                borderColor: "rgba(255, 255, 255, 1)",
+                borderWidth: 1
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    tryInitChart("officialTravelMonthChart", {
+        type: "bar",
+        data: {
+            labels: officialTravelMonthLabels,
+            datasets: [{
+                label: "每月新增官方行程數",
+                data: officialTravelMonthCounts,
+                backgroundColor: "rgba(153, 102, 255, 0.6)",
+                borderColor: "rgba(153, 102, 255, 1)",
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, precision: 0 }
+            }
+        }
+    });
 });

@@ -33,87 +33,50 @@ namespace TravelAgencyBackend.Controllers
 
             var rawOrderStats = _context.Orders
                 .GroupBy(o => new { o.CreatedAt.Year, o.CreatedAt.Month })
-                .Select(g => new
-                {
-                    Year = g.Key.Year,
-                    Month = g.Key.Month,
-                    Count = g.Count()
-                })
+                .Select(g => new { Year = g.Key.Year, Month = g.Key.Month, Count = g.Count() })
                 .ToList();
 
             var monthlyOrderStats = rawOrderStats
-                .Select(x => new
-                {
-                    Month = $"{x.Year}-{x.Month.ToString("D2")}",
-                    Count = x.Count
-                })
-                .OrderBy(x => x.Month)
-                .ToList();
+                .Select(x => new { Month = $"{x.Year}-{x.Month.ToString("D2")}", Count = x.Count })
+                .OrderBy(x => x.Month).ToList();
 
-            var genderStats = _context.Members
-                .GroupBy(m => m.Gender)
-                .Select(g => new
-                {
-                    Gender = g.Key,
-                    Count = g.Count()
-                })
-                .ToList();
+            var genderStats = _context.Members.GroupBy(m => m.Gender)
+                .Select(g => new { Gender = g.Key, Count = g.Count() }).ToList();
 
-            var paymentStats = _context.Orders
-                .GroupBy(o => o.PaymentMethod)
-                .Select(g => new
-                {
-                    Method = g.Key,
-                    Count = g.Count()
-                })
-                .ToList();
+            var paymentStats = _context.Orders.GroupBy(o => o.PaymentMethod)
+                .Select(g => new { Method = g.Key, Count = g.Count() }).ToList();
 
-            var orderStatusStats = _context.Orders
-                .GroupBy(o => o.Status)
-                .Select(g => new
-                {
-                    Status = g.Key,
-                    Count = g.Count()
-                })
-                .ToList();
+            var orderStatusStats = _context.Orders.GroupBy(o => o.Status)
+                .Select(g => new { Status = g.Key, Count = g.Count() }).ToList();
 
             var memberMonthlyStats = _context.Members
                 .GroupBy(m => new { m.RegisterDate.Year, m.RegisterDate.Month })
-                .Select(g => new
-                {
-                    Year = g.Key.Year,
-                    Month = g.Key.Month,
-                    Count = g.Count()
-                })
+                .Select(g => new { Year = g.Key.Year, Month = g.Key.Month, Count = g.Count() })
                 .ToList();
 
             var monthlyMemberStats = memberMonthlyStats
-                .Select(x => new
-                {
-                    Month = $"{x.Year}-{x.Month.ToString("D2")}",
-                    Count = x.Count
-                })
-                .OrderBy(x => x.Month)
-                .ToList();
+                .Select(x => new { Month = $"{x.Year}-{x.Month.ToString("D2")}", Count = x.Count })
+                .OrderBy(x => x.Month).ToList();
 
             var ratingStats = _context.Comments
                 .GroupBy(c => c.Rating)
-                .Select(g => new
-                {
-                    Rating = g.Key,
-                    Count = g.Count()
-                })
-                .OrderBy(g => g.Rating)
+                .Select(g => new { Rating = g.Key, Count = g.Count() })
+                .OrderBy(g => g.Rating).ToList();
+
+            var travelStatusStats = _context.CustomTravels.GroupBy(t => t.Status)
+                .Select(g => new { Status = g.Key, Count = g.Count() }).ToList();
+
+            var officialTravelStatusStats = _context.OfficialTravels.GroupBy(o => o.Status)
+                .Select(g => new { Status = g.Key, Count = g.Count() }).ToList();
+
+            var officialTravelMonthlyStats = _context.OfficialTravels
+                .GroupBy(o => new { o.CreatedAt.Value.Year, o.CreatedAt.Value.Month })
+                .Select(g => new { Year = g.Key.Year, Month = g.Key.Month, Count = g.Count() })
                 .ToList();
 
-            var travelStatusStats = _context.CustomTravels
-                .GroupBy(t => t.Status)
-                .Select(g => new
-                {
-                    Status = g.Key,
-                    Count = g.Count()
-                })
-                .ToList();
+            var monthlyOfficialTravelStats = officialTravelMonthlyStats
+                .Select(x => new { Month = $"{x.Year}-{x.Month.ToString("D2")}", Count = x.Count })
+                .OrderBy(x => x.Month).ToList();
 
             ViewBag.TotalMembers = totalMembers;
             ViewBag.TotalOrders = totalOrders;
@@ -125,23 +88,13 @@ namespace TravelAgencyBackend.Controllers
             ViewBag.OrderMonthLabels = monthlyOrderStats.Select(x => x.Month).ToList();
             ViewBag.OrderMonthCounts = monthlyOrderStats.Select(x => x.Count).ToList();
 
-            ViewBag.GenderLabels = genderStats
-                .Select(x => x.Gender.HasValue
-                    ? EnumDisplayHelper.GetDisplayName(x.Gender.Value)
-                    : "¥¼¶ñ¼g")
-                .ToList();
+            ViewBag.GenderLabels = genderStats.Select(x => x.Gender.HasValue ? EnumDisplayHelper.GetDisplayName(x.Gender.Value) : "¥¼¶ñ¼g").ToList();
             ViewBag.GenderCounts = genderStats.Select(x => x.Count).ToList();
 
-            ViewBag.PaymentLabels = paymentStats
-                .Select(x => x.Method.HasValue
-                    ? EnumDisplayHelper.GetDisplayName(x.Method.Value)
-                    : "¥¼¶ñ¼g")
-                .ToList();
+            ViewBag.PaymentLabels = paymentStats.Select(x => x.Method.HasValue ? EnumDisplayHelper.GetDisplayName(x.Method.Value) : "¥¼¶ñ¼g").ToList();
             ViewBag.PaymentCounts = paymentStats.Select(x => x.Count).ToList();
 
-            ViewBag.OrderStatusLabels = orderStatusStats
-                .Select(x => EnumDisplayHelper.GetDisplayName(x.Status))
-                .ToList();
+            ViewBag.OrderStatusLabels = orderStatusStats.Select(x => EnumDisplayHelper.GetDisplayName(x.Status)).ToList();
             ViewBag.OrderStatusCounts = orderStatusStats.Select(x => x.Count).ToList();
 
             ViewBag.MemberMonthLabels = monthlyMemberStats.Select(x => x.Month).ToList();
@@ -152,6 +105,12 @@ namespace TravelAgencyBackend.Controllers
 
             ViewBag.TravelStatusLabels = travelStatusStats.Select(x => EnumDisplayHelper.GetDisplayName(x.Status)).ToList();
             ViewBag.TravelStatusCounts = travelStatusStats.Select(x => x.Count).ToList();
+
+            ViewBag.OfficialTravelStatusLabels = officialTravelStatusStats.Select(x => EnumDisplayHelper.GetDisplayName(x.Status.Value)).ToList();
+            ViewBag.OfficialTravelStatusCounts = officialTravelStatusStats.Select(x => x.Count).ToList();
+
+            ViewBag.OfficialTravelMonthLabels = monthlyOfficialTravelStats.Select(x => x.Month).ToList();
+            ViewBag.OfficialTravelMonthCounts = monthlyOfficialTravelStats.Select(x => x.Count).ToList();
 
             return View();
         }
