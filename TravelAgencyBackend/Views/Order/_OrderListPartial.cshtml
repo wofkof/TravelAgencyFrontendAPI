@@ -61,11 +61,11 @@
                                 // 假設 Enum 有 Paid, PendingPayment, Unpaid
                                 switch (item.Status)
                                 {
-                                    case OrderStatus.Completed: // 已付款
+                                    case OrderStatus.Completed: // 付款完成
                                         badgeClass = "bg-success";
-                                        statusText = "已付款"; // 顯示中文
+                                        statusText = "付款完成"; // 顯示中文
                                         break;
-                                    case OrderStatus.Pending: // 待付款
+                                    case OrderStatus.Awaiting: // 待付款
                                         badgeClass = "bg-warning text-dark"; // 黃底建議搭配深色文字
                                         statusText = "待付款";
                                         break;

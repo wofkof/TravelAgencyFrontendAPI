@@ -36,8 +36,8 @@
                     string badgeClass = "bg-secondary"; string statusText = Model.Status.ToString();
                     switch (Model.Status)
                     {
-                        case OrderStatus.Completed: badgeClass = "bg-success"; statusText = "已付款"; break;
-                        case OrderStatus.Pending: badgeClass = "bg-warning text-dark"; statusText = "待付款"; break; // 假設 Enum 是 Pending
+                        case OrderStatus.Completed: badgeClass = "bg-success"; statusText = "付款完成"; break;
+                        case OrderStatus.Awaiting: badgeClass = "bg-warning text-dark"; statusText = "待付款"; break; // 假設 Enum 是 Awaiting
                         case OrderStatus.Cancelled: badgeClass = "bg-danger"; statusText = "已取消"; break;
                         default: badgeClass = "bg-info text-dark"; break;
                     }
