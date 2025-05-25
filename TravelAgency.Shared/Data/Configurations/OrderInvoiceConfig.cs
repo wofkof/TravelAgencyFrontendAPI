@@ -12,7 +12,7 @@ namespace TravelAgency.Shared.Data.Configurations
 
             builder.HasKey(i => i.InvoiceId);
 
-            builder.Property(i => i.InvoiceNumber).HasMaxLength(10);
+            builder.Property(i => i.InvoiceNumber).HasMaxLength(20);
             builder.Property(i => i.BuyerName).HasMaxLength(100);
             builder.Property(i => i.InvoiceFileURL).HasMaxLength(255);
             builder.Property(i => i.BuyerUniformNumber).HasMaxLength(8);
