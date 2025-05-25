@@ -1,21 +1,66 @@
 ﻿@{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "首頁";
+    var orderLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.OrderMonthLabels ?? new List<string>());
+    var orderCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.OrderMonthCounts ?? new List<int>());
+    var genderLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.GenderLabels ?? new List<string>());
+    var genderCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.GenderCounts ?? new List<int>());
+    var paymentLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.PaymentLabels ?? new List<string>());
+    var paymentCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.PaymentCounts ?? new List<int>());
+    var orderStatusLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.OrderStatusLabels ?? new List<string>());
+    var orderStatusCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.OrderStatusCounts ?? new List<int>());
+    var memberMonthLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.MemberMonthLabels ?? new List<string>());
+    var memberMonthCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.MemberMonthCounts ?? new List<int>());
+    var ratingLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.RatingLabels ?? new List<string>());
+    var ratingCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.RatingCounts ?? new List<int>());
+    var travelStatusLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.TravelStatusLabels ?? new List<string>());
+    var travelStatusCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.TravelStatusCounts ?? new List<int>());
 }
 
-<div class="app-main__inner">
-    <div class="app-page-title">
-        <div class="page-title-wrapper">
-            <div class="page-title-heading">
-                <div class="page-title-icon">
-                    <i class="pe-7s-rocket icon-gradient bg-mean-fruit"></i>
-                </div>
-                <div>
-                    Analytics Dashboard
-                    <div class="page-title-subheading">
-                        This is an example dashboard created using ArchitectUI theme.
-                    </div>
-                </div>
-            </div>
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div>後台首頁 Dashboard</div>
         </div>
     </div>
 </div>
+
+@await Html.PartialAsync("Partials/_KpiCards")
+
+<div class="row">
+    @await Html.PartialAsync("Partials/_GenderChart")
+    @await Html.PartialAsync("Partials/_OrderChart")
+</div>
+
+<div class="row">
+    @await Html.PartialAsync("Partials/_PaymentChart")
+    @await Html.PartialAsync("Partials/_OrderStatusChart")
+</div>
+
+<div class="row">
+    @await Html.PartialAsync("Partials/_MemberChart")
+    @await Html.PartialAsync("Partials/_RatingChart")
+</div>
+
+<div class="row">
+    @await Html.PartialAsync("Partials/_TravelStatusChart")
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const orderLabels = @Html.Raw(orderLabelsJson);
+    const orderData = @Html.Raw(orderCountsJson);
+    const genderLabels = @Html.Raw(genderLabelsJson);
+    const genderData = @Html.Raw(genderCountsJson);
+    const paymentLabels = @Html.Raw(paymentLabelsJson);
+    const paymentData = @Html.Raw(paymentCountsJson);
+    const orderStatusLabels = @Html.Raw(orderStatusLabelsJson);
+    const orderStatusData = @Html.Raw(orderStatusCountsJson);
+    const memberLabels = @Html.Raw(memberMonthLabelsJson);
+    const memberData = @Html.Raw(memberMonthCountsJson);
+    const ratingLabels = @Html.Raw(ratingLabelsJson);
+    const ratingData = @Html.Raw(ratingCountsJson);
+    const travelStatusLabels = @Html.Raw(travelStatusLabelsJson);
+    const travelStatusData = @Html.Raw(travelStatusCountsJson);
+</script>
+<script src="~/assets/scripts/dashboard_charts.js"></script>
+
