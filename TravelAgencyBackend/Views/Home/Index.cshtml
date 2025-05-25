@@ -18,37 +18,46 @@
     var officialTravelStatusCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.OfficialTravelStatusCounts ?? new List<int>());
     var officialTravelMonthLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.OfficialTravelMonthLabels ?? new List<string>());
     var officialTravelMonthCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.OfficialTravelMonthCounts ?? new List<int>());
+    var groupStatusLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.GroupStatusLabels ?? new List<string>());
+    var groupStatusCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.GroupStatusCounts ?? new List<int>());
+    var customTravelMonthLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.CustomTravelMonthLabels ?? new List<string>());
+    var customTravelMonthCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.CustomTravelMonthCounts ?? new List<int>());
 }
 
-<div class="app-page-title">
-    <div class="page-title-wrapper">
-        <div class="page-title-heading">
-            <div>後台首頁 Dashboard</div>
+<section class="container-fluid px-4">
+    <div class="app-page-title">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <h1 class="text-center mb-4 fw-bold">嶼你同行後台首頁</h1>
+            </div>
         </div>
     </div>
-</div>
 
-@await Html.PartialAsync("Partials/_KpiCards")
+    @await Html.PartialAsync("Partials/_KpiCards")
 
-<div class="row">
-    @await Html.PartialAsync("Partials/_GenderChart")
-    @await Html.PartialAsync("Partials/_OrderChart")
-</div>
+    <div class="row g-3">
+        @await Html.PartialAsync("Partials/_AnnouncementList")
+    </div>
 
-<div class="row">
-    @await Html.PartialAsync("Partials/_PaymentChart")
-    @await Html.PartialAsync("Partials/_OrderStatusChart")
-</div>
+    <div class="row g-3">
+        @await Html.PartialAsync("Partials/_GenderChart")
+        @await Html.PartialAsync("Partials/_OrderChart")
+        @await Html.PartialAsync("Partials/_PaymentChart")
+    </div>
 
-<div class="row">
-    @await Html.PartialAsync("Partials/_MemberChart")
-    @await Html.PartialAsync("Partials/_RatingChart")
-</div>
+    <div class="row g-3">
+        @await Html.PartialAsync("Partials/_OrderStatusChart")
+        @await Html.PartialAsync("Partials/_MemberChart")
+        @await Html.PartialAsync("Partials/_RatingChart")
+    </div>
 
-<div class="row">
-    @await Html.PartialAsync("Partials/_TravelStatusChart")
-    @await Html.PartialAsync("Partials/_OfficialTravelChart")
-</div>
+    <div class="row g-3">
+        @await Html.PartialAsync("Partials/_TravelStatusChart")
+        @await Html.PartialAsync("Partials/_OfficialTravelChart")
+        @await Html.PartialAsync("Partials/_GroupStatusChart")
+        @await Html.PartialAsync("Partials/_CustomTravelMonthChart")
+    </div>
+</section>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -70,5 +79,9 @@
     const officialTravelStatusCounts = @Html.Raw(officialTravelStatusCountsJson);
     const officialTravelMonthLabels = @Html.Raw(officialTravelMonthLabelsJson);
     const officialTravelMonthCounts = @Html.Raw(officialTravelMonthCountsJson);
+    const groupStatusLabels = @Html.Raw(groupStatusLabelsJson);
+    const groupStatusCounts = @Html.Raw(groupStatusCountsJson);
+    const customTravelMonthLabels = @Html.Raw(customTravelMonthLabelsJson);
+    const customTravelMonthCounts = @Html.Raw(customTravelMonthCountsJson);
 </script>
 <script src="/assets/scripts/dashboard_charts.js"></script>

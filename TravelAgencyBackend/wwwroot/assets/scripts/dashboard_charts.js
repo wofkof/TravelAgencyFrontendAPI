@@ -177,4 +177,48 @@
             }
         }
     });
+
+    tryInitChart("groupStatusChart", {
+        type: "pie",
+        data: {
+            labels: groupStatusLabels,
+            datasets: [{
+                label: "出團狀態",
+                data: groupStatusCounts,
+                backgroundColor: [
+                    "rgba(54, 162, 235, 0.6)",
+                    "rgba(255, 99, 132, 0.6)",
+                    "rgba(255, 206, 86, 0.6)"
+                ],
+                borderColor: "rgba(255,255,255,1)",
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    tryInitChart("customTravelMonthChart", {
+        type: "bar",
+        data: {
+            labels: customTravelMonthLabels,
+            datasets: [{
+                label: "每月新增客製化行程數",
+                data: customTravelMonthCounts,
+                backgroundColor: "rgba(255, 159, 64, 0.6)",
+                borderColor: "rgba(255, 159, 64, 1)",
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, precision: 0 }
+            }
+        }
+    });
+
 });

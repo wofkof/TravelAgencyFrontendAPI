@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TravelAgency.Shared.Data;
+using TravelAgency.Shared.Models;
 using TravelAgencyBackend.Helpers;
 
 namespace TravelAgencyBackend.Controllers
@@ -78,6 +80,43 @@ namespace TravelAgencyBackend.Controllers
                 .Select(x => new { Month = $"{x.Year}-{x.Month.ToString("D2")}", Count = x.Count })
                 .OrderBy(x => x.Month).ToList();
 
+            var groupStatusStats = _context.GroupTravels
+                .GroupBy(g => g.GroupStatus)
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToList();
+
+            var customTravelMonthlyStats = _context.CustomTravels
+                .GroupBy(c => new { c.CreatedAt.Year, c.CreatedAt.Month })
+                .Select(g => new {
+                    Year = g.Key.Year,
+                    Month = g.Key.Month,
+                    Count = g.Count()
+                }).ToList();
+
+            var monthlyCustomTravelStats = customTravelMonthlyStats
+                .Select(x => new {
+                    Month = $"{x.Year}-{x.Month.ToString("D2")}",
+                    Count = x.Count
+                }).OrderBy(x => x.Month).ToList();
+
+            var announcements = _context.Announcements
+                .Where(a => a.Status == AnnouncementStatus.Published)
+                .Include(a => a.Employee)
+                .OrderByDescending(a => a.SentAt)
+                .Take(5)
+                .Select(a => new {
+                    a.Title,
+                    a.Content,
+                    a.SentAt,
+                    Employee = new { a.Employee.Name }
+                }).ToList();
+
+            ViewBag.Announcements = announcements;
+
+            ViewBag.CustomTravelMonthLabels = monthlyCustomTravelStats.Select(x => x.Month).ToList();
+            ViewBag.CustomTravelMonthCounts = monthlyCustomTravelStats.Select(x => x.Count).ToList();
+
+
             ViewBag.TotalMembers = totalMembers;
             ViewBag.TotalOrders = totalOrders;
             ViewBag.NewMembersThisMonth = newMembersThisMonth;
@@ -111,6 +150,9 @@ namespace TravelAgencyBackend.Controllers
 
             ViewBag.OfficialTravelMonthLabels = monthlyOfficialTravelStats.Select(x => x.Month).ToList();
             ViewBag.OfficialTravelMonthCounts = monthlyOfficialTravelStats.Select(x => x.Count).ToList();
+
+            ViewBag.GroupStatusLabels = groupStatusStats.Select(x => x.Status ?? "¥¼¶ñ¼g").ToList();
+            ViewBag.GroupStatusCounts = groupStatusStats.Select(x => x.Count).ToList();
 
             return View();
         }
