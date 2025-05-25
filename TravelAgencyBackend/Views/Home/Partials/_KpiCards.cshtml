@@ -1,0 +1,45 @@
+﻿<div class="row">
+    <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+                <div class="text-center">
+                    <h5 class="card-title">本月新增會員</h5>
+                    <h3>@ViewBag.NewMembersThisMonth 人</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <div class="text-center">
+                    <h5 class="card-title">本月新增訂單</h5>
+                    <h3>@ViewBag.NewOrdersThisMonth 筆</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body">
+                <div class="text-center">
+                    <h5 class="card-title">本月總營收</h5>
+                    <h3>$@((ViewBag.TotalRevenueThisMonth as decimal?).Value.ToString("N0"))</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <div class="text-center">
+                    <h5 class="card-title">平均評價星等</h5>
+                    <h3>@ViewBag.AverageRating.ToString("0.0") ★</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
