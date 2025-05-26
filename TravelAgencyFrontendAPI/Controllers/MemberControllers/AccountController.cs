@@ -84,7 +84,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
 
             if (verification == null)
             {
-                ModelState.AddModelError("EmailVerificationCode", "請先發送驗證碼");
+                ModelState.AddModelError("EmailVerificationCode", "請先完成信箱驗證");
                 return ValidationProblem(ModelState);
             }
 
@@ -232,7 +232,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
 
             await _emailService.SendEmailAsync(
                 dto.Email,
-                "歡迎註冊會員 - 驗證碼通知",
+                "嶼你同行｜歡迎註冊會員-驗證碼通知",
                 $@"
                 <div style='font-family:Arial,sans-serif; font-size:16px; color:#333; line-height:1.8'>
                   <div style='text-align:center; margin-bottom:20px'>

@@ -61,7 +61,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 {
                     await _emailService.SendEmailAsync(
                         email,
-                        "嶼你同行｜密碼重設驗證碼通知",
+                        "嶼你同行｜密碼重設-驗證碼通知",
                         $@"<div style='font-family:Arial,sans-serif; font-size:16px; color:#333; line-height:1.8'>
                   <div style='text-align:center; margin-bottom:20px'>
                     <img src='https://i.postimg.cc/kgC50Qfb/logo.png' alt='嶼你同行 LOGO' width='180' />
