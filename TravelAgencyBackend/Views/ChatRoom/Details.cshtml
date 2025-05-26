@@ -338,8 +338,17 @@
 
         async function acceptCall() {
             updateCallStatus("⏳ 接通中...");
-            localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-            document.getElementById("localVideo").srcObject = localStream;
+            const isVideoCall = incomingOffer.sdp?.includes("m=video");
+            const mediaConstraints = isVideoCall
+                ? { audio: true, video: true }
+                : { audio: true, video: false };
+
+            localStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+
+            const localVideoElement = document.getElementById("localVideo");
+            if (isVideoCall && localVideoElement) {
+                localVideoElement.srcObject = localStream;
+            }
 
             peer = createPeerConnection();
             localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
