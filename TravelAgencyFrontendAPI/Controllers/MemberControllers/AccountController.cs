@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using TravelAgency.Shared.Data;
 using TravelAgency.Shared.Models;
 using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 
 
@@ -18,11 +19,13 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
     {
         private readonly AppDbContext _context;
         private readonly EmailService _emailService;
+        private readonly string _recaptchaSecret;
 
-        public AccountController(AppDbContext context, EmailService emailService)
+        public AccountController(AppDbContext context, EmailService emailService, IConfiguration config)
         {
             _context = context;
             _emailService = emailService;
+            _recaptchaSecret = config["GoogleReCaptcha:SecretKey"];
         }
 
         // POST: api/Account/signup 
@@ -141,6 +144,31 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
+            // ✅ Step 1：驗證 Google reCAPTCHA token
+            if (string.IsNullOrWhiteSpace(dto.RecaptchaToken))
+            {
+                return BadRequest("請先完成機器人驗證");
+            }
+
+            // 發送驗證請求給 Google
+            using var httpClient = new HttpClient();
+            var secret = _recaptchaSecret;
+
+            var response = await httpClient.PostAsync(
+                $"https://www.google.com/recaptcha/api/siteverify?secret={secret}&response={dto.RecaptchaToken}",
+                null
+            );
+
+            var json = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<RecaptchaVerifyResponse>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (result is not { Success: true })
+            {
+                return BadRequest("reCAPTCHA 驗證失敗");
+            }
             // 帳號比對已註冊的 Email 或 Phone 欄位
             var member = await _context.Members
                 .SingleOrDefaultAsync(m => m.Email == dto.Account || m.Phone == dto.Account);
