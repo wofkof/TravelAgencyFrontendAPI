@@ -1,0 +1,44 @@
+﻿@model TravelAgency.Shared.Models.Payment
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Payment</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="PaymentId" />
+            <div class="form-group">
+                <label asp-for="OrderFormId" class="control-label"></label>
+                <select asp-for="OrderFormId" class="form-control" asp-items="ViewBag.OrderFormId"></select>
+                <span asp-validation-for="OrderFormId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DocumentMenuId" class="control-label"></label>
+                <select asp-for="DocumentMenuId" class="form-control" asp-items="ViewBag.DocumentMenuId"></select>
+                <span asp-validation-for="DocumentMenuId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PaymentMethod" class="control-label"></label>
+                <select asp-for="PaymentMethod" class="form-control"></select>
+                <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
