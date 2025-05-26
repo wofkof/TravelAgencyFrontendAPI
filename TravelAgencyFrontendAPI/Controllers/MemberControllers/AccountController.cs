@@ -261,5 +261,35 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
 
             return Ok("驗證碼已寄出");
         }
+
+        // PUT: api/Account/change-password
+        [HttpPut("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.OldPassword) || string.IsNullOrWhiteSpace(dto.NewPassword))
+                return BadRequest("請填寫完整欄位");
+
+            if (dto.NewPassword != dto.ConfirmPassword)
+                return BadRequest("新密碼與確認密碼不一致");
+
+            if (!IsValidPassword(dto.NewPassword))
+                return BadRequest("新密碼格式不正確（需包含大小寫英文字母，長度6~12位）");
+
+            var member = await _context.Members.FindAsync(dto.MemberId);
+            if (member == null)
+                return NotFound("找不到會員");
+
+            if (!PasswordHasher.VerifyPassword(dto.OldPassword, member.PasswordHash, member.PasswordSalt))
+                return BadRequest("舊密碼錯誤");
+
+            // 建立新密碼雜湊
+            PasswordHasher.CreatePasswordHash(dto.NewPassword, out string newHash, out string newSalt);
+            member.PasswordHash = newHash;
+            member.PasswordSalt = newSalt;
+            member.UpdatedAt = DateTime.Now;
+            await _context.SaveChangesAsync();
+            return Ok("密碼已成功更新");
+        }
+
     }
 }
