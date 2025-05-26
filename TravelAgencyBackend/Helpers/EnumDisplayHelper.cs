@@ -163,10 +163,11 @@ namespace TravelAgencyBackend.Helpers
             },
             [typeof(OrderStatus)] = new()
             {
-                ["Pending"] = "待付款",
-                ["Awaiting"] = "待出團",
-                ["Completed"] = "已完成",
-                ["Cancelled"] = "已取消"
+                ["Unpaid"] = "未付款",
+                ["Awaiting"] = "待付款",
+                ["Completed"] = "付款完成",
+                ["Cancelled"] = "取消付款or失敗",
+                ["InvoiceFailed"] = "付款成功發票開立失敗",
             },
             [typeof(PaymentMethod)] = new()
             {

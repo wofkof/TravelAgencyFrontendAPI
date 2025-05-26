@@ -1,21 +1,87 @@
 ﻿@{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "首頁";
+    var orderLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.OrderMonthLabels ?? new List<string>());
+    var orderCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.OrderMonthCounts ?? new List<int>());
+    var genderLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.GenderLabels ?? new List<string>());
+    var genderCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.GenderCounts ?? new List<int>());
+    var paymentLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.PaymentLabels ?? new List<string>());
+    var paymentCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.PaymentCounts ?? new List<int>());
+    var orderStatusLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.OrderStatusLabels ?? new List<string>());
+    var orderStatusCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.OrderStatusCounts ?? new List<int>());
+    var memberMonthLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.MemberMonthLabels ?? new List<string>());
+    var memberMonthCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.MemberMonthCounts ?? new List<int>());
+    var ratingLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.RatingLabels ?? new List<string>());
+    var ratingCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.RatingCounts ?? new List<int>());
+    var travelStatusLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.TravelStatusLabels ?? new List<string>());
+    var travelStatusCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.TravelStatusCounts ?? new List<int>());
+    var officialTravelStatusLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.OfficialTravelStatusLabels ?? new List<string>());
+    var officialTravelStatusCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.OfficialTravelStatusCounts ?? new List<int>());
+    var officialTravelMonthLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.OfficialTravelMonthLabels ?? new List<string>());
+    var officialTravelMonthCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.OfficialTravelMonthCounts ?? new List<int>());
+    var groupStatusLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.GroupStatusLabels ?? new List<string>());
+    var groupStatusCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.GroupStatusCounts ?? new List<int>());
+    var customTravelMonthLabelsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.CustomTravelMonthLabels ?? new List<string>());
+    var customTravelMonthCountsJson = System.Text.Json.JsonSerializer.Serialize(ViewBag.CustomTravelMonthCounts ?? new List<int>());
 }
 
-<div class="app-main__inner">
+<section class="container-fluid px-4">
     <div class="app-page-title">
         <div class="page-title-wrapper">
             <div class="page-title-heading">
-                <div class="page-title-icon">
-                    <i class="pe-7s-rocket icon-gradient bg-mean-fruit"></i>
-                </div>
-                <div>
-                    Analytics Dashboard
-                    <div class="page-title-subheading">
-                        This is an example dashboard created using ArchitectUI theme.
-                    </div>
-                </div>
+                <h1 class="text-center mb-4 fw-bold">嶼你同行後台首頁</h1>
             </div>
         </div>
     </div>
-</div>
+
+    @await Html.PartialAsync("Partials/_KpiCards")
+
+    <div class="row g-3">
+        @await Html.PartialAsync("Partials/_AnnouncementList")
+    </div>
+
+    <div class="row g-3">
+        @await Html.PartialAsync("Partials/_GenderChart")
+        @await Html.PartialAsync("Partials/_OrderChart")
+        @await Html.PartialAsync("Partials/_PaymentChart")
+    </div>
+
+    <div class="row g-3">
+        @await Html.PartialAsync("Partials/_OrderStatusChart")
+        @await Html.PartialAsync("Partials/_MemberChart")
+        @await Html.PartialAsync("Partials/_RatingChart")
+    </div>
+
+    <div class="row g-3">
+        @await Html.PartialAsync("Partials/_TravelStatusChart")
+        @await Html.PartialAsync("Partials/_OfficialTravelChart")
+        @await Html.PartialAsync("Partials/_GroupStatusChart")
+        @await Html.PartialAsync("Partials/_CustomTravelMonthChart")
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const orderLabels = @Html.Raw(orderLabelsJson);
+    const orderData = @Html.Raw(orderCountsJson);
+    const genderLabels = @Html.Raw(genderLabelsJson);
+    const genderData = @Html.Raw(genderCountsJson);
+    const paymentLabels = @Html.Raw(paymentLabelsJson);
+    const paymentData = @Html.Raw(paymentCountsJson);
+    const orderStatusLabels = @Html.Raw(orderStatusLabelsJson);
+    const orderStatusData = @Html.Raw(orderStatusCountsJson);
+    const memberLabels = @Html.Raw(memberMonthLabelsJson);
+    const memberData = @Html.Raw(memberMonthCountsJson);
+    const ratingLabels = @Html.Raw(ratingLabelsJson);
+    const ratingData = @Html.Raw(ratingCountsJson);
+    const travelStatusLabels = @Html.Raw(travelStatusLabelsJson);
+    const travelStatusData = @Html.Raw(travelStatusCountsJson);
+    const officialTravelStatusLabels = @Html.Raw(officialTravelStatusLabelsJson);
+    const officialTravelStatusCounts = @Html.Raw(officialTravelStatusCountsJson);
+    const officialTravelMonthLabels = @Html.Raw(officialTravelMonthLabelsJson);
+    const officialTravelMonthCounts = @Html.Raw(officialTravelMonthCountsJson);
+    const groupStatusLabels = @Html.Raw(groupStatusLabelsJson);
+    const groupStatusCounts = @Html.Raw(groupStatusCountsJson);
+    const customTravelMonthLabels = @Html.Raw(customTravelMonthLabelsJson);
+    const customTravelMonthCounts = @Html.Raw(customTravelMonthCountsJson);
+</script>
+<script src="/assets/scripts/dashboard_charts.js"></script>
