@@ -19,12 +19,19 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
             _context = context;
         }
 
-        // GET: api/OrderHistory/list/{memberId}
+        // GET: api/OrderHistory/list/{memberId}?statuses=Completed&statuses=Expired
         [HttpGet("list/{memberId}")]
-        public async Task<IActionResult> GetOrderHistoryList(int memberId)
+        public async Task<IActionResult> GetOrderHistoryList(int memberId, [FromQuery] List<OrderStatus> statuses)
         {
-            var orders = await _context.Orders
-                .Where(o => o.MemberId == memberId && o.Status == OrderStatus.Completed)
+            var query = _context.Orders
+                .Where(o => o.MemberId == memberId);
+
+            if (statuses != null && statuses.Any())
+            {
+                query = query.Where(o => statuses.Contains(o.Status));
+            }
+
+            var orders = await query
                 .Include(o => o.OrderDetails)
                 .OrderByDescending(o => o.CreatedAt)
                 .Select(o => new OrderHistoryListItemDto
