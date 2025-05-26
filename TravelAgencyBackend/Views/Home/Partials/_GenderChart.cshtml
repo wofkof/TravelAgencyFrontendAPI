@@ -1,0 +1,13 @@
+﻿<div class="col-md-4">
+    <div class="card mb-3">
+        <div class="card-header">會員資訊統計</div>
+        <div class="card-body">
+            <p>會員總數量：<strong>@ViewBag.TotalMembers</strong></p>
+            <p>訂單總數量：<strong>@ViewBag.TotalOrders</strong></p>
+            <h5 class="card-title">會員性別比例</h5>
+            <div class="chart-container" style="max-width: 100%; min-height: 300px;">
+                <canvas id="genderChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>

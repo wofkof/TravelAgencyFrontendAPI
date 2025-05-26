@@ -1,0 +1,32 @@
+﻿<div class="col-md-12">
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">最新公告</h5>
+        </div>
+        <div class="card-body">
+            @if (ViewBag.Announcements != null && ViewBag.Announcements.Count > 0)
+            {
+                <ul class="list-group">
+                    @foreach (var item in ViewBag.Announcements)
+                    {
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <div class="fw-bold text-dark">@item.Title</div>
+                                    <div class="text-muted small">
+                                        發布人：@item.Employee.Name ｜ @item.SentAt.ToString("yyyy-MM-dd")
+                                    </div>
+                                    <div class="mt-1">@item.Content</div>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="text-muted">目前沒有可顯示的公告。</p>
+            }
+        </div>
+    </div>
+</div>

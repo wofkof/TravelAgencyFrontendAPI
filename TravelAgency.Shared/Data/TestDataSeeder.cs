@@ -39,12 +39,11 @@ namespace TravelAgency.Shared.Data
             await SeedCustomTravelContentAsync();
             await SeedPermissionsAsync();
             await SeedRolePermissionsAsync();
-            await SeedDocumentApplicationFormsAsync();//富成
-            //await SeedDocumentOrderDetailsAsync();//富成
-            //await SeedPickMethodAsync();
-            //await SeedPickupInformationAsync();
-            //await SeedAgencyAsync();
-            //await SeedMemberFavoriteTravelerAsync();
+            await SeedOrdersAndRelatedDataAsync();
+            await SeedPermissionsAsync();
+            await SeedRolePermissionsAsync();
+            await SeedMemberFavoriteTravelerAsync();
+            await SeedAnnouncementAsync();
         }
 
         private async Task SeedRolesAsync()
@@ -82,16 +81,27 @@ namespace TravelAgency.Shared.Data
             {
                 var roleId = _context.Roles.First().RoleId;
 
-                _context.Employees.Add(new Employee
-                {
-                    RoleId = roleId,
-                    Name = "測試員工",
-                    Password = "Test@123",
-                    Email = "employee@test.com",
-                    Phone = "0900000000",
-                    BirthDate = new DateTime(1990, 1, 1),
-                    Note = "這是測試用員工"
-                });
+                _context.Employees.AddRange(
+                    new Employee
+                    {
+                        RoleId = roleId,
+                        Name = "測試員工",
+                        Password = "Test@123",
+                        Email = "employee@test.com",
+                        Phone = "0900000000",
+                        BirthDate = new DateTime(1990, 1, 1),
+                        Note = "這是測試用員工"
+                    },
+                    new Employee
+                    {
+                        RoleId = 4,
+                        Name = "客服人員",
+                        Password = "Test@123",
+                        Email = "T@gmail.com",
+                        Phone = "0911111111",
+                        BirthDate = new DateTime(1955, 1, 1),
+                        Address = "高雄前金區"
+                    });
 
                 await _context.SaveChangesAsync();
             }
@@ -1691,6 +1701,313 @@ namespace TravelAgency.Shared.Data
                 await _context.SaveChangesAsync();
             }
         }
+
+        private async Task SeedOrdersAndRelatedDataAsync()
+        {
+            // --- 前置資料查詢 (保持不變) ---
+            var member1 = await _context.Members.OrderBy(m => m.MemberId).FirstOrDefaultAsync();
+            if (member1 == null) { Console.WriteLine("會員資料未找到，無法繼續。"); return; }
+
+            var groupTravelItem1 = await _context.GroupTravels
+                .Include(gt => gt.OfficialTravelDetail)
+                .ThenInclude(otd => otd.OfficialTravel)
+                .Where(gt => gt.OfficialTravelDetail.OfficialTravel.Title == "國外旅行專案標題" &&
+                                gt.OfficialTravelDetail.OfficialTravel.Status == TravelStatus.Active &&
+                                gt.RecordStatus == "正常")
+                .OrderBy(gt => gt.GroupTravelId)
+                .FirstOrDefaultAsync();
+            if (groupTravelItem1 == null || groupTravelItem1.OfficialTravelDetail == null) { Console.WriteLine("團體旅遊項目1 ('國外旅行專案標題') 未找到或其詳細資料不完整。"); }
+
+
+            var customTravelItem1 = await _context.CustomTravels
+                .Where(ct => ct.Status == CustomTravelStatus.Completed && ct.Note == "台南旅遊")
+                .OrderBy(ct => ct.CustomTravelId)
+                .FirstOrDefaultAsync();
+            if (customTravelItem1 == null) { Console.WriteLine("客製化旅遊項目1 ('台南旅遊') 未找到。"); }
+
+            var ordersToAdd = new List<Order>();
+            var now = DateTime.Now;
+            // 這個 shortGuidPart 在每次執行 SeedOrdersAndRelatedDataAsync 時都是新的
+            string shortGuidPart = Guid.NewGuid().ToString("N").Substring(0, 10);
+
+            // 初始化一個計數器，用於在同一次執行中區分發票號碼的尾數
+            int invoiceCounter = 1;
+
+            // --- 訂單 1: 會員1購買團體旅遊 (ECPay, 已完成) ---
+            if (member1 != null && groupTravelItem1 != null && groupTravelItem1.OfficialTravelDetail != null)
+            {
+                var order1 = new Order
+                {
+                    MemberId = member1.MemberId,
+                    TotalAmount = groupTravelItem1.OfficialTravelDetail.AdultPrice ?? 0, // IsRequired
+                    PaymentMethod = PaymentMethod.ECPay_CreditCard, // IsRequired (有預設值但此處指定)
+                    Status = OrderStatus.Completed, // IsRequired (有預設值但此處指定)
+                    CreatedAt = now.AddDays(-10), // 有 SQL 預設值
+                    PaymentDate = now.AddDays(-10).AddHours(1),
+                    InvoiceDeliveryEmail = member1.Email,
+                    InvoiceOption = InvoiceOption.Personal, // IsRequired (有預設值但此處指定)
+                    InvoiceAddBillingAddr = false, // 有預設值
+                    Note = "訂單1備註：希望高樓層房間",
+                    OrdererName = member1.Name, // IsRequired
+                    OrdererPhone = member1.Phone ?? "0912345678", // IsRequired, 提供預設電話以防 member1.Phone 為 null
+                    OrdererEmail = member1.Email, // IsRequired
+                    MerchantTradeNo = $"MNO_{shortGuidPart}_O1",
+                    ECPayTradeNo = $"ECP_{shortGuidPart}_T1"
+                };
+                order1.OrderDetails.Add(new OrderDetail
+                {
+                    Category = ProductCategory.GroupTravel, // IsRequired
+                    ItemId = groupTravelItem1.GroupTravelId,
+                    Description = groupTravelItem1.OfficialTravelDetail.OfficialTravel.Title,
+                    Quantity = 1, // 有預設值
+                    Price = groupTravelItem1.OfficialTravelDetail.AdultPrice ?? 0, // IsRequired
+                    TotalAmount = groupTravelItem1.OfficialTravelDetail.AdultPrice ?? 0, // IsRequired
+                    CreatedAt = order1.CreatedAt, // 有 SQL 預設值
+                    UpdatedAt = order1.CreatedAt, // 有 SQL 預設值
+                    StartDate = groupTravelItem1.DepartureDate,
+                    EndDate = groupTravelItem1.ReturnDate,
+                    Note = "成人票"
+                });
+                order1.OrderInvoices.Add(new OrderInvoice
+                {
+                    // OrderId 會由 EF Core 自動設定
+                    InvoiceNumber = $"INV_{shortGuidPart}_{invoiceCounter++:D3}",
+                    BuyerName = member1.Name,
+                    InvoiceItemDesc = groupTravelItem1.OfficialTravelDetail.OfficialTravel.Title,
+                    TotalAmount = order1.TotalAmount, // IsRequired
+                    CreatedAt = order1.PaymentDate ?? order1.CreatedAt, // 有 SQL 預設值
+                    UpdatedAt = order1.PaymentDate ?? order1.CreatedAt, // 有 SQL 預設值
+                    InvoiceType = InvoiceType.ElectronicInvoice, // IsRequired (有預設值但此處指定)
+                    InvoiceStatus = InvoiceStatus.Opened, // IsRequired (有預設值但此處指定)
+                    RandomCode = "1111"
+                });
+                ordersToAdd.Add(order1);
+            }
+
+            // --- 訂單 2: 會員1購買客製化旅遊 (LinePay, 已完成, 公司發票) ---
+            if (member1 != null && customTravelItem1 != null)
+            {
+                var order2 = new Order
+                {
+                    MemberId = member1.MemberId,
+                    TotalAmount = customTravelItem1.TotalAmount, // IsRequired
+                    PaymentMethod = PaymentMethod.LinePay, // IsRequired (有預設值但此處指定)
+                    Status = OrderStatus.Completed, // IsRequired (有預設值但此處指定)
+                    CreatedAt = now.AddDays(-8), // 有 SQL 預設值
+                    PaymentDate = now.AddDays(-8).AddHours(2),
+                    InvoiceDeliveryEmail = "finance@company.test",
+                    InvoiceOption = InvoiceOption.Company, // IsRequired (有預設值但此處指定)
+                    InvoiceUniformNumber = "87654321",
+                    InvoiceTitle = "範例科技有限公司",
+                    InvoiceAddBillingAddr = true, // 有預設值
+                    InvoiceBillingAddress = "範例市範例路123號",
+                    Note = "訂單2備註：需要安排接駁",
+                    OrdererName = member1.Name, // IsRequired
+                    OrdererPhone = member1.Phone ?? "0987654321", // IsRequired
+                    OrdererEmail = member1.Email, // IsRequired
+                    MerchantTradeNo = $"MNO_{Guid.NewGuid().ToString("N").Substring(0, 10)}_O2"
+                };
+                order2.OrderDetails.Add(new OrderDetail
+                {
+                    Category = ProductCategory.CustomTravel, // IsRequired
+                    ItemId = customTravelItem1.CustomTravelId,
+                    Description = $"客製化行程 - {customTravelItem1.Note}",
+                    Quantity = 1, // 有預設值
+                    Price = customTravelItem1.TotalAmount, // IsRequired
+                    TotalAmount = customTravelItem1.TotalAmount, // IsRequired
+                    CreatedAt = order2.CreatedAt, // 有 SQL 預設值
+                    UpdatedAt = order2.CreatedAt, // 有 SQL 預設值
+                    StartDate = customTravelItem1.DepartureDate,
+                    EndDate = customTravelItem1.EndDate,
+                    Note = $"共 {customTravelItem1.People} 人"
+                });
+                order2.OrderInvoices.Add(new OrderInvoice
+                {
+                    InvoiceNumber = $"INV_{shortGuidPart}_{invoiceCounter++:D3}",
+                    BuyerName = order2.InvoiceTitle,
+                    InvoiceItemDesc = $"客製化行程 - {customTravelItem1.Note}",
+                    TotalAmount = order2.TotalAmount, // IsRequired
+                    CreatedAt = order2.PaymentDate ?? order2.CreatedAt, // 有 SQL 預設值
+                    UpdatedAt = order2.PaymentDate ?? order2.CreatedAt, // 有 SQL 預設值
+                    InvoiceType = InvoiceType.Triplet, // IsRequired (有預設值但此處指定)
+                    InvoiceStatus = InvoiceStatus.Opened, // IsRequired (有預設值但此處指定)
+                    BuyerUniformNumber = order2.InvoiceUniformNumber
+                });
+                ordersToAdd.Add(order2);
+            }
+
+            // --- 訂單 3 (發票為 Pending，InvoiceNumber 為 null) ---
+            if (member1 != null && groupTravelItem1 != null && groupTravelItem1.OfficialTravelDetail != null)
+            {
+                var order3 = new Order
+                {
+                    MemberId = member1.MemberId,
+                    TotalAmount = (groupTravelItem1.OfficialTravelDetail.AdultPrice ?? 0) * 2, // IsRequired
+                    PaymentMethod = PaymentMethod.ECPay_CreditCard, 
+                    Status = OrderStatus.Unpaid, // IsRequired (使用預設值)
+                    CreatedAt = now.AddDays(-5), // 有 SQL 預設值
+                    // PaymentDate is null for Unpaid order
+                    InvoiceOption = InvoiceOption.Personal, // IsRequired (使用預設值)
+                    InvoiceDeliveryEmail = member1.Email,
+                    OrdererName = member1.Name, // IsRequired
+                    OrdererPhone = member1.Phone ?? "0911223344", // IsRequired
+                    OrdererEmail = member1.Email, // IsRequired
+                    Note = "訂單3: 2位成人，待付款",
+                    MerchantTradeNo = $"MNO_{Guid.NewGuid().ToString("N").Substring(0, 10)}_O3"
+                };
+                order3.OrderDetails.Add(new OrderDetail
+                {
+                    Category = ProductCategory.GroupTravel, // IsRequired
+                    ItemId = groupTravelItem1.GroupTravelId,
+                    Description = $"{groupTravelItem1.OfficialTravelDetail.OfficialTravel.Title} - 待確認",
+                    Quantity = 2, // 有預設值 (此處指定為2)
+                    Price = groupTravelItem1.OfficialTravelDetail.AdultPrice ?? 0, // IsRequired
+                    TotalAmount = (groupTravelItem1.OfficialTravelDetail.AdultPrice ?? 0) * 2, // IsRequired
+                    CreatedAt = order3.CreatedAt, // 有 SQL 預設值
+                    UpdatedAt = order3.CreatedAt, // 有 SQL 預設值
+                    StartDate = groupTravelItem1.DepartureDate,
+                    EndDate = groupTravelItem1.ReturnDate,
+                    Note = "成人票 x2"
+                });
+                order3.OrderInvoices.Add(new OrderInvoice
+                {
+                    InvoiceNumber = null, // 保持為 null (非必填)
+                    BuyerName = member1.Name, // 非必填，但通常會有
+                    InvoiceItemDesc = $"{groupTravelItem1.OfficialTravelDetail.OfficialTravel.Title} (x2)",
+                    TotalAmount = order3.TotalAmount, // IsRequired
+                    CreatedAt = order3.CreatedAt, // 有 SQL 預設值
+                    UpdatedAt = order3.CreatedAt, // 有 SQL 預設值
+                    InvoiceType = InvoiceType.ElectronicInvoice, // IsRequired (使用預設值)
+                    InvoiceStatus = InvoiceStatus.Pending, // IsRequired (使用預設值)
+                    Note = "等待付款後開立"
+                });
+                ordersToAdd.Add(order3);
+            }
+
+            // --- 訂單 4 (發票為 Pending，InvoiceNumber 為 null, 客製化旅遊) ---
+            if (member1 != null && customTravelItem1 != null)
+            {
+                var order4 = new Order
+                {
+                    MemberId = member1.MemberId,
+                    TotalAmount = customTravelItem1.TotalAmount + 500, // IsRequired (假設加了附加服務)
+                    PaymentMethod = PaymentMethod.Other, // IsRequired (使用預設值)
+                    Status = OrderStatus.Awaiting, 
+                    CreatedAt = now.AddDays(-3), // 有 SQL 預設值
+                    PaymentDate = now.AddDays(-3).AddHours(1), // Processing, so paid
+                    InvoiceOption = InvoiceOption.Company, // IsRequired (使用與預設不同的值)
+                    InvoiceDeliveryEmail = "accounting@anothercompany.test",
+                    InvoiceUniformNumber = "12345678",
+                    InvoiceTitle = "另一家有限公司",
+                    OrdererName = "陳先生", // IsRequired
+                    OrdererPhone = "0955667788", // IsRequired
+                    OrdererEmail = "chen@example.com", // IsRequired
+                    Note = "訂單4: 客製化，公司發票待開",
+                    MerchantTradeNo = $"MNO_{Guid.NewGuid().ToString("N").Substring(0, 10)}_O4"
+                };
+                order4.OrderDetails.Add(new OrderDetail
+                {
+                    Category = ProductCategory.CustomTravel, // IsRequired
+                    ItemId = customTravelItem1.CustomTravelId,
+                    Description = $"客製化行程 - {customTravelItem1.Note} + 額外服務",
+                    Quantity = 1, // 有預設值
+                    Price = customTravelItem1.TotalAmount + 500, // IsRequired
+                    TotalAmount = customTravelItem1.TotalAmount + 500, // IsRequired
+                    CreatedAt = order4.CreatedAt, // 有 SQL 預設值
+                    UpdatedAt = order4.CreatedAt, // 有 SQL 預設值
+                    StartDate = customTravelItem1.DepartureDate,
+                    EndDate = customTravelItem1.EndDate
+                });
+                order4.OrderInvoices.Add(new OrderInvoice
+                {
+                    InvoiceNumber = null, // 保持為 null
+                    BuyerName = order4.InvoiceTitle,
+                    InvoiceItemDesc = $"客製化行程 - {customTravelItem1.Note} + 額外服務",
+                    TotalAmount = order4.TotalAmount, // IsRequired
+                    CreatedAt = order4.PaymentDate ?? order4.CreatedAt, // 有 SQL 預設值
+                    UpdatedAt = order4.PaymentDate ?? order4.CreatedAt, // 有 SQL 預設值
+                    InvoiceType = InvoiceType.Triplet, // IsRequired (使用與預設不同的值)
+                    InvoiceStatus = InvoiceStatus.Pending, // IsRequired (使用預設值)
+                    BuyerUniformNumber = order4.InvoiceUniformNumber,
+                    Note = "已付款，發票處理中"
+                });
+                ordersToAdd.Add(order4);
+            }
+
+            // --- 訂單 5 (發票開立失敗，InvoiceNumber 為 null) ---
+            // 假設混合了團體旅遊和一個額外項目
+            if (member1 != null && groupTravelItem1 != null && groupTravelItem1.OfficialTravelDetail != null && customTravelItem1 != null)
+            {
+                decimal extraItemPrice = 150.00m;
+                var order5TotalAmount = (groupTravelItem1.OfficialTravelDetail.AdultPrice ?? 0) + extraItemPrice;
+                var order5 = new Order
+                {
+                    MemberId = member1.MemberId,
+                    TotalAmount = order5TotalAmount, // IsRequired
+                    PaymentMethod = PaymentMethod.ECPay_CreditCard, // IsRequired
+                    Status = OrderStatus.Cancelled, // IsRequired (假設付款或訂單處理失敗)
+                    CreatedAt = now.AddDays(-1), // 有 SQL 預設值
+                    // PaymentDate might be null or set if payment attempted and failed
+                    InvoiceOption = InvoiceOption.Personal, // IsRequired
+                    InvoiceDeliveryEmail = member1.Email,
+                    OrdererName = member1.Name, // IsRequired
+                    OrdererPhone = member1.Phone ?? "0900112233", // IsRequired
+                    OrdererEmail = member1.Email, // IsRequired
+                    Note = "訂單5: 付款失敗，或後續處理錯誤",
+                    MerchantTradeNo = $"MNO_{Guid.NewGuid().ToString("N").Substring(0, 10)}_O5",
+                    ECPayTradeNo = $"ECP_{Guid.NewGuid().ToString("N").Substring(0, 10)}_T5" // 假設 ECPay 交易號
+                };
+                order5.OrderDetails.Add(new OrderDetail
+                {
+                    Category = ProductCategory.GroupTravel, // IsRequired
+                    ItemId = groupTravelItem1.GroupTravelId,
+                    Description = groupTravelItem1.OfficialTravelDetail.OfficialTravel.Title,
+                    Quantity = 1, // 有預設值
+                    Price = groupTravelItem1.OfficialTravelDetail.AdultPrice ?? 0, // IsRequired
+                    TotalAmount = groupTravelItem1.OfficialTravelDetail.AdultPrice ?? 0, // IsRequired
+                    CreatedAt = order5.CreatedAt, // 有 SQL 預設值
+                    UpdatedAt = order5.CreatedAt, // 有 SQL 預設值
+                    StartDate = groupTravelItem1.DepartureDate
+                });
+                order5.OrderDetails.Add(new OrderDetail
+                {
+                    Category = ProductCategory.CustomTravel, // IsRequired
+                    ItemId = 999, // 假設一個額外項目的 ID
+                    Description = "機場接送服務",
+                    Quantity = 1, // 有預設值
+                    Price = extraItemPrice, // IsRequired
+                    TotalAmount = extraItemPrice, // IsRequired
+                    CreatedAt = order5.CreatedAt, // 有 SQL 預設值
+                    UpdatedAt = order5.CreatedAt, // 有 SQL 預設值
+                });
+                order5.OrderInvoices.Add(new OrderInvoice
+                {
+                    InvoiceNumber = null, // 保持為 null
+                    BuyerName = member1.Name,
+                    InvoiceItemDesc = "混合商品 - 發票開立失敗",
+                    TotalAmount = order5.TotalAmount, // IsRequired
+                    CreatedAt = order5.CreatedAt, // 有 SQL 預設值
+                    UpdatedAt = order5.CreatedAt, // 有 SQL 預設值
+                    InvoiceType = InvoiceType.ElectronicInvoice, // IsRequired
+                    InvoiceStatus = InvoiceStatus.Voided, // IsRequired
+                    Note = "系統開立發票失敗，請手動處理"
+                });
+                ordersToAdd.Add(order5);
+            }
+
+            // --- 最後的 AddRangeAsync 和 SaveChangesAsync 邏輯不變 ---
+            if (ordersToAdd.Any())
+            {
+                await _context.Orders.AddRangeAsync(ordersToAdd);
+                await _context.SaveChangesAsync();
+                Console.WriteLine($"已填充 {ordersToAdd.Count} 筆新的訂單及其詳細資料和發票。");
+            }
+            else
+            {
+                Console.WriteLine("由於缺少必要的前置資料 (會員、團體旅遊產品或客製化旅遊產品)，未能產生任何新的訂單。");
+            }
+        }
+
         //權限假資料
         private async Task SeedPermissionsAsync()
         {
@@ -1751,9 +2068,11 @@ namespace TravelAgency.Shared.Data
                 (7, 20)
             };
 
+
             var existing = _context.RolePermissions
                 .Select(rp => new { rp.RoleId, rp.PermissionId })
                 .ToHashSet();
+
 
             var toAdd = mappings
                 .Where(m => !existing.Contains(new { m.RoleId, m.PermissionId }))
@@ -1765,128 +2084,47 @@ namespace TravelAgency.Shared.Data
                 })
                 .ToList();
 
+
+
             if (toAdd.Any())
             {
                 _context.RolePermissions.AddRange(toAdd);
                 await _context.SaveChangesAsync();
             }
         }
-        //富成 固態假資料
-        //表示非同步操作的關鍵
-        public async Task SeedDocumentApplicationFormsAsync()
-        //定義了一個公開的**、非同步的方法。這個方法的主要作用是初始化(設定好起點，確保一個系統、元件或資料從一開始就處於正確、可用、或符合預期行為的狀態。)（或稱為「種子」）資料庫中的 DocumentApplicationForms 表格資料。
+        //公告假資料
+        private async Task SeedAnnouncementAsync()
         {
-            if (!_context.DocumentApplicationForms.Any())
-            //意思是「如果 DocumentApplicationForms 表格中沒有任何資料」，那麼就執行後續的程式碼塊。這樣做的目的是為了防止重複添加資料，確保只有在表格為空時才進行初始化。
+            if (!_context.Announcements.Any())
             {
-                _context.DocumentApplicationForms.AddRange(
-                //.AddRange(...): 這是 Entity Framework Core 提供的一個方法，用於向資料庫上下文的集合中添加一個或多個實體。這裡它會準備將一個新的 DocumentApplicationForm 物件添加到表格中。
-                    new DocumentApplicationForm
-                    //是在創建一個新的 DocumentApplicationForm 物件，並為其屬性賦值
-                    {//這裡的東西是要從資料庫抓到頁面顯示給使用者看的
-                        ApplicationType = ApplicationType.Passport,
-                        ProcessingItem = "新辦/更換(14歲以上)",
-                        CaseType = CaseType.General,
-                        ProcessingDays = 16,
-                        ExpiryDate = "10年",
-                        Fee = 1700,
-                    }
-                );
-
-                await _context.SaveChangesAsync();
-                //await: 這是 async/await 模式的一部分。它會等待 _context.SaveChangesAsync() 方法完成。_context.SaveChangesAsync(): 這個方法會將資料庫上下文中所做的所有更改（例如這裡的添加操作）異步地保存到實際的資料庫中。
-            }
-        }
-
-
-        public async Task SeedDocumentOrderDetailsAsync()
-        {
-            if (!_context.DocumentOrderDetails.Any())
-            {
-
-                _context.DocumentOrderDetails.AddRange(
-
-                    new DocumentOrderDetails
+                _context.Announcements.AddRange(
+                    new Announcement
                     {
-                        ApplicationId = 1,
-                        MemberId = 11110,
-                        PickupMethodId = 0,
-                        PickupInfoId = 1,
-                        AgencyCode = 1,
-                        RequiredData = "(1)身份證正本 (1份)\r\n(2)舊護照 (1份)\r\n(3)六個月內正面拍攝之2吋白色背景彩色照片(背面請填妥申請人姓名且照片規格請參閱備註欄) (1份)\r\n(4)未婚且未滿18歲者，附上監護人的身分證正本詳情及規格請參閱備註欄) (1份)\r\n(5)委任書 (1份)",
-                        SubmissionMethod = "以掛號寄到【104台北市中山區民生東路三段49號2樓／易遊網客服中心收（信封上請註記訂單編號）】，或送交易遊網各門市客服人員代為物流到台北總公司辦理\r\n* 客服人員將於收件後一個工作日內和您確認。",
-                        Notes = "文件下載區\r\n• 申請人本人委任旅行社委任書⭐D式範例\r\n• 申請人委託代送件(受委任人)複委託委任書，另需檢附雙方關係證明(如下)⭐E式範例\r\n(註) 雙方關係證明需含有照片之相關證件(如同學代送提供雙方學生證影本)\r\n(註) 受委任人限親屬(三等親內)、配偶、同事、同學\r\n(註) 未滿18歲者若使用本人委任書，簽名欄位除本人簽名外，旁邊須簽上同所需提供資料第5點之監護人之簽名\r\n(註) 人在國外請務必用E式委任書\r\n•已過期舊護照不用交\r\n• 護照申請需知\r\n• 照片規格說明\r\n•照片補件，需兩張實體照片\r\n•戶謄不退\r\n\r\n首次申請\r\n1.須先至戶政事務所辦理人別確認後，始得委託代理人續向外交部代為申請\r\n2.未婚且未滿18歲申請人，首次申請須由父或母或監護人簽署護照同意書/委任陪同書\r\n3.經外交部查驗為首次申請但未做人別確認需撤件（照片及申請書不退還），需重新送件及工作天重新計算\r\n\r\n其他注意事項\r\n• 年滿十四歲者應申請初領國民身分證\r\n• 未婚且未滿18歲之未成年人及受監護宣告申請護照，倘父母離婚或為受監護宣告人之監護人，父或母或監護人請提供有權行使、負擔權利義務之證明文件正本（如含詳細記事之戶口名簿或三個月內保留完整記事欄之戶籍謄本）及國民身分證正本\r\n• 更改姓氏或國民身分證號應申請換發新護照並提供三個月內所申請之詳細記事欄戶籍謄本正本\r\n• 更改中文姓名申請換發新護照，舊護照外文姓名必須列為新護照外文別名，已有外文別名者得以加簽方式辦理\r\n• 國軍人員出境應事先申請許可\r\n• 人在國外的役男無法辦理\r\n• 護照剩餘效期不足一年或所持護照非屬現行最新式樣者可申請換照\r\n• 護照污損或其他原因皆須附上聲明書正本，內容須載名更換原因並簽名\r\n• 刪除因改名被迫新增舊外文姓名至舊護照外文別名者，請A4填寫 (本人確認刪除外文別名，並了解以後取用別名須出示證明文件並簽名)\r\n• 舊護照外文名字音節中間無短橫，於護照申請書填寫外文姓名或別名欄位，格式請如右(姓氏, 名△字)並且於三角形下方簽名\r\n• 新增外文別名，習用之外文別名（如Peter Lin、等）免附有關證件，但以後都不可修改和刪除。倘為特殊姓名者，須出示證明文件正本（國外護照或國外畢業證書或國外出生證明）\r\n\r\n僑居身分移（加）簽須檢附\r\n(1) 原護照加簽僑居沿用需填寫僑居加簽申請書\r\n(2) 首次辦理加簽僑居者須提供，僑務委員會核准公函\r\n(3) 原已辦理僑居身分加簽之舊護照\r\n(4) 僑居國有效護照或永久居留證件\r\n\r\n• 辦事處有權依照申請個案之需要對申請人提出額外相關文件的要求\r\n• 辦事處依簽證主管判斷給予簽證，辦事處有權拒絕解釋拒給簽證之理由\r\n• 申請書上所填內容、檢附證件及照片請確實無訛，如有不實將產生法律責任\r\n• 已送件訂單不得改辦及撤件\r\n• 送件後需補件不補件或遭辦證處拒件者或一般件改急件(須詢問辦件人員)，收取手續費200元",
-                        DepartureDate = new DateTime(2025, 7, 10),
-                        ProcessingCount = 1,
-                        ChineseLastName = "王",
-                        ChineseFirstName = "愛麗絲",
-                        EnglishLastName = "Wang",
-                        EnglishFirstName = "Alice",
-                        BirthDate = new DateTime(1992, 3, 20)
-                    }
-                );
-                await _context.SaveChangesAsync();
-}
-
-        }
-
-        public async Task SeedPickMethodAsync()
-        {
-            if (!_context.PickupMethods.Any())
-            {
-                _context.PickupMethods.AddRange(
-
-                    new PickupMethod
+                        EmployeeId = 1,
+                        Title = "資展國際★名言佳句",
+                        Content = "{{ 今日口號 }} 一.給阿波棒。，二.先看喔先看喔,對不對,對齁。，三.A星A味,愛恩G。，四.不是尼的湊拉,是西阿歐s的問題的拉。",
+                        SentAt = new DateTime(2024, 8, 11),
+                        Status = AnnouncementStatus.Published
+                    },
+                    new Announcement
                     {
-                        PickupMethodName = PickupMethodName.SelfPickup,
-                    }
-                );
-                //await _context.SaveChangesAsync();
-            }
-
-        }
-
-        public async Task SeedPickupInformationAsync()
-        {
-            if (!_context.PickupInformations.Any())
-            {
-
-                _context.PickupInformations.AddRange(
-
-                    new PickupInformation
+                        EmployeeId = 1,
+                        Title = "【使用JC卡】",
+                        Content = "要不要吃涼麵，要不要吃京多多，要不要吃小飯骨，要不要吃蛋餅。",
+                        SentAt = new DateTime(2024, 8, 11),
+                        Status = AnnouncementStatus.Published
+                    },
+                    new Announcement
                     {
-                        City = "高雄市",
-                        District = "前金區",
-                        PostalCode = "郵遞區號801",
-                        DetailedAddress = "中正四路211號8號樓之1"
+                        EmployeeId = 1,
+                        Title = "我是山頂洞人，我引以為傲",
+                        Content = "呼叫李小姐，請您看一下LINE看一眼也好",
+                        SentAt = new DateTime(2024, 8, 11),
+                        Status = AnnouncementStatus.Published
                     }
                 );
                 await _context.SaveChangesAsync();
             }
-
-        }
-
-
-        public async Task SeedAgencyAsync()
-        {
-            if (!_context.Agencies.Any())
-            {
-
-                _context.Agencies.AddRange(
-
-                    new Agency
-                    {
-                        AgencyName = "資展國際",
-                        ContactPerson = "張小姐",
-                        ContactEmail = "abc123@gmail.com",
-                        ContactPhone = "0987654321",
-                        Address = "高雄市中正四路211號8樓之1",
-                        ServiceDescription = "代辦簽證與護照服務"
-                    }
-                );
-                await _context.SaveChangesAsync();
-            }
-
         }
     }
 }
