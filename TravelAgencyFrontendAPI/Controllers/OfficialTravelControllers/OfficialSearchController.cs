@@ -69,7 +69,7 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                 var result = await query
                 .GroupBy(x => new {
                     x.OfficialTravelId
-                    
+
                 })
                 .Select(g => g
                     .OrderBy(x => x.DepartureDate)
@@ -103,11 +103,11 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
         }
 
         [HttpGet("getMainInfo/{projectId}/{detailId}/{groupId}")]
-        public async Task<ActionResult> GetMainInfo(int projectId,int detailId, int groupId)
+        public async Task<ActionResult> GetMainInfo(int projectId, int detailId, int groupId)
         {
-            try 
-            { 
-                var travel = await(
+            try
+            {
+                var travel = await (
                     from t in _context.OfficialTravels
                     where t.OfficialTravelId == projectId && t.Status == TravelStatus.Active
                     from d in t.OfficialTravelDetails
@@ -127,15 +127,15 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                         Departure = g.DepartureDate,
                         Return = g.ReturnDate,
                         TotalSeats = g.TotalSeats,
-                        AvailableSeats =g.TotalSeats-g.SoldSeats
+                        AvailableSeats = g.TotalSeats - g.SoldSeats
                     }
                 ).FirstOrDefaultAsync();
                 return Ok(travel);
             }
-            catch (Exception ex) 
-            { 
+            catch (Exception ex)
+            {
                 Console.WriteLine("GetMainInfo API Error: " + ex.ToString());
-                return StatusCode(500, new { message = ex.Message }); 
+                return StatusCode(500, new { message = ex.Message });
             }
         }
 
@@ -144,7 +144,7 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
         {
             try
             {
-                var groups = await(
+                var groups = await (
                     from g in _context.GroupTravels
                     from d in _context.OfficialTravelDetails
                     from t in _context.OfficialTravels
@@ -164,7 +164,7 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                     ).ToListAsync();
 
                 var result = groups
-                    .GroupBy(x => new { x.GroupId})
+                    .GroupBy(x => new { x.GroupId })
                     .Select(g => new GetGroups
                     {
                         GroupId = g.Key.GroupId,
@@ -222,6 +222,43 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
             }
         }
 
-        
+        [HttpGet("getAttraction/{attractionId}")]
+        public async Task<ActionResult> GetAttraction (int? attractionId) 
+        {
+            try 
+            {
+                if (attractionId == null)
+                {
+                    return BadRequest(new { message = "請輸入景點ID" });
+                }
+                var attraction = await(
+                    from a in _context.OfficialAttractions
+                    where a.AttractionId == attractionId
+                    select new GetAttraction
+                    {
+                        AttractionId = a.AttractionId,
+                        Name = a.Name,
+                        Description = a.Description,
+                        Longitude = a.Longitude,
+                        Latitude = a.Latitude
+                    }
+                    ).FirstOrDefaultAsync();
+
+
+                if (attraction == null)
+                {
+                    return NotFound(new { message = "景點不存在" });
+                }
+                return Ok(attraction);
+
+
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("ChangeAttraction API Error: " + ex.ToString());
+                return StatusCode(500, new { message = ex.Message });
+            }
+
+        }
     }
 }
