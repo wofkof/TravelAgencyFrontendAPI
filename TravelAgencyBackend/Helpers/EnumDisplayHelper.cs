@@ -113,16 +113,6 @@ namespace TravelAgencyBackend.Helpers
                 ["Restaurant"] = "餐廳",
                 ["Transport"] = "交通"
             },
-            [typeof(ApplicationType)] = new()
-            {
-                ["Passport"] = "護照",
-                ["Visa"] = "簽證"
-            },
-            [typeof(CaseType)] = new()
-            {
-                ["General"] = "一般",
-                ["Urgent"] = "急件"
-            },
             [typeof(EmployeeStatus)] = new()
             {
                 ["Active"] = "在職",
@@ -173,10 +163,11 @@ namespace TravelAgencyBackend.Helpers
             },
             [typeof(OrderStatus)] = new()
             {
-                ["Pending"] = "待付款",
-                ["Awaiting"] = "待出團",
-                ["Completed"] = "已完成",
-                ["Cancelled"] = "已取消"
+                ["Unpaid"] = "未付款",
+                ["Awaiting"] = "待付款",
+                ["Completed"] = "付款完成",
+                ["Cancelled"] = "取消付款or失敗",
+                ["InvoiceFailed"] = "付款成功發票開立失敗",
             },
             [typeof(PaymentMethod)] = new()
             {
@@ -206,11 +197,6 @@ namespace TravelAgencyBackend.Helpers
                 ["ElectronicInvoice"] = "電子發票",
                 ["Double"] = "二聯式",
                 ["Triplet"] = "三聯式"
-            },
-            [typeof(PickupMethodName)] = new()
-            {
-                ["SelfPickup"] = "自取",
-                ["HomeDelivery"] = "宅配"
             },
             [typeof(SupplierType)] = new()
             {

@@ -188,32 +188,6 @@
                         </li>
                     </ul>
                 </li>
-                @* 購物車 *@
-                <li>
-                    <a href="#">
-                        <i class="metismenu-icon pe-7s-cart"></i>購物車
-                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
-                    </a>
-                    <ul>
-                        @if (PermissionChecker.CanViewCarts)
-                        {
-                            <li>
-                                <a asp-controller="Carts" asp-action="Index">
-                                    <i class="metismenu-icon"></i>檢視購物車
-                                </a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li>
-                                <a asp-controller="Carts" asp-action="Index"
-                                class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false">
-                                    <i class="metismenu-icon"></i>檢視購物車
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </li>
                 @* 公告 *@
                 <li>
                     <a href="#">
@@ -423,20 +397,6 @@
                                     <i class="metismenu-icon"></i>權限
                                 </a>
                             }
-                        </li>
-                    </ul>
-                </li>
-                @* 前端功能 *@
-                <li>
-                    <a href="#">
-                        <i class="metismenu-icon pe-7s-look"></i>前台功能
-                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
-                    </a>
-                    <ul>
-                        <li>
-                            <a asp-controller="MemberChat" asp-action="Index">
-                                <i class="metismenu-icon"></i>會員聊天室
-                            </a>
                         </li>
                     </ul>
                 </li>

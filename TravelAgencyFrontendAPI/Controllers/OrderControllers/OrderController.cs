@@ -5,7 +5,12 @@ using System.Security.Claims;
 using TravelAgency.Shared.Data;
 using TravelAgency.Shared.Models;
 using TravelAgencyFrontendAPI.DTOs.OrderDTOs;
-
+using Microsoft.Extensions.Logging; // 加入 ILogger
+using System; // 加入 System
+using System.Collections.Generic; // 加入 List
+using System.Linq; // 加入 Linq
+using System.Threading.Tasks; // 加入 Task
+using System.ComponentModel.DataAnnotations; // 如果 DTO 使用 DataAnnotations
 
 namespace TravelAgencyFrontendAPI.Controllers
 {
@@ -182,110 +187,84 @@ namespace TravelAgencyFrontendAPI.Controllers
             }
 
             // 4. 處理旅客列表 (OrderParticipants)
-            foreach (var participantDto in orderCreateDto.Participants)
+            if (orderCreateDto.Participants != null)
             {
-                if (participantDto.DocumentType == DocumentType.PASSPORT && string.IsNullOrEmpty(participantDto.DocumentNumber))
+                foreach (var participantDto in orderCreateDto.Participants)
                 {
-                    // 添加一個 Model 錯誤或直接返回 BadRequest
-                    ModelState.AddModelError($"Participants[{order.OrderParticipants.Count}].DocumentNumber", "選擇護照作為證件類型時，護照號碼為必填。");
-                }
-
-                // 檢查必填欄位是否有值 (雖然 DTO 已有 [Required]，但這裡可以再次確認或記錄)
-                if (string.IsNullOrEmpty(participantDto.Name)) { /* ... 錯誤處理 ... */ }
-                // ... 其他必填欄位檢查 ...
-
-                // 或者其他組合規則，例如：IdNumber 或 DocumentNumber 至少要有一個非空？
-                if (string.IsNullOrEmpty(participantDto.IdNumber) && string.IsNullOrEmpty(participantDto.DocumentNumber))
-                {
-                    ModelState.AddModelError($"Participants[{order.OrderParticipants.Count}].IdOrDocumentNumber", "旅客身分證號或證件號碼至少需填寫一項。");
-                }
-
-                // 如果有自定義驗證錯誤，建議在這裡檢查並提前返回
-                if (!ModelState.IsValid)
-                {
-                    // 記錄錯誤並返回
-                    _logger.LogWarning("CreateOrder Participant Custom Validation Failed: {@ModelStateErrors}", ModelState);
-                    return BadRequest(ModelState);
-                }
-
-                var participant = new OrderParticipant
-                {
-                    Name = participantDto.Name,
-                    BirthDate = participantDto.BirthDate,
-                    IdNumber = participantDto.IdNumber,
-                    Gender = participantDto.Gender,
-
-                    Phone = participantDto.Phone,
-                    Email = participantDto.Email,
-
-                    DocumentType = participantDto.DocumentType,
-                    DocumentNumber = participantDto.DocumentNumber,
-                    PassportSurname = participantDto.PassportSurname,
-                    PassportGivenName = participantDto.PassportGivenName,
-                    PassportExpireDate = participantDto.PassportExpireDate,
-                    Nationality = participantDto.Nationality,
-                    Note = participantDto.Note
-                };
-
-                if (participantDto.FavoriteTravelerId.HasValue && participantDto.FavoriteTravelerId.Value > 0)
-                {
-                    // 嘗試從常用旅客讀取資料
-                    var favoriteTraveler = await _context.MemberFavoriteTravelers
-                        .FirstOrDefaultAsync(ft => ft.FavoriteTravelerId == participantDto.FavoriteTravelerId.Value &&
-                                                   ft.MemberId == member.MemberId && // 確保是該會員的常用旅客
-                                                   ft.Status == FavoriteStatus.Active); // 確保常用旅客是有效的
-
-                    if (favoriteTraveler == null)
+                    if (participantDto.DocumentType == DocumentType.PASSPORT && string.IsNullOrEmpty(participantDto.DocumentNumber))
                     {
-                        return BadRequest($"找不到常用旅客 ID: {participantDto.FavoriteTravelerId.Value} 或該旅客已停用。");
+                        // 添加一個 Model 錯誤或直接返回 BadRequest
+                        ModelState.AddModelError($"Participants[{order.OrderParticipants.Count}].DocumentNumber", "選擇護照作為證件類型時，護照號碼為必填。");
                     }
 
-                    // 使用常用旅客資料預填 OrderParticipant
-                    participant.Name = favoriteTraveler.Name;
-                    participant.BirthDate = favoriteTraveler.BirthDate ?? default; // 如果常用旅客生日可為null，提供預設值
-                    participant.IdNumber = favoriteTraveler.IdNumber;
-                    participant.Gender = favoriteTraveler.Gender ?? default; // 同上
-                    participant.Phone = favoriteTraveler.Phone;
-                    participant.Email = favoriteTraveler.Email;
-                    participant.DocumentType = favoriteTraveler.DocumentType ?? default; // 同上
-                    participant.DocumentNumber = favoriteTraveler.DocumentNumber;
-                    participant.PassportSurname = favoriteTraveler.PassportSurname;
-                    participant.PassportGivenName = favoriteTraveler.PassportGivenName;
-                    participant.PassportExpireDate = favoriteTraveler.PassportExpireDate;
-                    participant.Nationality = favoriteTraveler.Nationality;
-                    participant.Note = favoriteTraveler.Note; // 可以考慮是否要合併 DTO 的 Note
+                    // 檢查必填欄位是否有值 (雖然 DTO 已有 [Required]，但這裡可以再次確認或記錄)
+                    if (string.IsNullOrEmpty(participantDto.Name)) { /* ... 錯誤處理 ... */ }
+                    // ... 其他必填欄位檢查 ...
 
-                }
-                order.OrderParticipants.Add(participant);
-            }
+                    // 或者其他組合規則，例如：IdNumber 或 DocumentNumber 至少要有一個非空？
+                    if (string.IsNullOrEmpty(participantDto.IdNumber) && string.IsNullOrEmpty(participantDto.DocumentNumber))
+                    {
+                        ModelState.AddModelError($"Participants[{order.OrderParticipants.Count}].IdOrDocumentNumber", "旅客身分證號或證件號碼至少需填寫一項。");
+                    }
 
-            // 步驟 6: 【核心修改】如果需要，更新會員資料
-            if (orderCreateDto.UpdateMemberProfile)
-            {
-                if (orderCreateDto.MemberProfileToUpdate != null)
-                {
-                    var profileData = orderCreateDto.MemberProfileToUpdate;
-                    _logger.LogInformation("準備更新會員資料，會員 ID: {MemberId}", member.MemberId);
+                    // 如果有自定義驗證錯誤，建議在這裡檢查並提前返回
+                    if (!ModelState.IsValid)
+                    {
+                        // 記錄錯誤並返回
+                        _logger.LogWarning("CreateOrder Participant Custom Validation Failed: {@ModelStateErrors}", ModelState);
+                        return BadRequest(ModelState);
+                    }
 
-                    // 更新 Member 實體的屬性
+                    var participant = new OrderParticipant
+                    {
+                        Name = participantDto.Name,
+                        BirthDate = participantDto.BirthDate,
+                        IdNumber = participantDto.IdNumber,
+                        Gender = participantDto.Gender,
 
-                    member.Name = profileData.Name; 
-                    member.Phone = NormalizePhoneNumber(profileData.MobilePhone);
-                    member.Email = profileData.Email; // 注意：如果 Email 是登入帳號，修改時需謹慎，可能涉及驗證或唯一性檢查
+                        Phone = participantDto.Phone,
+                        Email = participantDto.Email,
 
-                    member.Nationality = profileData.Nationality;
-                    member.DocumentType = profileData.DocumentType; // 你的 Member.DocumentType 應與 DTO 的 DocumentType? 相容
-                    member.DocumentNumber = profileData.DocumentNumber;
+                        DocumentType = participantDto.DocumentType,
+                        DocumentNumber = participantDto.DocumentNumber,
+                        PassportSurname = participantDto.PassportSurname,
+                        PassportGivenName = participantDto.PassportGivenName,
+                        PassportExpireDate = participantDto.PassportExpireDate,
+                        Nationality = participantDto.Nationality,
+                        Note = participantDto.Note
+                    };
+                    order.OrderParticipants.Add(participant);
+                    // 步驟 5: 嘗試從常用旅客讀取資料
+                    if (participantDto.FavoriteTravelerId.HasValue && participantDto.FavoriteTravelerId.Value > 0)
+                    {
+                        // 嘗試從常用旅客讀取資料
+                        var favoriteTraveler = await _context.MemberFavoriteTravelers
+                            .FirstOrDefaultAsync(ft => ft.FavoriteTravelerId == participantDto.FavoriteTravelerId.Value &&
+                                                       ft.MemberId == member.MemberId && // 確保是該會員的常用旅客
+                                                       ft.Status == FavoriteStatus.Active); // 確保常用旅客是有效的
 
+                        if (favoriteTraveler == null)
+                        {
+                            return BadRequest($"找不到常用旅客 ID: {participantDto.FavoriteTravelerId.Value} 或該旅客已停用。");
+                        }
 
-                    member.UpdatedAt = DateTime.UtcNow; // 記錄最後修改時間
+                        // 使用常用旅客資料預填 OrderParticipant
+                        participant.Name = favoriteTraveler.Name;
+                        participant.BirthDate = favoriteTraveler.BirthDate ?? default; // 如果常用旅客生日可為null，提供預設值
+                        participant.IdNumber = favoriteTraveler.IdNumber;
+                        participant.Gender = favoriteTraveler.Gender ?? default; // 同上
+                        participant.Phone = favoriteTraveler.Phone;
+                        participant.Email = favoriteTraveler.Email;
+                        participant.DocumentType = favoriteTraveler.DocumentType ?? default; // 同上
+                        participant.DocumentNumber = favoriteTraveler.DocumentNumber;
+                        participant.PassportSurname = favoriteTraveler.PassportSurname;
+                        participant.PassportGivenName = favoriteTraveler.PassportGivenName;
+                        participant.PassportExpireDate = favoriteTraveler.PassportExpireDate;
+                        participant.Nationality = favoriteTraveler.Nationality;
+                        participant.Note = favoriteTraveler.Note; // 可以考慮是否要合併 DTO 的 Note
 
-                    _context.Members.Update(member); 
-                }
-                else
-                {
-                    // 如果前端說要更新，但沒給資料，可以記錄一個警告
-                    _logger.LogWarning("前端要求更新會員資料 (UpdateMemberProfile=true)，但 MemberProfileToUpdate 物件為 null。會員 ID: {MemberId}", member.MemberId);
+                    }
+                    order.OrderParticipants.Add(participant);
                 }
             }
 
@@ -301,8 +280,114 @@ namespace TravelAgencyFrontendAPI.Controllers
             {
                 try
                 {
+                    // 在第一次 SaveChangesAsync 之前賦值 MerchantTradeNo (不依賴 OrderId 的版本)
+                    // 或者，如果 MerchantTradeNo 必須包含 OrderId，則需要在第一次 SaveChangesAsync 之後再更新一次。
+                    // 這裡採用先產生一個基於時間戳和GUID片段的唯一編號，不依賴 OrderId。
+                    // 如果您的 ECPayService.GenerateEcPayPaymentForm 中的 MerchantTradeNo 生成邏輯更完善，可以考慮將其提取為共用方法。
+                    string tempGuidPart = Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper(); // 增加唯一性
+                    string timePartForMtn = DateTime.UtcNow.ToString("yyMMddHHmmss"); // 使用 UTC 時間更佳
+                    string prefixForMtn = "TRV";
+                    string mtnBase = $"{prefixForMtn}{timePartForMtn}{tempGuidPart}";
+                    order.MerchantTradeNo = new string(mtnBase.Where(char.IsLetterOrDigit).ToArray());
+                    if (order.MerchantTradeNo.Length > 20)
+                    {
+                        order.MerchantTradeNo = order.MerchantTradeNo.Substring(0, 20);
+                    }
+                    _logger.LogInformation("為新訂單產生的 MerchantTradeNo: {MerchantTradeNo}", order.MerchantTradeNo);
+
                     _context.Orders.Add(order);
                     await _context.SaveChangesAsync();
+
+                    // (可選) 如果 MerchantTradeNo 強烈建議包含 OrderId，可以在此處更新並再次儲存
+                    bool requiresMtnUpdateWithOrderId = false; // 根據您的需求設定此標誌
+                    if (requiresMtnUpdateWithOrderId)
+                    {
+                        string orderIdPartForMtn = order.OrderId.ToString("D5"); // 例如補零到5位
+                        string finalMtnBase = $"{prefixForMtn}{orderIdPartForMtn}{timePartForMtn}"; // 假設 timePartForMtn 已在上面定義
+                        order.MerchantTradeNo = new string(finalMtnBase.Where(char.IsLetterOrDigit).ToArray());
+                        if (order.MerchantTradeNo.Length > 20)
+                        {
+                            order.MerchantTradeNo = order.MerchantTradeNo.Substring(0, 20);
+                        }
+                        _context.Orders.Update(order); // 標記為更新
+                        await _context.SaveChangesAsync(); // 第二次儲存以更新 MerchantTradeNo
+                        _logger.LogInformation("已使用 OrderId 更新訂單 MerchantTradeNo: {MerchantTradeNo}", order.MerchantTradeNo);
+                    }
+                    // 處理常用旅客的更新或新增
+                    if (orderCreateDto.TravelerProfileActions != null && orderCreateDto.TravelerProfileActions.Any())
+                    {
+                        foreach (var profileAction in orderCreateDto.TravelerProfileActions)
+                        {
+                            if (profileAction.FavoriteTravelerIdToUpdate.HasValue && profileAction.FavoriteTravelerIdToUpdate.Value > 0)
+                            {
+                                // 更新現有的常用旅客
+                                var existingFavTraveler = await _context.MemberFavoriteTravelers
+                                    .FirstOrDefaultAsync(ft => ft.FavoriteTravelerId == profileAction.FavoriteTravelerIdToUpdate.Value &&
+                                                                ft.MemberId == member.MemberId); // 安全性檢查：確保是該會員的
+
+                                if (existingFavTraveler != null)
+                                {
+                                    _logger.LogInformation("準備更新常用旅客資料，常用旅客ID: {FavoriteTravelerId}, 會員ID: {MemberId}",
+                                        existingFavTraveler.FavoriteTravelerId, member.MemberId);
+
+                                    // 更新欄位 (假設 MemberFavoriteTraveler 有這些欄位)
+                                    existingFavTraveler.Name = profileAction.Name;
+                                    existingFavTraveler.BirthDate = profileAction.BirthDate;
+                                    existingFavTraveler.IdNumber = profileAction.IdNumber;
+                                    existingFavTraveler.Gender = profileAction.Gender;
+                                    // existingFavTraveler.Phone = profileAction.Phone; // 如果常用旅客有電話
+                                    // existingFavTraveler.Email = profileAction.Email; // 如果常用旅客有Email
+                                    existingFavTraveler.DocumentType = profileAction.DocumentType;
+                                    existingFavTraveler.DocumentNumber = profileAction.DocumentNumber;
+                                    existingFavTraveler.PassportSurname = profileAction.PassportSurname;
+                                    existingFavTraveler.PassportGivenName = profileAction.PassportGivenName;
+                                    existingFavTraveler.PassportExpireDate = profileAction.PassportExpireDate;
+                                    existingFavTraveler.Nationality = profileAction.Nationality;
+                                    // existingFavTraveler.Note = profileAction.Note; // 如果常用旅客有備註
+                                    existingFavTraveler.UpdatedAt = DateTime.UtcNow;
+                                    // Status 通常保持 Active，除非有特別邏輯
+
+                                    _context.MemberFavoriteTravelers.Update(existingFavTraveler);
+                                }
+                                else
+                                {
+                                    _logger.LogWarning("嘗試更新不存在或不屬於該會員的常用旅客資料，常用旅客ID: {FavoriteTravelerIdToUpdate}, 會員ID: {MemberId}",
+                                        profileAction.FavoriteTravelerIdToUpdate, member.MemberId);
+                                    // 可選擇是否要因此中斷交易或僅記錄
+                                }
+                            }
+                            else
+                            {
+                                // 新增常用旅客
+                                _logger.LogInformation("準備新增常用旅客資料，會員ID: {MemberId}, 旅客姓名: {TravelerName}",
+                                    member.MemberId, profileAction.Name);
+
+                                var newFavTraveler = new MemberFavoriteTraveler
+                                {
+                                    MemberId = member.MemberId,
+                                    Name = profileAction.Name,
+                                    BirthDate = profileAction.BirthDate,
+                                    IdNumber = profileAction.IdNumber,
+                                    Gender = profileAction.Gender,
+                                    // Phone = profileAction.Phone,
+                                    // Email = profileAction.Email,
+                                    DocumentType = profileAction.DocumentType,
+                                    DocumentNumber = profileAction.DocumentNumber,
+                                    PassportSurname = profileAction.PassportSurname,
+                                    PassportGivenName = profileAction.PassportGivenName,
+                                    PassportExpireDate = profileAction.PassportExpireDate,
+                                    Nationality = profileAction.Nationality,
+                                    // Note = profileAction.Note,
+                                    Status = FavoriteStatus.Active, // 設定預設狀態
+                                    CreatedAt = DateTime.UtcNow,
+                                    UpdatedAt = DateTime.UtcNow
+                                };
+                                _context.MemberFavoriteTravelers.Add(newFavTraveler);
+                            }
+                        }
+                        await _context.SaveChangesAsync(); // 儲存常用旅客的變更
+                    }
+
                     await transaction.CommitAsync();
                 }
                 catch (DbUpdateException ex)
@@ -331,32 +416,6 @@ namespace TravelAgencyFrontendAPI.Controllers
             };
             return Created($"/api/Order/{order.OrderId}", orderSummary); // 假設之後會有GET api/Order/{id}
         }
-
-
-        // 輔助方法：獲取當前登入使用者的 MemberId
-        // 實際實作會根據您的身份驗證設定而有所不同
-
-        private int? GetCurrentUserId()
-        {
-            if (User.Identity != null && User.Identity.IsAuthenticated)
-            {
-                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (int.TryParse(userIdClaim, out int userId))
-                {
-                    return userId;
-                }
-                _logger.LogWarning("GetCurrentUserId (parameterless): 已認證，但無法從 Claims 中解析 UserId。ClaimValue: '{ClaimValue}'", userIdClaim);
-            }
-            else
-            {
-                _logger.LogWarning("GetCurrentUserId (parameterless): User 未認證或 User.Identity 為 null。");
-            }
-
-            return null;
-        }
-
-        // GET: api/Order/{id} (範例，用於 CreatedAtAction 和前端查詢訂單)
-
 
         // *** 在這裡添加電話號碼正規化的私有 Helper Method ***
         private string NormalizePhoneNumber(string phoneNumberString)
@@ -404,6 +463,20 @@ namespace TravelAgencyFrontendAPI.Controllers
             return normalizedNumber;
         }
 
+        // 輔助方法：獲取當前登入使用者的 MemberId
+        // 實際實作會根據您的身份驗證設定而有所不同
+        private int? GetCurrentUserId()
+        {
+            // ... (您的用戶ID獲取邏輯) ...
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (int.TryParse(userIdClaim, out int userId)) { return userId; }
+                _logger.LogWarning("GetCurrentUserId (parameterless): 已認證，但無法從 Claims 中解析 UserId。ClaimValue: '{ClaimValue}'", userIdClaim);
+            }
+            else { _logger.LogWarning("GetCurrentUserId (parameterless): User 未認證或 User.Identity 為 null。"); }
+            return null;
+        }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<OrderDto>> GetOrderById(int id, [FromQuery] int? memberId)
@@ -438,79 +511,137 @@ namespace TravelAgencyFrontendAPI.Controllers
                     if (detail.Category == ProductCategory.GroupTravel)
                     {
                         // 使用 ItemId 從 _context.GroupTravels 查詢
-                        // 確保你的 GroupTravel 實體有與 detail.ItemId 對應的主鍵，例如 GroupTravelId
-                        var groupTravelItem = await _context.GroupTravels
-                                                    .Include(gt => gt.OfficialTravelDetail) // 假設你需要 OfficialTravelDetail
-                                                        .ThenInclude(otd => otd.OfficialTravel) // 進一步載入 OfficialTravel
-                                                    .FirstOrDefaultAsync(gt => gt.GroupTravelId == detail.ItemId); // 使用 ItemId 關聯
-                        detail.GroupTravel = groupTravelItem; // 將查詢到的物件賦值給 [NotMapped] 屬性
+                        // 確保你GroupTravel 實體有與 detail.ItemId 對應的主鍵，例如 GroupTravelId
+                        detail.GroupTravel = await _context.GroupTravels
+                            .Include(gt => gt.OfficialTravelDetail)
+                            .ThenInclude(otd => otd.OfficialTravel)
+                            .FirstOrDefaultAsync(gt => gt.GroupTravelId == detail.ItemId);
                     }
                     else if (detail.Category == ProductCategory.CustomTravel)
                     {
                         // 使用 ItemId 從 _context.CustomTravels 查詢
-                        // 確保你的 CustomTravel 實體有與 detail.ItemId 對應的主鍵，例如 CustomTravelId
-                        var customTravelItem = await _context.CustomTravels
-                                                     .FirstOrDefaultAsync(ct => ct.CustomTravelId == detail.ItemId); // 使用 ItemId 關聯
-                        detail.CustomTravel = customTravelItem; // 將查詢到的物件賦值給 [NotMapped] 屬性
+                        // 確保 CustomTravel 實體有與 detail.ItemId 對應的主鍵，例如 CustomTravelId
+                        detail.CustomTravel = await _context.CustomTravels
+                            .FirstOrDefaultAsync(ct => ct.CustomTravelId == detail.ItemId);
                     }
                 }
             }
             // 暫時回傳 order 實體，應建立並使用一個詳細的 OrderDto
             var orderDto = new // 你應該用你定義的 OrderDto
             {
-                orderData.OrderId,
-                orderData.MemberId,
+                OrderId = orderData.OrderId,
+                MemberId = orderData.MemberId,
                 OrdererName = orderData.OrdererName,
                 OrdererPhone = orderData.OrdererPhone,
                 OrdererEmail = orderData.OrdererEmail,
-                orderData.TotalAmount,
-                PaymentMethod = orderData.PaymentMethod?.ToString(), // 加上 ?. 避免 PaymentMethod 為 null 時出錯
-                Status = orderData.Status.ToString(),
-                orderData.CreatedAt,
-                orderData.PaymentDate,
-                orderData.Note,
-                orderData.InvoiceOption, // 假設 InvoiceOption 是 string 或 enum
-                Participants = orderData.OrderParticipants?.Select(p => new // 加上 ?.
+                TotalAmount = orderData.TotalAmount,
+                PaymentMethod = orderData.PaymentMethod?.ToString(),
+                OrderStatus = orderData.Status.ToString(),
+                CreatedAt = orderData.CreatedAt,
+                PaymentDate = orderData.PaymentDate,
+                Note = orderData.Note,
+                InvoiceOption = orderData.InvoiceOption.ToString(), // 轉換為字串
+                InvoiceDeliveryEmail = orderData.InvoiceDeliveryEmail,
+                InvoiceUniformNumber = orderData.InvoiceUniformNumber,
+                InvoiceTitle = orderData.InvoiceTitle,
+                InvoiceAddBillingAddr = orderData.InvoiceAddBillingAddr,
+                InvoiceBillingAddress = orderData.InvoiceBillingAddress,
+                Participants = orderData.OrderParticipants?.Select(p => new OrderParticipantDto
                 {
-                    p.Name,
-                    p.BirthDate,
-                    p.IdNumber,
-                    p.Gender, // 假設 Gender 是 string 或 enum
-                    p.DocumentType // 假設 DocumentType 是 string 或 enum
-                }).ToList(),
-                OrderDetails = orderData.OrderDetails?.Select(od => new // 加上 ?.
+                    Name = p.Name,
+                    BirthDate = p.BirthDate,
+                    IdNumber = p.IdNumber,
+                    Gender = p.Gender, // 轉換為字串
+                    DocumentType = p.DocumentType // 轉換為字串
+                }).ToList() ?? new List<OrderParticipantDto>(),
+                OrderDetails = orderData.OrderDetails?.Select(od => new OrderDetailItemDto 
                 {
-                    ProductTypeName = od.Category.ToString(),
-                    od.ItemId,
-                    // 這裡可以安全地訪問 od.GroupTravel 和 od.CustomTravel，因為它們已經被手動填入
-                    ProductName = od.Category == ProductCategory.GroupTravel ?
+                    //Category = od.Category, // DTO 中可能是 string
+                    Category = od.Category, // Enum 可以直接賦值，如果 DTO 也是 Enum
+                    ItemId = od.ItemId,
+                    Description = od.Category == ProductCategory.GroupTravel ?
                                   od.GroupTravel?.OfficialTravelDetail?.OfficialTravel?.Title :
-                                 (od.Category == ProductCategory.CustomTravel ? od.CustomTravel?.Note : "N/A"),
-                    od.Description,
-                    od.Quantity,
-                    od.Price,
-                    od.TotalAmount
-                }).ToList()
+                                 (od.Category == ProductCategory.CustomTravel ? od.CustomTravel?.Note : od.Description), // 調整品名獲取
+                    Quantity = od.Quantity,
+                    Price = od.Price,
+                    TotalAmount = od.TotalAmount
+                    // ... 其他 OrderDetailItemDto 欄位 ...
+                }).ToList() ?? new List<OrderDetailItemDto>(),
             };
 
             return Ok(orderDto);
         }
-    
+
+        [HttpGet("{orderId}/invoice")] // 例如: GET /api/Order/149/invoice
+        public async Task<ActionResult<InvoiceDetailsDto>> GetInvoiceDetails(int orderId, [FromQuery] int? memberId)
+        {
+            // 1. 安全性檢查 (類似 GetOrderById，確認 memberId 與訂單匹配)
+            if (memberId == null || memberId.Value <= 0)
+            {
+                return BadRequest("查詢發票詳情需要提供有效的 memberId。");
+            }
+
+            var order = await _context.Orders
+                                      .Include(o => o.OrderInvoices) // 確保載入已存在的發票記錄
+                                      .FirstOrDefaultAsync(o => o.OrderId == orderId && o.MemberId == memberId.Value);
+
+            if (order == null)
+            {
+                return NotFound($"找不到訂單 ID {orderId}，或您無權存取此訂單。");
+            }
+
+            // 2. 查找已開立的發票記錄
+            var openedInvoice = order.OrderInvoices
+                                         .FirstOrDefault(inv => inv.InvoiceStatus == InvoiceStatus.Opened); // 假設 Opened 表示成功
+
+            if (openedInvoice != null)
+            {
+                return Ok(new InvoiceDetailsDto
+                {
+                    RtnCode = 1,
+                    RtnMsg = "發票已成功開立。",
+                    InvoiceNo = openedInvoice.InvoiceNumber,
+                    InvoiceDate = openedInvoice.CreatedAt.ToString("yyyy/MM/dd HH:mm:ss"), // 使用一致的日期格式
+                    RandomNumber = openedInvoice.RandomCode,
+
+                    InvoiceType = openedInvoice.InvoiceType.ToString(), // 將 enum 轉為字串
+                    BuyerName = openedInvoice.BuyerName,
+                    BuyerUniformNumber = openedInvoice.BuyerUniformNumber,
+                    TotalAmount = openedInvoice.TotalAmount,
+                    InvoiceItemDesc = openedInvoice.InvoiceItemDesc,
+                    Note = openedInvoice.Note
+                    // InvoiceStatus = openedInvoice.InvoiceStatus.ToString() // 如果也想回傳狀態
+                });
+            }
+
+            // 3. 如果資料庫中沒有已開立的發票記錄，且訂單已付款，可以考慮是否要嘗試即時開立或提示
+            //    這裡的邏輯取決於您的業務流程：
+            //    a) 付款成功時 (ECPay callback) 就應該已觸發 IssueInvoiceAsync。
+            //    b) 此處僅為查詢，若未開立則提示。
+            //    c) 此處嘗試補開 (較複雜，需注意重複開票問題)。
+
+            // 假設流程 (a) 已完成，這裡主要做查詢
+            // 如果在 ECPay callback 中開票失敗，OrderInvoice 中可能會有失敗記錄
+            var failedInvoiceAttempt = order.OrderInvoices.OrderByDescending(i => i.CreatedAt).FirstOrDefault();
+            if (failedInvoiceAttempt != null && failedInvoiceAttempt.InvoiceStatus != InvoiceStatus.Opened)
+            {
+                _logger.LogWarning("訂單 {OrderId} 先前嘗試開立發票但未成功: {Note}", orderId, failedInvoiceAttempt.Note);
+                return Ok(new InvoiceDetailsDto
+                {
+                    RtnCode = 0, // 自定義失敗碼
+                    RtnMsg = $"發票先前嘗試開立但未成功: {failedInvoiceAttempt.Note ?? "請洽客服"}",
+                });
+            }
+
+
+            _logger.LogInformation("訂單 {OrderId} 尚未找到已開立的發票記錄。", orderId);
+            return Ok(new InvoiceDetailsDto
+            {
+                RtnCode = 2, // 自定義碼，表示尚未開立或查詢不到
+                RtnMsg = "此訂單目前尚無已開立的發票資訊。"
+            });
+        }
+
     }
 
-
-
-    // 定義這個 OrderSummaryDto，用於 PostOrder 的回應
-    public class OrderSummaryDto
-    {
-        public int OrderId { get; set; }
-        public string OrderStatus { get; set; }
-        public decimal TotalAmount { get; set; }
-        public string SelectedPaymentMethod { get; set; }
-        // public string PaymentGatewayRedirectUrl { get; set; } // 用於支付
-        // public string PaymentReference { get; set; } // 
-    }
-
-    // 您可能還需要一個更詳細的 OrderDto，用於 GetOrderById
-    // public class OrderDto { ... }
 }

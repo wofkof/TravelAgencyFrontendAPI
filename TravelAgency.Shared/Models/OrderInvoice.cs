@@ -2,9 +2,9 @@
 {
     public enum InvoiceStatus
     {
-        Pending,
-        Opened,
-        Voided
+        Pending, // 未開立發票
+        Opened, // 已開立發票
+        Voided, // 已作廢發票
     }
     public enum InvoiceType
     {
@@ -28,6 +28,7 @@
         public string? InvoiceFileURL { get; set; }
         public string? Note { get; set; }
 
+        public string? RandomCode { get; set; } //綠界4位隨機碼
         public Order Order { get; set; } = null!;
     }
 }

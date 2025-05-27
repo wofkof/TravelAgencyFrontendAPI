@@ -2,10 +2,11 @@
 {
     public enum OrderStatus
     {
-        Pending,
-        Awaiting,
-        Completed,
-        Cancelled
+        Unpaid,  //未付款
+        Awaiting, //待付款
+        Completed, //付款完成
+        Cancelled, //取消付款or失敗
+        InvoiceFailed //付款成功發票開立失敗
     }
     public enum PaymentMethod
     {
@@ -23,9 +24,9 @@
         public int OrderId { get; set; }
         public int MemberId { get; set; }
 
-        public decimal TotalAmount { get; set; }
+        public decimal TotalAmount { get; set; }  //含稅總金額
         public PaymentMethod? PaymentMethod { get; set; } 
-        public OrderStatus Status { get; set; } = OrderStatus.Pending;
+        public OrderStatus Status { get; set; } = OrderStatus.Unpaid;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? PaymentDate { get; set; }
         public string? InvoiceDeliveryEmail { get; set; }
