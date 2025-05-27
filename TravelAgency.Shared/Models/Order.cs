@@ -25,7 +25,7 @@
         public int MemberId { get; set; }
 
         public decimal TotalAmount { get; set; }  //含稅總金額
-        public PaymentMethod PaymentMethod { get; set; } 
+        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.ECPay_CreditCard;
         public OrderStatus Status { get; set; } = OrderStatus.Awaiting;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? PaymentDate { get; set; }

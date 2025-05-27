@@ -2183,7 +2183,7 @@ namespace TravelAgency.Shared.Data
                     new Payment
 
                     {
-                        OrderFormId = 3,
+                        OrderFormId = 1,
                         DocumentMenuId = 1,
                         PaymentMethod = PaymentMethodEnum.信用卡,
                     }
@@ -2207,7 +2207,7 @@ namespace TravelAgency.Shared.Data
 
                     {
                         DocumentMenuId = 1,
-                        OrderFormId = 3,
+                        OrderFormId = 1,
                     }
                 );
 

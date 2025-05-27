@@ -130,7 +130,8 @@ namespace TravelAgencyBackend.Controllers
             ViewBag.GenderLabels = genderStats.Select(x => x.Gender.HasValue ? EnumDisplayHelper.GetDisplayName(x.Gender.Value) : "¥¼¶ñ¼g").ToList();
             ViewBag.GenderCounts = genderStats.Select(x => x.Count).ToList();
 
-            ViewBag.PaymentLabels = paymentStats.Select(x => x.Method.HasValue ? EnumDisplayHelper.GetDisplayName(x.Method.Value) : "¥¼¶ñ¼g").ToList();
+            ViewBag.PaymentLabels = paymentStats.Select(x => x.Method == PaymentMethod.Other? "¥¼¶ñ¼g": EnumDisplayHelper.GetDisplayName(x.Method)).ToList();
+
             ViewBag.PaymentCounts = paymentStats.Select(x => x.Count).ToList();
 
             ViewBag.OrderStatusLabels = orderStatusStats.Select(x => EnumDisplayHelper.GetDisplayName(x.Status)).ToList();

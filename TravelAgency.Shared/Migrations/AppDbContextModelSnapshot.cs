@@ -187,6 +187,7 @@ namespace TravelAgency.Shared.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime?>("StartTime")
+                        .IsRequired()
                         .HasColumnType("datetime");
 
                     b.Property<string>("Status")
@@ -1439,7 +1440,7 @@ namespace TravelAgency.Shared.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("Other");
+                        .HasDefaultValue("ECPay_CreditCard");
 
                     b.Property<string>("Status")
                         .IsRequired()

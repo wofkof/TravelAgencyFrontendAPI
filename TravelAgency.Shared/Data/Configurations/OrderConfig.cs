@@ -14,7 +14,7 @@ namespace TravelAgency.Shared.Data.Configurations
 
             builder.Property(o => o.PaymentMethod)
                    .HasConversion<string>()
-                   .HasDefaultValue(PaymentMethod.Other)
+                   .HasDefaultValue(PaymentMethod.ECPay_CreditCard)
                    .IsRequired()
                    .HasMaxLength(20);
 
