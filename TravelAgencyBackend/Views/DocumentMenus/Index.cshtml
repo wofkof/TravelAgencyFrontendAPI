@@ -1,0 +1,83 @@
+﻿@model IEnumerable<TravelAgency.Shared.Models.DocumentMenu>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.RocPassportOption)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ForeignVisaOption)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ApplicationType)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ProcessingItem)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CaseType)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ProcessingDays)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DocumentValidityPeriod)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.StayDuration)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Fee)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.RocPassportOption)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ForeignVisaOption)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ApplicationType)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ProcessingItem)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CaseType)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ProcessingDays)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DocumentValidityPeriod)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.StayDuration)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Fee)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.MenuId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.MenuId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.MenuId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

@@ -4,10 +4,10 @@ using TravelAgency.Shared.Models;
 
 namespace TravelAgency.Shared.Data
 {
-    public class TestDataSeeder
+    public class TestDataSeeder 
     {
         private readonly AppDbContext _context;
-
+        
         public TestDataSeeder(AppDbContext context)
         {
             _context = context;
@@ -43,7 +43,10 @@ namespace TravelAgency.Shared.Data
             await SeedPermissionsAsync();
             await SeedRolePermissionsAsync();
             await SeedMemberFavoriteTravelerAsync();
-            await SeedAnnouncementAsync();
+            await SeedDocumentMenuAsync();
+            await SeedOrderFormAsync();
+            await SeedPaymentMethodAsync();
+            await SeedCompletedOrderDetailAsync();
         }
 
         private async Task SeedRolesAsync()
@@ -2092,39 +2095,127 @@ namespace TravelAgency.Shared.Data
                 await _context.SaveChangesAsync();
             }
         }
-        //公告假資料
-        private async Task SeedAnnouncementAsync()
+
+
+
+        //證件選單假資料 富成
+        //固態假資料,表示非同步操作的關鍵
+        public async Task SeedDocumentMenuAsync()
+        //定義了一個公開的**、非同步的方法。這個方法的主要作用是初始化(設定好起點，確保一個系統、元件或資料從一開始就處於正確、可用、或符合預期行為的狀態。)（或稱為「種子」）資料庫中的 DocumentMenu 表格資料。
         {
-            if (!_context.Announcements.Any())
+            if (!_context.DocumentMenus.Any())
+            //意思是「如果 DocumentMenu 表格中沒有任何資料」，那麼就執行後續的程式碼塊。這樣做的目的是為了防止重複添加資料，確保只有在表格為空時才進行初始化。
             {
-                _context.Announcements.AddRange(
-                    new Announcement
-                    {
-                        EmployeeId = 1,
-                        Title = "資展國際★名言佳句",
-                        Content = "{{ 今日口號 }} 一.給阿波棒。，二.先看喔先看喔,對不對,對齁。，三.A星A味,愛恩G。，四.不是尼的湊拉,是西阿歐s的問題的拉。",
-                        SentAt = new DateTime(2024, 8, 11),
-                        Status = AnnouncementStatus.Published
-                    },
-                    new Announcement
-                    {
-                        EmployeeId = 1,
-                        Title = "【使用JC卡】",
-                        Content = "要不要吃涼麵，要不要吃京多多，要不要吃小飯骨，要不要吃蛋餅。",
-                        SentAt = new DateTime(2024, 8, 11),
-                        Status = AnnouncementStatus.Published
-                    },
-                    new Announcement
-                    {
-                        EmployeeId = 1,
-                        Title = "我是山頂洞人，我引以為傲",
-                        Content = "呼叫李小姐，請您看一下LINE看一眼也好",
-                        SentAt = new DateTime(2024, 8, 11),
-                        Status = AnnouncementStatus.Published
+                _context.DocumentMenus.AddRange(
+                    //.AddRange(...): 這是 Entity Framework Core 提供的一個方法，用於向資料庫上下文的集合中添加一個或多個實體。這裡它會準備將一個新的 DocumentMenu 物件添加到表格中。
+                    new DocumentMenu
+                    //是在創建一個新的 DocumentMenu 物件，並為其屬性賦值
+                    {//這裡的東西是要從資料庫抓到頁面顯示給使用者看的
+                        RocPassportOption = "中華民國護照",
+                        ForeignVisaOption = "",
+                        ApplicationType = ApplicationTypeEnum.passport,
+                        ProcessingItem = "新辦/更換(14歲以上)",
+                        CaseType = CaseTypeEnum.general,
+                        ProcessingDays = "16個工作天",
+                        DocumentValidityPeriod = "效期10年",
+                        StayDuration = "",
+                        Fee = "TWD 1,700",
+
                     }
                 );
+
                 await _context.SaveChangesAsync();
+                //await: 這是 async/await 模式的一部分。它會等待 _context.SaveChangesAsync() 方法完成。_context.SaveChangesAsync(): 這個方法會將資料庫上下文中所做的所有更改（例如這裡的添加操作）異步地保存到實際的資料庫中。
             }
         }
+
+        //填寫訂單假資料 富成
+        public async Task SeedOrderFormAsync()
+        
+        {
+            if (!_context.OrderForms.Any())
+            
+            {
+                _context.OrderForms.AddRange(
+                    
+                    new OrderForm
+                    
+                    {
+                        MemberId = 11110,
+                        DocumentMenuId = 1,
+                        DepartureDate = new DateTime(2025, 6, 12),
+                        ProcessingQuantity = 1,
+                        ChineseSurname = "金",
+                        ChineseName = "城武",
+                        EnglishSurname = "JIN",
+                        EnglishName = "CHENG-WU",
+                        Gender = GenderEnum.Male,
+                        BirthDate = new DateTime(1990, 1, 1),
+                        ContactPersonName = "梁朝偉",
+                        ContactPersonEmail = "abc123@gmail.com",
+                        ContactPersonPhoneNumber = "0912345678",
+                        PickupMethodOption = PickupMethodEnum.門市,
+                        MailingCity = "",
+                        MailingDetailAddress = "",
+                        StoreDetailAddress = "高雄市前金區中正四路211號8樓之1",
+                        TaxIdOption = TaxIdOptionEnum.不需要,
+                        CompanyName = "",
+                        TaxIdNumber = "",
+                        OrderCreationTime = DateTime.Now,
+
+                    }
+                );
+
+                await _context.SaveChangesAsync();
+               
+            }
+        }
+
+        //付款假資料 富成
+        public async Task SeedPaymentMethodAsync()
+
+        {
+            if (!_context.Payments.Any())
+
+            {
+                _context.Payments.AddRange(
+
+                    new Payment
+
+                    {
+                        OrderFormId = 3,
+                        DocumentMenuId = 1,
+                        PaymentMethod = PaymentMethodEnum.信用卡,
+                    }
+                );
+
+                await _context.SaveChangesAsync();
+
+            }
+        }
+
+        //完成訂單明細假資料 富成
+        public async Task SeedCompletedOrderDetailAsync()
+
+        {
+            if (!_context.CompletedOrderDetails.Any())
+
+            {
+                _context.CompletedOrderDetails.AddRange(
+
+                    new CompletedOrderDetail
+
+                    {
+                        DocumentMenuId = 1,
+                        OrderFormId = 3,
+                    }
+                );
+
+                await _context.SaveChangesAsync();
+
+            }
+        }
+
     }
+
 }
