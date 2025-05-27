@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using TravelAgency.Shared.Data;
 using TravelAgency.Shared.Models;
 using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 
 
@@ -18,11 +19,13 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
     {
         private readonly AppDbContext _context;
         private readonly EmailService _emailService;
+        private readonly string _recaptchaSecret;
 
-        public AccountController(AppDbContext context, EmailService emailService)
+        public AccountController(AppDbContext context, EmailService emailService, IConfiguration config)
         {
             _context = context;
             _emailService = emailService;
+            _recaptchaSecret = config["GoogleReCaptcha:SecretKey"];
         }
 
         // POST: api/Account/signup 
@@ -81,7 +84,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
 
             if (verification == null)
             {
-                ModelState.AddModelError("EmailVerificationCode", "請先發送驗證碼");
+                ModelState.AddModelError("EmailVerificationCode", "請先完成信箱驗證");
                 return ValidationProblem(ModelState);
             }
 
@@ -141,6 +144,31 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
+            // ✅ Step 1：驗證 Google reCAPTCHA token
+            if (string.IsNullOrWhiteSpace(dto.RecaptchaToken))
+            {
+                return BadRequest("請先完成機器人驗證");
+            }
+
+            // 發送驗證請求給 Google
+            using var httpClient = new HttpClient();
+            var secret = _recaptchaSecret;
+
+            var response = await httpClient.PostAsync(
+                $"https://www.google.com/recaptcha/api/siteverify?secret={secret}&response={dto.RecaptchaToken}",
+                null
+            );
+
+            var json = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<RecaptchaVerifyResponse>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (result is not { Success: true })
+            {
+                return BadRequest("reCAPTCHA 驗證失敗");
+            }
             // 帳號比對已註冊的 Email 或 Phone 欄位
             var member = await _context.Members
                 .SingleOrDefaultAsync(m => m.Email == dto.Account || m.Phone == dto.Account);
@@ -204,7 +232,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
 
             await _emailService.SendEmailAsync(
                 dto.Email,
-                "歡迎註冊會員 - 驗證碼通知",
+                "嶼你同行｜歡迎註冊會員-驗證碼通知",
                 $@"
                 <div style='font-family:Arial,sans-serif; font-size:16px; color:#333; line-height:1.8'>
                   <div style='text-align:center; margin-bottom:20px'>
@@ -233,5 +261,35 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
 
             return Ok("驗證碼已寄出");
         }
+
+        // PUT: api/Account/change-password
+        [HttpPut("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.OldPassword) || string.IsNullOrWhiteSpace(dto.NewPassword))
+                return BadRequest("請填寫完整欄位");
+
+            if (dto.NewPassword != dto.ConfirmPassword)
+                return BadRequest("新密碼與確認密碼不一致");
+
+            if (!IsValidPassword(dto.NewPassword))
+                return BadRequest("新密碼格式不正確（需包含大小寫英文字母，長度6~12位）");
+
+            var member = await _context.Members.FindAsync(dto.MemberId);
+            if (member == null)
+                return NotFound("找不到會員");
+
+            if (!PasswordHasher.VerifyPassword(dto.OldPassword, member.PasswordHash, member.PasswordSalt))
+                return BadRequest("舊密碼錯誤");
+
+            // 建立新密碼雜湊
+            PasswordHasher.CreatePasswordHash(dto.NewPassword, out string newHash, out string newSalt);
+            member.PasswordHash = newHash;
+            member.PasswordSalt = newSalt;
+            member.UpdatedAt = DateTime.Now;
+            await _context.SaveChangesAsync();
+            return Ok("密碼已成功更新");
+        }
+
     }
 }

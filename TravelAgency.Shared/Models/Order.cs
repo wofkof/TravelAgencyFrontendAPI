@@ -2,11 +2,11 @@
 {
     public enum OrderStatus
     {
-        Unpaid,  //未付款
         Awaiting, //待付款
         Completed, //付款完成
         Cancelled, //取消付款or失敗
-        InvoiceFailed //付款成功發票開立失敗
+        InvoiceFailed, //付款成功發票開立失敗
+        Expired,     // 逾期未付自動失效
     }
     public enum PaymentMethod
     {
@@ -25,8 +25,8 @@
         public int MemberId { get; set; }
 
         public decimal TotalAmount { get; set; }  //含稅總金額
-        public PaymentMethod? PaymentMethod { get; set; } 
-        public OrderStatus Status { get; set; } = OrderStatus.Unpaid;
+        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.ECPay_CreditCard;
+        public OrderStatus Status { get; set; } = OrderStatus.Awaiting;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? PaymentDate { get; set; }
         public string? InvoiceDeliveryEmail { get; set; }
@@ -42,7 +42,7 @@
 
         public string? ECPayTradeNo { get; set; } // 綠界交易編號
         public string? MerchantTradeNo { get; set; } // 自訂商店交易編號
-
+        public DateTime? ExpiresAt { get; set; }
 
         public Member Member { get; set; } = null!;
         public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();

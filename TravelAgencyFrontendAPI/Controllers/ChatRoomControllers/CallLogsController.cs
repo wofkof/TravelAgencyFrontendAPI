@@ -1,43 +1,72 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using TravelAgency.Shared.Data;
+using TravelAgency.Shared.Models;
+using TravelAgencyFrontendAPI.DTOs.ChatRoomDTOs;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
-namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
+namespace TravelAgencyFrontendAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class CallLogsController : ControllerBase
     {
-        // GET: api/<CallLogsController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly AppDbContext _context;
+
+        public CallLogsController(AppDbContext context)
         {
-            return new string[] { "value1", "value2" };
+            _context = context;
         }
 
-        // GET api/<CallLogsController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // POST api/<CallLogsController>
+        // 建立通話紀錄
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<IActionResult> CreateCallLog([FromBody] CallLogDto dto)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var callLog = new CallLog
+            {
+                ChatRoomId = dto.ChatRoomId,
+                CallerId = dto.CallerId,
+                ReceiverId = dto.ReceiverId,
+                CallerType = dto.CallerType,
+                ReceiverType = dto.ReceiverType,
+                CallType = dto.CallType,
+                Status = dto.Status,
+                StartTime = dto.StartTime,
+                EndTime = dto.EndTime,
+                DurationInSeconds = dto.DurationInSeconds
+            };
+
+            _context.CallLogs.Add(callLog);
+            await _context.SaveChangesAsync();
+
+            return Ok(callLog.CallId);
         }
 
-        // PUT api/<CallLogsController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
 
-        // DELETE api/<CallLogsController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        // 查詢特定聊天室的通話紀錄
+        [HttpGet("ByChatRoom/{chatRoomId}")]
+        public async Task<IActionResult> GetLogsByChatRoom(int chatRoomId)
         {
+            var logs = await _context.CallLogs
+                .Where(c => c.ChatRoomId == chatRoomId)
+                .OrderByDescending(c => c.StartTime)
+                .Select(c => new CallLog
+                {
+                    ChatRoomId = c.ChatRoomId,
+                    CallerType = c.CallerType,
+                    CallerId = c.CallerId,
+                    ReceiverType = c.ReceiverType,
+                    ReceiverId = c.ReceiverId,
+                    CallType = c.CallType,
+                    Status = c.Status,
+                    StartTime = c.StartTime,
+                    EndTime = c.EndTime,
+                    DurationInSeconds = c.DurationInSeconds
+                })
+                .ToListAsync();
+
+            return Ok(logs);
         }
     }
 }

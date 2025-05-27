@@ -6,6 +6,7 @@ using Microsoft.Extensions.FileProviders;
 
 using TravelAgencyFrontendAPI.ECPay.Models; // 引入 ECPayConfiguration
 using TravelAgencyFrontendAPI.ECPay.Services; // 引入 ECPayService
+using TravelAgencyFrontendAPI.Services;
 
 //using Microsoft.AspNetCore.Authentication.JwtBearer;
 //using Microsoft.IdentityModel.Tokens;
@@ -44,48 +45,17 @@ builder.Services.AddCors(options =>
 //});
 
 builder.Services.AddSignalR();
-builder.Services.AddControllers();
+
+builder.Services.AddControllers()
+     .AddJsonOptions(options =>
+     {
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+     });
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
 builder.Services.AddHttpClient();
-
-// 驗證服務
-//builder.Services.AddAuthentication(options =>
-//{
-//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-//    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-//})
-//.AddJwtBearer(options => // 添加 JWT Bearer 驗證處理器
-//{
-//    options.TokenValidationParameters = new TokenValidationParameters
-//    {
-//        ValidateIssuer = true, // 是否驗證發行者
-//        ValidateAudience = true, // 是否驗證接收者
-//        ValidateLifetime = true, // 是否驗證 Token 的有效期限
-//        ValidateIssuerSigningKey = true, // 是否驗證簽名金鑰
-//        ValidIssuer = builder.Configuration["Jwt:Issuer"], // 從 appsettings.json 讀取 Issuer
-//        ValidAudience = builder.Configuration["Jwt:Audience"], // 從 appsettings.json 讀取 Audience
-//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])) // 從 appsettings.json 讀取並轉換金鑰
-//    };
-
-//    options.Events = new JwtBearerEvents
-//    {
-//        OnMessageReceived = context =>
-//        {
-//            var accessToken = context.Request.Query["access_token"];
-//            var path = context.HttpContext.Request.Path;
-//            if (!string.IsNullOrEmpty(accessToken) &&
-//                (path.StartsWithSegments("/chathub"))) // 只針對 chathub
-//            {
-//                context.Token = accessToken;
-//            }
-//            return Task.CompletedTask;
-//        }
-//    };
-//});
 
 builder.Services.AddAuthorization();
 

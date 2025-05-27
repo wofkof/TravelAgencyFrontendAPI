@@ -186,7 +186,8 @@ namespace TravelAgency.Shared.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<DateTime>("StartTime")
+                    b.Property<DateTime?>("StartTime")
+                        .IsRequired()
                         .HasColumnType("datetime");
 
                     b.Property<string>("Status")
@@ -1374,6 +1375,9 @@ namespace TravelAgency.Shared.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime");
+
                     b.Property<bool>("InvoiceAddBillingAddr")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -1436,14 +1440,14 @@ namespace TravelAgency.Shared.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("Other");
+                        .HasDefaultValue("ECPay_CreditCard");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("Unpaid");
+                        .HasDefaultValue("Awaiting");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");

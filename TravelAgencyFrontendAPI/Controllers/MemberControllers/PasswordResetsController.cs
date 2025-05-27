@@ -28,7 +28,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
         public async Task<IActionResult> RequestReset([FromBody] EmailDto dto)
         {           
             if (dto == null || string.IsNullOrWhiteSpace(dto.Email))
-                return BadRequest("❌ Email 欄位是空的，請正確傳送 Email 資料");
+                return BadRequest("Email 欄位是空的，請正確傳送 Email 資料");
 
             string email = dto.Email.Trim().ToLower();
 
@@ -37,7 +37,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 // 檢查會員是否存在
                 var member = await _context.Members.FirstOrDefaultAsync(m => m.Email.ToLower() == email);
                 if (member == null)
-                    return BadRequest("⚠ 查無此會員信箱，請確認輸入正確");
+                    return BadRequest("查無此會員信箱，請確認輸入正確");
 
             // 產生 6 碼驗證碼
                 var code = new Random().Next(100000, 999999).ToString();
@@ -61,7 +61,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 {
                     await _emailService.SendEmailAsync(
                         email,
-                        "嶼你同行｜密碼重設驗證碼通知",
+                        "嶼你同行｜密碼重設-驗證碼通知",
                         $@"<div style='font-family:Arial,sans-serif; font-size:16px; color:#333; line-height:1.8'>
                   <div style='text-align:center; margin-bottom:20px'>
                     <img src='https://i.postimg.cc/kgC50Qfb/logo.png' alt='嶼你同行 LOGO' width='180' />

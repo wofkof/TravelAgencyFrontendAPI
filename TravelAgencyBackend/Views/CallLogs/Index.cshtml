@@ -1,0 +1,37 @@
+﻿@model List<TravelAgency.Shared.Models.CallLog>
+
+@{
+    ViewData["Title"] = "通話紀錄";
+}
+
+<h2>通話紀錄</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>聊天室ID</th>
+            <th>來電者</th>
+            <th>接收者</th>
+            <th>通話類型</th>
+            <th>狀態</th>
+            <th>開始時間</th>
+            <th>結束時間</th>
+            <th>通話秒數</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var log in Model)
+        {
+            <tr>
+                <td>@log.ChatRoomId</td>
+                <td>@log.CallerType @log.CallerId</td>
+                <td>@log.ReceiverType @log.ReceiverId</td>
+                <td>@log.CallType</td>
+                <td>@log.Status</td>
+                <td>@log.StartTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                <td>@log.EndTime?.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                <td>@(log.DurationInSeconds.HasValue ? log.DurationInSeconds + " 秒" : "-")</td>
+            </tr>
+        }
+    </tbody>
+</table>

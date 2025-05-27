@@ -158,6 +158,22 @@
                             @* 管理聊天室 *@
                             @if (PermissionChecker.CanManageChatRooms)
                             {
+                                <a asp-controller="CallLogs" asp-action="Index">
+                                    <i class="metismenu-icon"></i>通話紀錄
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="CallLogs" asp-action="Index"
+                                   class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false">
+                                    <i class="metismenu-icon"></i>通話紀錄
+                                </a>
+                            }
+                        </li>
+                        <li>
+                            @* 管理聊天室 *@
+                            @if (PermissionChecker.CanManageChatRooms)
+                            {
                                 <a asp-controller="ChatRoom" asp-action="Create">
                                     <i class="metismenu-icon"></i>新增聊天室
                                 </a>

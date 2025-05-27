@@ -5,23 +5,23 @@ namespace TravelAgencyFrontendAPI.DTOs.OrderDTOs
 {
     public class OrderInvoiceRequestDto
     {
-        [Required(ErrorMessage = "發票選項為必填")]
-        public InvoiceOption InvoiceOption { get; set; } // Personal (二聯), Company (三聯)
+        [Required(ErrorMessage = "必須選擇發票選項")]
+        public InvoiceOption InvoiceOption { get; set; }
 
-        // 以下對應 Order Model 中的發票欄位
-        [EmailAddress(ErrorMessage = "請輸入有效的發票寄送電子信箱")]
-        public string? InvoiceDeliveryEmail { get; set; } // 發票寄送Email (常用於電子發票)
+        // Email: 個人發票時為 CloudInvoiceDeliveryEmail，公司發票時為 CompanyInvoiceEmail
+        [EmailAddress(ErrorMessage = "Email格式不正確")]
+        [StringLength(100, ErrorMessage = "Email過長")]
+        public string? InvoiceDeliveryEmail { get; set; }
 
-        // 公司發票 (InvoiceOption.Company)
-        [StringLength(10)]
+        [StringLength(8, MinimumLength = 8, ErrorMessage = "統一編號必須為8碼")]
         public string? InvoiceUniformNumber { get; set; } // 公司統編
 
-        [StringLength(100)]
-        public string? InvoiceTitle { get; set; } // 發票抬頭
+        [StringLength(100, ErrorMessage = "發票抬頭過長")]
+        public string? InvoiceTitle { get; set; } // 公司發票抬頭
 
         public bool InvoiceAddBillingAddr { get; set; } = false;
 
-        [StringLength(200)]
+        [StringLength(200, ErrorMessage = "帳單地址過長")]
         public string? InvoiceBillingAddress { get; set; }
     }
 }
