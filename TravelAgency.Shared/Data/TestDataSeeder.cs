@@ -47,6 +47,7 @@ namespace TravelAgency.Shared.Data
             await SeedOrderFormAsync();
             await SeedPaymentMethodAsync();
             await SeedCompletedOrderDetailAsync();
+            await SeedAnnouncementAsync();
         }
 
         private async Task SeedRolesAsync()
@@ -2183,7 +2184,7 @@ namespace TravelAgency.Shared.Data
                     new Payment
 
                     {
-                        OrderFormId = 3,
+                        OrderFormId = 1,
                         DocumentMenuId = 1,
                         PaymentMethod = PaymentMethodEnum.信用卡,
                     }
@@ -2196,7 +2197,6 @@ namespace TravelAgency.Shared.Data
 
         //完成訂單明細假資料 富成
         public async Task SeedCompletedOrderDetailAsync()
-
         {
             if (!_context.CompletedOrderDetails.Any())
 
@@ -2207,12 +2207,47 @@ namespace TravelAgency.Shared.Data
 
                     {
                         DocumentMenuId = 1,
-                        OrderFormId = 3,
+                        OrderFormId = 1,
                     }
                 );
 
                 await _context.SaveChangesAsync();
 
+            }
+        }
+
+        //公告假資料
+        private async Task SeedAnnouncementAsync()
+        {
+            if (!_context.Announcements.Any())
+            {
+                _context.Announcements.AddRange(
+                    new Announcement
+                    {
+                        EmployeeId = 1,
+                        Title = "資展國際★名言佳句",
+                        Content = "{{ 今日口號 }} 一.給阿波棒。，二.先看喔先看喔,對不對,對齁。，三.A星A味,愛恩G。，四.不是尼的湊拉,是西阿歐s的問題的拉。",
+                        SentAt = new DateTime(2024, 8, 11),
+                        Status = AnnouncementStatus.Published
+                    },
+                    new Announcement
+                    {
+                        EmployeeId = 1,
+                        Title = "【使用JC卡】",
+                        Content = "要不要吃涼麵，要不要吃京多多，要不要吃小飯骨，要不要吃蛋餅。",
+                        SentAt = new DateTime(2024, 8, 11),
+                        Status = AnnouncementStatus.Published
+                    },
+                    new Announcement
+                    {
+                        EmployeeId = 1,
+                        Title = "我是山頂洞人，我引以為傲",
+                        Content = "呼叫李小姐，請您看一下LINE看一眼也好",
+                        SentAt = new DateTime(2024, 8, 11),
+                        Status = AnnouncementStatus.Published
+                    }
+                );
+                await _context.SaveChangesAsync();
             }
         }
 

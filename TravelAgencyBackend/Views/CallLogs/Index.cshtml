@@ -28,7 +28,7 @@
                 <td>@log.ReceiverType @log.ReceiverId</td>
                 <td>@log.CallType</td>
                 <td>@log.Status</td>
-                <td>@log.StartTime?.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                <td>@log.StartTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
                 <td>@log.EndTime?.ToString("yyyy-MM-dd HH:mm:ss")</td>
                 <td>@(log.DurationInSeconds.HasValue ? log.DurationInSeconds + " 秒" : "-")</td>
             </tr>

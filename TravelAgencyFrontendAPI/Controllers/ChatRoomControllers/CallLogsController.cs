@@ -60,7 +60,7 @@ namespace TravelAgencyFrontendAPI.Controllers
                     ReceiverId = c.ReceiverId,
                     CallType = c.CallType,
                     Status = c.Status,
-                    StartTime = c.StartTime ?? DateTime.MinValue,
+                    StartTime = c.StartTime,
                     EndTime = c.EndTime,
                     DurationInSeconds = c.DurationInSeconds
                 })
