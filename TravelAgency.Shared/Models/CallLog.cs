@@ -32,7 +32,7 @@
         public int ReceiverId { get; set; }
         public CallType CallType { get; set; }
         public Status Status { get; set; } 
-        public DateTime StartTime { get; set; }
+        public DateTime? StartTime { get; set; }
         public DateTime? EndTime { get; set; }
         public int? DurationInSeconds { get; set; }
 

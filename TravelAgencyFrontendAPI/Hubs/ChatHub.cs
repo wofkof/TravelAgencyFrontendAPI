@@ -141,5 +141,19 @@ namespace TravelAgencyFrontendAPI.Hubs
             await Clients.Client(toConnectionId).SendAsync("CallRejected", Context.ConnectionId);
         }
 
+        public async Task EndCallByGroup(int chatRoomId)
+        {
+            Console.WriteLine($"[Hub] 通知聊天室 {chatRoomId} 所有人掛斷");
+
+            try
+            {
+                await Clients.Group(chatRoomId.ToString()).SendAsync("ReceiveEndCall", Context.ConnectionId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Hub] 傳送 ReceiveEndCall 失敗：{ex.Message}");
+            }
+        }
+
     }
 }

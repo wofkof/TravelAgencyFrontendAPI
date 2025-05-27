@@ -76,7 +76,7 @@ namespace TravelAgencyBackend.Controllers
                 return RedirectToAction("Details", new { id = vm.ChatRoomId });
             }
 
-            int employeeId = 1;
+            int employeeId = GetCurrentEmployeeId();
 
             var chatRoom = _context.ChatRooms
                 .FirstOrDefault(c => c.ChatRoomId == vm.ChatRoomId && c.EmployeeId == employeeId);
