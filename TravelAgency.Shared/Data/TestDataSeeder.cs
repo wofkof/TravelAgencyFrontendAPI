@@ -1847,7 +1847,7 @@ namespace TravelAgency.Shared.Data
                     MemberId = member1.MemberId,
                     TotalAmount = (groupTravelItem1.OfficialTravelDetail.AdultPrice ?? 0) * 2, // IsRequired
                     PaymentMethod = PaymentMethod.ECPay_CreditCard, 
-                    Status = OrderStatus.Unpaid, // IsRequired (使用預設值)
+                    Status = OrderStatus.Awaiting, // IsRequired (使用預設值)
                     CreatedAt = now.AddDays(-5), // 有 SQL 預設值
                     // PaymentDate is null for Unpaid order
                     InvoiceOption = InvoiceOption.Personal, // IsRequired (使用預設值)
