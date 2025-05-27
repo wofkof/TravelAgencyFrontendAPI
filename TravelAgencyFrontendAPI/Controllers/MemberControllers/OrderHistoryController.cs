@@ -66,7 +66,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 OrdererPhone = orderData.OrdererPhone,
                 OrdererEmail = orderData.OrdererEmail,
                 Note = orderData.Note,
-                PaymentMethod = orderData.PaymentMethod?.ToString(),
+                PaymentMethod = orderData.PaymentMethod.ToString(),
                 Status = orderData.Status.ToString(),
                 CreatedAt = orderData.CreatedAt,
                 PaymentDate = orderData.PaymentDate,

@@ -92,7 +92,7 @@ namespace TravelAgencyFrontendAPI.ECPay.Services
             }
 
             // << 修改點：使用您更新的 OrderStatus >>
-            if (order.Status != OrderStatus.Unpaid && order.Status != OrderStatus.Awaiting)
+            if (order.Status != OrderStatus.Awaiting)
             {
                 _logger.LogWarning($"[Payment] OrderId: {orderId} 的訂單狀態 ({order.Status}) 不允許支付。"); // 原有備註 + 更新
                 throw new InvalidOperationException($"訂單 ID 為 {orderId} 的訂單狀態不允許支付。");
@@ -574,8 +574,8 @@ namespace TravelAgencyFrontendAPI.ECPay.Services
                     return "1|OK_DuplicateNotification_CompletedAndInvoiced";
                 }
 
-                // 只有 Unpaid 或 Awaiting 狀態的訂單才繼續處理付款和開票
-                if (order.Status == OrderStatus.Unpaid || order.Status == OrderStatus.Awaiting)
+                // 只有 Awaiting 狀態的訂單才繼續處理付款和開票
+                if (order.Status == OrderStatus.Awaiting)
                 {
                     _logger.LogInformation($"[PaymentReturn] 訂單 {order.OrderId} (MTN: {merchantTradeNoFromForm}) 付款成功。準備開立發票。"); // 原有備註
                     order.PaymentDate = DateTime.TryParse(formData["PaymentDate"].FirstOrDefault(), out var pDate) ? pDate : DateTime.UtcNow; // 原有備註
@@ -665,7 +665,7 @@ namespace TravelAgencyFrontendAPI.ECPay.Services
             else // 金流付款失敗
             {
                 // << 修改點：使用您更新的 OrderStatus >>
-                if (order.Status == OrderStatus.Unpaid || order.Status == OrderStatus.Awaiting)
+                if (order.Status == OrderStatus.Awaiting)
                 {
                     order.Status = OrderStatus.Cancelled; // 付款失敗，訂單取消 (您更新的狀態)
                     order.ECPayTradeNo = ecpayTradeNoFromForm; // 仍然可以記錄綠界交易號碼 // 原有備註

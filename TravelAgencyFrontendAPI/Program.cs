@@ -6,6 +6,7 @@ using Microsoft.Extensions.FileProviders;
 
 using TravelAgencyFrontendAPI.ECPay.Models; // 引入 ECPayConfiguration
 using TravelAgencyFrontendAPI.ECPay.Services; // 引入 ECPayService
+using TravelAgencyFrontendAPI.Services;
 
 //using Microsoft.AspNetCore.Authentication.JwtBearer;
 //using Microsoft.IdentityModel.Tokens;

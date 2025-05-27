@@ -5,36 +5,41 @@ using System.Security.Claims;
 using TravelAgency.Shared.Data;
 using TravelAgency.Shared.Models;
 using TravelAgencyFrontendAPI.DTOs.OrderDTOs;
-using Microsoft.Extensions.Logging; // 加入 ILogger
-using System; // 加入 System
-using System.Collections.Generic; // 加入 List
-using System.Linq; // 加入 Linq
-using System.Threading.Tasks; // 加入 Task
-using System.ComponentModel.DataAnnotations; // 如果 DTO 使用 DataAnnotations
+using TravelAgencyFrontendAPI.ECPay.Services;
+using TravelAgencyFrontendAPI.ECPay.Models;
 
 namespace TravelAgencyFrontendAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize] // 加上這個，確保只有登入會員才能下單
     public class OrderController : ControllerBase
     {
         private readonly AppDbContext _context;
         private readonly ILogger<OrderController> _logger;
+        private readonly ECPayService _ecpayService;
 
-        public OrderController(AppDbContext context, ILogger<OrderController> logger)
+        public OrderController(AppDbContext context, ILogger<OrderController> logger, ECPayService ecpayService)
         {
             _context = context;
             _logger = logger;
+            _ecpayService = ecpayService;
         }
 
-        // POST: api/Order
-        // 建立新的訂單 (初始狀態，待付款)
-        [HttpPost]
-        public async Task<ActionResult<OrderSummaryDto>> CreateOrder([FromBody] OrderCreateDto orderCreateDto)
+        // POST: api/Order/initiate
+        // << 初步訂單建立」 >>
+        /// <summary>
+        /// 步驟1：建立初步訂單 (不含付款方式和發票資訊)
+        /// </summary>
+        /// <param name="orderCreateDto">訂單建立資訊 (不含付款和發票)</param>
+        /// <returns>初步訂單摘要，包含OrderId, MerchantTradeNo, ExpiresAt</returns>
+        [HttpPost("initiate")]
+        public async Task<ActionResult<OrderSummaryDto>> InitiateOrderAsync([FromBody] OrderCreateDto orderCreateDto) // << 修改：方法名和 DTO >>
         {
+            _logger.LogInformation("接收到初步訂單建立請求: {@OrderCreateDto}", orderCreateDto); // << 新增：日誌記錄 >>
+
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("初步訂單模型驗證失敗: {@ModelState}", ModelState); // << 新增：日誌記錄 >>
                 return BadRequest(ModelState);
             }
 
@@ -43,33 +48,39 @@ namespace TravelAgencyFrontendAPI.Controllers
             if (member == null)
             {
                 _logger.LogWarning("CreateOrder 找不到會員，會員 ID (來自前端DTO): {MemberId}", memberIdFromDto);
-                // 返回明確的錯誤，告知前端提供的 MemberId 找不到對應的會員
                 ModelState.AddModelError(nameof(orderCreateDto.MemberId), $"提供的會員 ID {memberIdFromDto} 不存在。");
                 return BadRequest(ModelState);
             }
+
+            // << 新增：產生唯一的商店交易編號 (MerchantTradeNo) 移至此處 >>
+            // 確保此編號的唯一性，綠界要求20碼內英數字
+            string tempGuidPart = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
+            string timePartForMtn = DateTime.UtcNow.ToString("yyMMddHHmmss"); // 精確到秒，減少重複機率
+            string prefixForMtn = "TRVORD"; // 您的商店前綴
+            string mtnBase = $"{prefixForMtn}{timePartForMtn}{tempGuidPart}";
+            string merchantTradeNo = new string(mtnBase.Where(char.IsLetterOrDigit).ToArray());
+            if (merchantTradeNo.Length > 20)
+            {
+                merchantTradeNo = merchantTradeNo.Substring(0, 20);
+            }
+            _logger.LogInformation("為訂單產生的 MerchantTradeNo: {MerchantTradeNo}", merchantTradeNo);
+
 
             // 初始化 Order 物件
             var order = new Order
             {
                 MemberId = member.MemberId,
+                OrdererName = orderCreateDto.OrdererInfo.Name,
+                OrdererPhone = NormalizePhoneNumber(orderCreateDto.OrdererInfo.MobilePhone),
+                OrdererEmail = orderCreateDto.OrdererInfo.Email,
 
-                OrdererName = orderCreateDto.OrdererInfo.Name, // 訂購人姓名
-                OrdererPhone = NormalizePhoneNumber(orderCreateDto.OrdererInfo.MobilePhone), // 訂購人電話
-                OrdererEmail = orderCreateDto.OrdererInfo.Email, // 訂購人Email
-
-                PaymentMethod = orderCreateDto.SelectedPaymentMethod, // 使用者選擇的付款方式
-                Status = OrderStatus.Awaiting, // 初始狀態設為Awaiting(待付款)
-                CreatedAt = DateTime.UtcNow, // 使用 UTC 時間
+                Status = OrderStatus.Awaiting,
+                CreatedAt = DateTime.UtcNow,
+                ExpiresAt = DateTime.UtcNow.AddSeconds(30), // 30秒後失效 (之後背景服務會處理)
+                MerchantTradeNo = merchantTradeNo, // << 新增：設定商店交易編號 >>
                 Note = orderCreateDto.OrderNotes,
-                // 處理發票請求資訊
-                InvoiceOption = orderCreateDto.InvoiceRequestInfo.InvoiceOption,
-                InvoiceDeliveryEmail = orderCreateDto.InvoiceRequestInfo.InvoiceDeliveryEmail,
-                InvoiceUniformNumber = orderCreateDto.InvoiceRequestInfo.InvoiceUniformNumber,
-                InvoiceTitle = orderCreateDto.InvoiceRequestInfo.InvoiceTitle,
-                InvoiceAddBillingAddr = orderCreateDto.InvoiceRequestInfo.InvoiceAddBillingAddr,
-                InvoiceBillingAddress = orderCreateDto.InvoiceRequestInfo.InvoiceBillingAddress,
-                OrderDetails = new List<OrderDetail>(), // 初始化訂單明細集合
-                OrderParticipants = new List<OrderParticipant>() // 初始化旅客集合
+                OrderDetails = new List<OrderDetail>(),
+                OrderParticipants = new List<OrderParticipant>()
             };
 
             decimal calculatedServerTotalAmount = 0;
@@ -86,15 +97,13 @@ namespace TravelAgencyFrontendAPI.Controllers
                 string optionSpecificDescription = cartItemDto.OptionType; // 選項的描述
                 ProductCategory itemCategory; // 用來儲存轉換後的 ProductCategory
 
-                if (Enum.TryParse<ProductCategory>(cartItemDto.ProductType, true, out var parsedCategory)) // true 表示忽略大小寫
-                {
-                    itemCategory = parsedCategory;
-                }
-                else
+                if (!Enum.TryParse<ProductCategory>(cartItemDto.ProductType, true, out var parsedCategory))
                 {
                     _logger.LogWarning($"無效的 ProductType: {cartItemDto.ProductType}。");
                     return BadRequest($"不支援的商品類型: {cartItemDto.ProductType}。");
                 }
+                itemCategory = parsedCategory;
+
                 if (itemCategory == ProductCategory.GroupTravel)
                 {
                     var groupTravel = await _context.GroupTravels
@@ -102,22 +111,11 @@ namespace TravelAgencyFrontendAPI.Controllers
                                                     .ThenInclude(otd => otd.OfficialTravel)
                                                 .FirstOrDefaultAsync(gt => gt.GroupTravelId == cartItemDto.ProductId && gt.GroupStatus == "開團");
 
-                    if (groupTravel == null)
-                    {
-                        return BadRequest($"團體行程 (ID: GT{cartItemDto.ProductId}) 無效、未開放報名，或找不到對應的行程資料。");
+                    if (groupTravel == null || groupTravel.OfficialTravelDetail == null || groupTravel.OfficialTravelDetail.OfficialTravel == null || groupTravel.OfficialTravelDetail.State != DetailState.Locked)
+                    { 
+                        return BadRequest($"團體行程 (ID: GT{cartItemDto.ProductId}) 資訊不完整或未鎖定價格。"); 
                     }
-                    if (groupTravel.OfficialTravelDetail == null)
-                    {
-                        return BadRequest($"團體行程 (ID: GT{cartItemDto.ProductId}) 缺少必要的價格明細設定 (OfficialTravelDetail)。");
-                    }
-                    if (groupTravel.OfficialTravelDetail.OfficialTravel == null)
-                    {
-                        return BadRequest($"團體行程 (ID: GT{cartItemDto.ProductId}) 關聯的官方行程主檔資料遺失。");
-                    }
-                    if (groupTravel.OfficialTravelDetail.State != DetailState.Locked) // 假設價格必須是鎖定狀態
-                    {
-                        return BadRequest($"團體行程 (ID: GT{cartItemDto.ProductId}) 的價格資訊目前未鎖定，無法下單。");
-                    }
+
                     productName = groupTravel.OfficialTravelDetail.OfficialTravel.Title;
                     var priceDetail = groupTravel.OfficialTravelDetail; // 價格資訊從這裡來
 
@@ -166,9 +164,8 @@ namespace TravelAgencyFrontendAPI.Controllers
 
                 var orderDetail = new OrderDetail
                 {
-                    //OrderId = order.OrderId,
-                    Category = itemCategory,                     // << 賦值 ProductCategory
-                    ItemId = cartItemDto.ProductId,              // << 賦值 ItemId (GroupTravelId 或 CustomTravelId)
+                    Category = itemCategory,                     
+                    ItemId = cartItemDto.ProductId,              // ItemId (GroupTravelId 或 CustomTravelId)
                     Description = $"{productName} - {optionSpecificDescription}",
                     Quantity = cartItemDto.Quantity,
                     Price = unitPrice,
@@ -280,39 +277,9 @@ namespace TravelAgencyFrontendAPI.Controllers
             {
                 try
                 {
-                    // 在第一次 SaveChangesAsync 之前賦值 MerchantTradeNo (不依賴 OrderId 的版本)
-                    // 或者，如果 MerchantTradeNo 必須包含 OrderId，則需要在第一次 SaveChangesAsync 之後再更新一次。
-                    // 這裡採用先產生一個基於時間戳和GUID片段的唯一編號，不依賴 OrderId。
-                    // 如果您的 ECPayService.GenerateEcPayPaymentForm 中的 MerchantTradeNo 生成邏輯更完善，可以考慮將其提取為共用方法。
-                    string tempGuidPart = Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper(); // 增加唯一性
-                    string timePartForMtn = DateTime.UtcNow.ToString("yyMMddHHmmss"); // 使用 UTC 時間更佳
-                    string prefixForMtn = "TRV";
-                    string mtnBase = $"{prefixForMtn}{timePartForMtn}{tempGuidPart}";
-                    order.MerchantTradeNo = new string(mtnBase.Where(char.IsLetterOrDigit).ToArray());
-                    if (order.MerchantTradeNo.Length > 20)
-                    {
-                        order.MerchantTradeNo = order.MerchantTradeNo.Substring(0, 20);
-                    }
-                    _logger.LogInformation("為新訂單產生的 MerchantTradeNo: {MerchantTradeNo}", order.MerchantTradeNo);
-
                     _context.Orders.Add(order);
-                    await _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync(); // 第一次儲存以獲取 OrderId
 
-                    // (可選) 如果 MerchantTradeNo 強烈建議包含 OrderId，可以在此處更新並再次儲存
-                    bool requiresMtnUpdateWithOrderId = false; // 根據您的需求設定此標誌
-                    if (requiresMtnUpdateWithOrderId)
-                    {
-                        string orderIdPartForMtn = order.OrderId.ToString("D5"); // 例如補零到5位
-                        string finalMtnBase = $"{prefixForMtn}{orderIdPartForMtn}{timePartForMtn}"; // 假設 timePartForMtn 已在上面定義
-                        order.MerchantTradeNo = new string(finalMtnBase.Where(char.IsLetterOrDigit).ToArray());
-                        if (order.MerchantTradeNo.Length > 20)
-                        {
-                            order.MerchantTradeNo = order.MerchantTradeNo.Substring(0, 20);
-                        }
-                        _context.Orders.Update(order); // 標記為更新
-                        await _context.SaveChangesAsync(); // 第二次儲存以更新 MerchantTradeNo
-                        _logger.LogInformation("已使用 OrderId 更新訂單 MerchantTradeNo: {MerchantTradeNo}", order.MerchantTradeNo);
-                    }
                     // 處理常用旅客的更新或新增
                     if (orderCreateDto.TravelerProfileActions != null && orderCreateDto.TravelerProfileActions.Any())
                     {
@@ -409,18 +376,109 @@ namespace TravelAgencyFrontendAPI.Controllers
             var orderSummary = new OrderSummaryDto
             {
                 OrderId = order.OrderId,
+                MerchantTradeNo = order.MerchantTradeNo, // 重要，用於後續付款
                 OrderStatus = order.Status.ToString(),
                 TotalAmount = order.TotalAmount,
-                SelectedPaymentMethod = order.PaymentMethod?.ToString(),
-
+                ExpiresAt = order.ExpiresAt // 重要，用於前端顯示倒數
             };
-            return Created($"/api/Order/{order.OrderId}", orderSummary); // 假設之後會有GET api/Order/{id}
+            _logger.LogInformation("初步訂單建立成功，回傳 orderSummary: {@OrderSummary}", orderSummary);
+            return CreatedAtAction(nameof(GetOrderById), new { id = order.OrderId, memberId = order.MemberId }, orderSummary);
         }
+
+        // << 處理第二階段付款與發票資訊的 Action >>
+        /// <summary>
+        /// 步驟2：最終確認訂單付款方式與發票資訊，並取得 ECPay 付款參數
+        /// </summary>
+        /// <param name="orderId">訂單 ID</param>
+        /// <param name="paymentDto">付款及發票資訊</param>
+        /// <returns>ECPay 付款表單所需參數</returns>
+        [HttpPut("{orderId}/finalize-payment")]
+        public async Task<ActionResult<ECPayService.ECPayPaymentRequestViewModel>> FinalizePaymentAsync(int orderId, [FromBody] OrderPaymentFinalizationDto paymentDto)
+        {
+            _logger.LogInformation("接收到訂單最終確認付款請求，OrderID: {OrderId}, DTO: {@PaymentDto}", orderId, paymentDto); // << 新增：日誌記錄 >>
+
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("訂單最終確認付款模型驗證失敗: {@ModelState}", ModelState);
+                return BadRequest(ModelState);
+            }
+
+            if (paymentDto.MemberId <= 0)
+            {
+                _logger.LogWarning("訂單最終確認付款：DTO 中提供的 MemberId 無效: {ProvidedMemberId}", paymentDto.MemberId);
+                return BadRequest(new { message = "請求中缺少有效的會員ID。" });
+            }
+            var memberIdFromDto = paymentDto.MemberId;
+            var order = await _context.Orders
+                                .Include(o => o.OrderDetails) // ECPayService 可能會用到
+                                .FirstOrDefaultAsync(o => o.OrderId == orderId && o.MemberId == memberIdFromDto);
+
+            if (order == null)
+            {
+                _logger.LogWarning("訂單最終確認付款：找不到訂單 ID {OrderId} 或會員 {MemberIdFromDto} 無權限。", orderId, memberIdFromDto);
+                return NotFound(new { message = $"找不到訂單 {orderId} 或您無權存取。" });
+            }
+
+            if (order.Status != OrderStatus.Awaiting)
+            {
+                _logger.LogWarning("訂單 {OrderId} 狀態為 {Status}，無法進行付款設定。", orderId, order.Status);
+                return BadRequest(new { message = $"訂單目前狀態為 '{order.Status}'，無法設定付款資訊。請確認訂單狀態或重新下單。" });
+            }
+
+            if (order.ExpiresAt.HasValue && order.ExpiresAt.Value <= DateTime.UtcNow)
+            {
+                _logger.LogWarning("訂單 {OrderId} 已於 {ExpiresAt} 過期。", orderId, order.ExpiresAt.Value);
+                order.Status = OrderStatus.Expired; // 主動更新狀態
+                await _context.SaveChangesAsync();
+                return BadRequest(new { message = "此訂單的付款時間已過期，請重新下單。" });
+            }
+
+            // 更新訂單的付款方式和發票資訊
+            order.PaymentMethod = paymentDto.SelectedPaymentMethod;
+            order.InvoiceOption = paymentDto.InvoiceRequestInfo.InvoiceOption;
+            order.InvoiceDeliveryEmail = paymentDto.InvoiceRequestInfo.InvoiceDeliveryEmail;
+            order.InvoiceUniformNumber = paymentDto.InvoiceRequestInfo.InvoiceUniformNumber;
+            order.InvoiceTitle = paymentDto.InvoiceRequestInfo.InvoiceTitle;
+            order.InvoiceAddBillingAddr = paymentDto.InvoiceRequestInfo.InvoiceAddBillingAddr;
+            order.InvoiceBillingAddress = paymentDto.InvoiceRequestInfo.InvoiceBillingAddress;
+            // 如果 OrderPaymentFinalizationDto.InvoiceRequestInfo 有其他發票欄位，一併更新
+
+            try
+            {
+                _context.Orders.Update(order);
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("訂單 {OrderId} 已更新付款及發票資訊。", order.OrderId);
+
+                // << 新增：調用 ECPayService 來產生綠界付款表單參數 >>
+                // 注意：ECPayService.GenerateEcPayPaymentForm 內部會再次檢查訂單狀態和效期
+                var ecpayViewModel = await _ecpayService.GenerateEcPayPaymentForm(order.OrderId);
+
+                _logger.LogInformation("成功為訂單 {OrderId} 產生 ECPay 付款參數，準備回傳前端。", order.OrderId);
+                return Ok(ecpayViewModel);
+            }
+            catch (InvalidOperationException ex) // 可能由 ECPayService 拋出 (例如訂單狀態不符或已過期)
+            {
+                _logger.LogWarning(ex, "準備 ECPay 參數時發生業務邏輯錯誤 (InvalidOperationException)。訂單 ID: {OrderId}", orderId);
+                return BadRequest(new { message = ex.Message }); // 將 ECPayService 的錯誤訊息回傳給前端
+            }
+            catch (ArgumentException ex) // 可能由 ECPayService 拋出 (例如找不到訂單)
+            {
+                _logger.LogWarning(ex, "準備 ECPay 參數時發生參數錯誤 (ArgumentException)。訂單 ID: {OrderId}", orderId);
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "最終確認付款並產生 ECPay 參數時發生未預期錯誤。訂單 ID: {OrderId}", orderId);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "處理付款請求時發生內部錯誤，請稍後再試。" });
+            }
+        }
+
+
 
         // *** 在這裡添加電話號碼正規化的私有 Helper Method ***
         private string NormalizePhoneNumber(string phoneNumberString)
         {
-            if (string.IsNullOrEmpty(phoneNumberString))
+            if (string.IsNullOrWhiteSpace(phoneNumberString)) // 使用 IsNullOrWhiteSpace 更佳
             {
                 return phoneNumberString; // 如果是 null 或空字串，直接返回
             }
@@ -428,38 +486,47 @@ namespace TravelAgencyFrontendAPI.Controllers
             string normalizedNumber = phoneNumberString.Trim(); // 移除前後空白
 
             // 檢查是否以 "+" 開頭，且長度足夠進行檢查 (至少包含 +國碼數字0數字 或 +國碼數字數字)
-            if (normalizedNumber.StartsWith("+") && normalizedNumber.Length >= 3) // 假設最短國碼數字至少2位，如 +886
+            if (normalizedNumber.StartsWith("+"))
             {
-                // 找到國碼後面的數字部分
-                int firstDigitAfterPlus = 1; // 從 '+' 的下一個字元開始
-                int firstNonDigitIndexAfterPlus = firstDigitAfterPlus;
+                // 移除開頭的 '+'
+                string numberWithoutPlus = normalizedNumber.Substring(1);
 
-                // 找到國碼數字部分的結束位置 (第一個非數字字元)
-                while (firstNonDigitIndexAfterPlus < normalizedNumber.Length && char.IsDigit(normalizedNumber[firstNonDigitIndexAfterPlus]))
+                // 特別處理台灣的國碼 "886"
+                if (numberWithoutPlus.StartsWith("886"))
                 {
-                    firstNonDigitIndexAfterPlus++;
-                }
+                    string countryCodePart = "886";
+                    // 取得 "886" 後面的號碼部分
+                    string nationalNumberPart = numberWithoutPlus.Substring(countryCodePart.Length); // 例如 "0905088127" 或 "905088127"
 
-                // 如果國碼數字部分存在，且後面還有號碼
-                if (firstNonDigitIndexAfterPlus > firstDigitAfterPlus && firstNonDigitIndexAfterPlus < normalizedNumber.Length)
-                {
-                    string countryCodeWithPlus = normalizedNumber.Substring(0, firstNonDigitIndexAfterPlus); // 包含 "+" 和國碼數字
-                    string restOfNumber = normalizedNumber.Substring(firstNonDigitIndexAfterPlus); // 國碼後面的號碼部分
-
-                    // 檢查號碼的其餘部分是否以 "0" 開頭，並且其長度大於 1
-                    if (restOfNumber.StartsWith("0") && restOfNumber.Length > 1)
+                    // 如果號碼部分以 "0" 開頭，且長度大於1 (例如 "09..." 而非只有 "0")
+                    if (nationalNumberPart.StartsWith("0") && nationalNumberPart.Length > 1)
                     {
-                        // 移除開頭的 "0"
-                        restOfNumber = restOfNumber.Substring(1);
+                        nationalNumberPart = nationalNumberPart.Substring(1); // 移除開頭的 "0"，變成 "905088127"
                     }
-
-                    // 重新組合國碼和處理後的號碼
-                    normalizedNumber = countryCodeWithPlus + restOfNumber;
+                    // 組合國碼和處理後的號碼部分
+                    _logger.LogInformation("Normalized phone from {Original} to {Processed}", phoneNumberString, countryCodePart + nationalNumberPart);
+                    return countryCodePart + nationalNumberPart; // 結果："886905088127"
                 }
-                // else: 如果格式不符合預期 (例如只有 + 或 +國碼沒有後續號碼)，保持原樣
+                else
+                {
+                    // 警告：這假設 "+" 後面緊跟的是完整的數字，如果包含其他非數字字元，可能需要額外處理。
+                    if (numberWithoutPlus.All(char.IsDigit))
+                    {
+                        _logger.LogInformation("Normalized non-TW phone from {Original} to {Processed} (removed '+')", phoneNumberString, numberWithoutPlus);
+                        return numberWithoutPlus; // 例如：輸入 "+14155552671"，返回 "14155552671"
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Phone number {PhoneNumber} starts with '+' but is not in the expected +886... format or contains non-digits after the initial '+'. Returning without '+'.", phoneNumberString);
+                        // 嘗試移除 "+" 後，移除所有非數字字元 (這是一個比較寬鬆的處理)
+                        // string cleanedNumber = new string(numberWithoutPlus.Where(char.IsDigit).ToArray());
+                        // return cleanedNumber;
+                        // 或者，如果格式不符預期，可以考慮返回原始號碼(不含+)或拋出格式錯誤
+                        return numberWithoutPlus; // 目前僅移除 '+'
+                    }
+                }
             }
-            // else: 如果不以 "+" 開頭，根據您的需求決定如何處理，這裡保持原樣
-
+            _logger.LogInformation("Phone number {Original} did not match specific normalization rules, returning trimmed version.", phoneNumberString);
             return normalizedNumber;
         }
 
@@ -478,6 +545,84 @@ namespace TravelAgencyFrontendAPI.Controllers
             return null;
         }
 
+        /// <summary>
+        /// 查詢當前使用者是否有活躍的、未過期的待付款訂單。
+        /// </summary>
+        /// <returns>PendingOrderStatusDto 或 NotFound</returns>
+        [HttpGet("active-pending")] // 例如: GET /api/Order/active-pending
+        public async Task<ActionResult<PendingOrderStatusDto>> GetActivePendingOrderForCurrentUser([FromQuery] int? memberId)
+        {
+            _logger.LogInformation("[GetActivePendingOrder] API endpoint hit. Received memberId from query: {QueryMemberId}", memberId);
+            if (memberId == null || memberId.Value <= 0) // << 修改點：檢查傳入的 memberId
+            {
+                _logger.LogWarning("[GetActivePendingOrder] Invalid memberId received from query: {QueryMemberId}", memberId);
+                return BadRequest(new { message = "需要提供有效的 memberId。" });
+            }
+
+            var activePendingOrder = await _context.Orders
+                .Where(o => o.MemberId == memberId.Value &&
+                             o.Status == OrderStatus.Awaiting && // 只找狀態為 Awaiting 的
+                             o.ExpiresAt.HasValue && o.ExpiresAt.Value > DateTime.UtcNow) // 且尚未過期
+                .OrderByDescending(o => o.CreatedAt) // 如果有多筆，取最新的 (理論上應該只有一筆活躍的)
+                .Select(o => new PendingOrderStatusDto
+                {
+                    OrderId = o.OrderId,
+                    MerchantTradeNo = o.MerchantTradeNo,
+                    Status = o.Status.ToString(), // 將 enum 轉為 string
+                    ExpiresAt = o.ExpiresAt,
+                    TotalAmount = o.TotalAmount,
+                    PaymentMethod = o.PaymentMethod.ToString() // 將 enum 轉為 string
+                })
+                .FirstOrDefaultAsync();
+
+            if (activePendingOrder == null)
+            {
+                _logger.LogInformation("GetActivePendingOrderForCurrentUser: MemberId {MemberId} 沒有找到活躍的待付款訂單。", memberId.Value);
+                return NotFound(new { message = "目前沒有待付款的訂單。" });
+            }
+
+            _logger.LogInformation("GetActivePendingOrderForCurrentUser: MemberId {MemberId} 找到待付款訂單 {@ActiveOrder}", memberId.Value, activePendingOrder);
+            return Ok(activePendingOrder);
+        }
+
+        /// <summary>
+        /// 查詢特定訂單的最新狀態，供前端核對。
+        /// </summary>
+        /// <param name="orderId">要查詢的訂單 ID</param>
+        /// <returns>PendingOrderStatusDto 或 NotFound/Unauthorized</returns>
+        [HttpGet("{orderId}/status-check")] // 例如: GET /api/Order/123/status-check
+        public async Task<ActionResult<PendingOrderStatusDto>> CheckOrderStatus(int orderId)
+        {
+            var memberId = GetCurrentUserId();
+            if (memberId == null)
+            {
+                _logger.LogWarning("CheckOrderStatus for OrderId {OrderId}: User 未認證或無法獲取 MemberId。", orderId);
+                return Unauthorized(new { message = "使用者未登入或無法識別身份。" });
+            }
+
+            var orderStatusInfo = await _context.Orders
+                .Where(o => o.OrderId == orderId && o.MemberId == memberId.Value) // 確保是該會員的訂單
+                .Select(o => new PendingOrderStatusDto
+                {
+                    OrderId = o.OrderId,
+                    MerchantTradeNo = o.MerchantTradeNo,
+                    Status = o.Status.ToString(),
+                    ExpiresAt = o.ExpiresAt, // 即使過期也回傳，讓前端知道
+                    TotalAmount = o.TotalAmount,
+                    PaymentMethod = o.PaymentMethod.ToString()
+                })
+                .FirstOrDefaultAsync();
+
+            if (orderStatusInfo == null)
+            {
+                _logger.LogWarning("CheckOrderStatus: MemberId {MemberId} 查詢不到訂單 {OrderId} 或無權限。", memberId.Value, orderId);
+                return NotFound(new { message = $"找不到訂單 {orderId} 或您無權存取。" });
+            }
+            _logger.LogInformation("CheckOrderStatus: 查詢到訂單狀態 {@OrderStatusInfo} for OrderId {OrderId}, MemberId {MemberId}", orderStatusInfo, orderId, memberId.Value);
+            return Ok(orderStatusInfo);
+        }
+
+
         [HttpGet("{id}")]
         public async Task<ActionResult<OrderDto>> GetOrderById(int id, [FromQuery] int? memberId)
         {
@@ -492,7 +637,6 @@ namespace TravelAgencyFrontendAPI.Controllers
                 .Include(o => o.OrderParticipants)
                 .Include(o => o.OrderDetails)
                 //    .ThenInclude(od => od.GroupTravel) // 如果需要在訂單詳情中顯示 GroupTravel 的資訊
-                //.Include(o => o.OrderDetails)
                 //    .ThenInclude(od => od.CustomTravel)   // 如果需要在訂單詳情中顯示 CustomTravel 的資訊
                 .FirstOrDefaultAsync(o => o.OrderId == id && o.MemberId == memberId.Value);
 
@@ -535,7 +679,7 @@ namespace TravelAgencyFrontendAPI.Controllers
                 OrdererPhone = orderData.OrdererPhone,
                 OrdererEmail = orderData.OrdererEmail,
                 TotalAmount = orderData.TotalAmount,
-                PaymentMethod = orderData.PaymentMethod?.ToString(),
+                PaymentMethod = orderData.PaymentMethod.ToString(),
                 OrderStatus = orderData.Status.ToString(),
                 CreatedAt = orderData.CreatedAt,
                 PaymentDate = orderData.PaymentDate,
@@ -546,30 +690,80 @@ namespace TravelAgencyFrontendAPI.Controllers
                 InvoiceTitle = orderData.InvoiceTitle,
                 InvoiceAddBillingAddr = orderData.InvoiceAddBillingAddr,
                 InvoiceBillingAddress = orderData.InvoiceBillingAddress,
+                ExpiresAt = orderData.ExpiresAt, // 回傳訂單過期時間 
+                MerchantTradeNo = orderData.MerchantTradeNo,// 回傳商店交易編號 
+
                 Participants = orderData.OrderParticipants?.Select(p => new OrderParticipantDto
                 {
                     Name = p.Name,
                     BirthDate = p.BirthDate,
                     IdNumber = p.IdNumber,
                     Gender = p.Gender, // 轉換為字串
-                    DocumentType = p.DocumentType // 轉換為字串
+                    DocumentType = p.DocumentType, // 轉換為字串
+                    DocumentNumber = p.DocumentNumber,
+                    PassportSurname = p.PassportSurname,
+                    PassportGivenName = p.PassportGivenName,
+                    PassportExpireDate = p.PassportExpireDate,
+                    Nationality = p.Nationality,
+                    Note = p.Note,
                 }).ToList() ?? new List<OrderParticipantDto>(),
-                OrderDetails = orderData.OrderDetails?.Select(od => new OrderDetailItemDto 
+                OrderDetails = orderData.OrderDetails?.Select(od =>
                 {
-                    //Category = od.Category, // DTO 中可能是 string
-                    Category = od.Category, // Enum 可以直接賦值，如果 DTO 也是 Enum
-                    ItemId = od.ItemId,
-                    Description = od.Category == ProductCategory.GroupTravel ?
-                                  od.GroupTravel?.OfficialTravelDetail?.OfficialTravel?.Title :
-                                 (od.Category == ProductCategory.CustomTravel ? od.CustomTravel?.Note : od.Description), // 調整品名獲取
-                    Quantity = od.Quantity,
-                    Price = od.Price,
-                    TotalAmount = od.TotalAmount
-                    // ... 其他 OrderDetailItemDto 欄位 ...
+                    string productTitle = string.Empty;
+                    DateTime? itemStartDate = null;
+                    DateTime? itemEndDate = null;
+                    if (od.Category == ProductCategory.GroupTravel && od.GroupTravel != null)
+                    {
+                        productTitle = od.GroupTravel.OfficialTravelDetail?.OfficialTravel?.Title ?? string.Empty;
+                        // 假設 OfficialTravelDetail 或 GroupTravel 有 StartDate/EndDate
+                        // itemStartDate = od.GroupTravel.OfficialTravelDetail?.StartDate;
+                        // itemEndDate = od.GroupTravel.OfficialTravelDetail?.EndDate;
+                    }
+                    else if (od.Category == ProductCategory.CustomTravel && od.CustomTravel != null)
+                    {
+                        productTitle = od.CustomTravel.Note ?? $"客製化行程 {od.CustomTravel.CustomTravelId}";
+                        // 假設 CustomTravel 有 StartDate/EndDate
+                        // itemStartDate = od.CustomTravel.StartDate;
+                        // itemEndDate = od.CustomTravel.EndDate;
+                    }
+
+                    if (string.IsNullOrEmpty(productTitle) && !string.IsNullOrEmpty(od.Description))
+                    {
+                        int separatorIndex = od.Description.LastIndexOf(" - ");
+                        productTitle = separatorIndex > 0 ? od.Description.Substring(0, separatorIndex) : od.Description;
+                    }
+
+
+                    return new OrderDetailItemDto
+                    {
+                        OrderDetailId = od.OrderDetailId,
+                        Category = od.Category,
+                        ItemId = od.ItemId,
+                        Description = od.Description,
+                        Quantity = od.Quantity,
+                        Price = od.Price,
+                        TotalAmount = od.TotalAmount,
+                        ProductType = od.Category.ToString(),
+                        OptionType = ParseOptionTypeFromDescription(od.Description, productTitle),
+                        StartDate = itemStartDate,
+                        EndDate = itemEndDate,   
+                    };
                 }).ToList() ?? new List<OrderDetailItemDto>(),
             };
 
             return Ok(orderDto);
+        }
+        // 輔助方法：從 OrderDetail.Description 中解析 OptionType (這部分比較tricky，需要你根據 Description 的格式來實作)
+        private string ParseOptionTypeFromDescription(string description, string productName)
+        {
+            if (string.IsNullOrEmpty(description) || string.IsNullOrEmpty(productName)) return description; // 或返回空字串
+            // 假設 Description 格式為 "{productName} - {optionSpecificDescription}"
+            string prefix = $"{productName} - ";
+            if (description.StartsWith(prefix))
+            {
+                return description.Substring(prefix.Length);
+            }
+            return description; // 如果格式不符，返回原始描述或特定預設值
         }
 
         [HttpGet("{orderId}/invoice")] // 例如: GET /api/Order/149/invoice

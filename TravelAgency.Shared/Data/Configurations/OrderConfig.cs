@@ -22,7 +22,7 @@ namespace TravelAgency.Shared.Data.Configurations
                    .HasConversion<string>()
                    .IsRequired()
                    .HasMaxLength(20)
-                   .HasDefaultValue(OrderStatus.Unpaid);
+                   .HasDefaultValue(OrderStatus.Awaiting);
 
             builder.Property(o => o.CreatedAt)
                    .HasColumnType("datetime")
@@ -67,6 +67,10 @@ namespace TravelAgency.Shared.Data.Configurations
 
             builder.Property(o => o.MerchantTradeNo)
                    .HasMaxLength(20);
+
+            builder.Property(o => o.ExpiresAt)
+                   .HasColumnType("datetime");
+
 
             builder.HasOne(o => o.Member)
                    .WithMany(m => m.Orders)
