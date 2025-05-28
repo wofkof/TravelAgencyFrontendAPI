@@ -1,16 +1,69 @@
-﻿@model List<TravelAgency.Shared.Models.CallLog>
-
+﻿@model CallLogListViewModel
+@using TravelAgencyBackend.Helpers
+@using TravelAgencyBackend.ViewModels
 @{
     ViewData["Title"] = "通話紀錄";
+    var employeeNames = ViewBag.EmployeeNames as Dictionary<int, string>;
+    var memberNames = ViewBag.MemberNames as Dictionary<int, string>;
+    var myId = (int)ViewBag.EmployeeId;
+    string? keyword = ViewBag.Keyword as string;
+    Status? statusFilter = ViewBag.StatusFilter as Status?;
+}
+@{
+    int totalPages = (int)Math.Ceiling((double)Model.TotalCount / Model.PageSize);
+    int currentPage = Model.Page;
+    int maxPagesToShow = 5;
+    int startPage = Math.Max(1, currentPage - 2);
+    int endPage = Math.Min(totalPages, currentPage + 2);
+
+    if (endPage - startPage + 1 < maxPagesToShow)
+    {
+        if (startPage == 1)
+            endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
+        else if (endPage == totalPages)
+            startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+    }
 }
 
 <h2>通話紀錄</h2>
+
+<nav>
+    <ul class="pagination">
+        @for (int i = startPage; i <= endPage; i++)
+        {
+            <li class="page-item @(i == currentPage ? "active" : "")">
+                <a class="page-link" href="?keyword=@Model.Keyword&statusFilter=@Model.StatusFilter&page=@i">@i</a>
+            </li>
+        }
+    </ul>
+</nav>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="keyword" value="@keyword" class="form-control" placeholder="搜尋 ID 或姓名...">
+    </div>
+    <div class="col-auto">
+        <select name="statusFilter" class="form-select">
+            <option value="">-- 全部狀態 --</option>
+            @foreach (var s in Enum.GetValues(typeof(Status)).Cast<Status>())
+            {
+                var selected = statusFilter?.ToString() == s.ToString() ? "selected" : "";
+                @Html.Raw($"<option value=\"{s}\" {selected}>{EnumDisplayHelper.GetDisplayName(s)}</option>")
+            }
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">搜尋</button>
+    </div>
+</form>
+
 
 <table class="table table-striped">
     <thead>
         <tr>
             <th>聊天室ID</th>
             <th>來電者</th>
+            <th>角色</th>
             <th>接收者</th>
             <th>通話類型</th>
             <th>狀態</th>
@@ -20,14 +73,61 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var log in Model)
+        @foreach (var log in Model.Logs)
         {
             <tr>
                 <td>@log.ChatRoomId</td>
-                <td>@log.CallerType @log.CallerId</td>
-                <td>@log.ReceiverType @log.ReceiverId</td>
-                <td>@log.CallType</td>
-                <td>@log.Status</td>
+                <td>
+                    <span class="badge @(log.CallerType == CallerType.Employee ? "bg-primary" : "bg-success")">
+                        @EnumDisplayHelper.GetDisplayName(log.CallerType) 
+                    </span>
+                    @if (log.CallerType == CallerType.Employee && employeeNames.ContainsKey(log.CallerId))
+                    {
+                        <span class="ms-1">(@employeeNames[log.CallerId])</span>
+                    }
+                    else if (log.CallerType == CallerType.Member && memberNames.ContainsKey(log.CallerId))
+                    {
+                        <span class="ms-1">(@memberNames[log.CallerId])</span>
+                    }
+                </td>
+                <td>
+                    @if (log.CallerType == TravelAgency.Shared.Models.CallerType.Employee && log.CallerId == (int)ViewBag.EmployeeId)
+                    {
+                        <span class="text-primary">← 我撥的</span>
+                    }
+                    else if (log.ReceiverType == TravelAgency.Shared.Models.ReceiverType.Employee && log.ReceiverId == (int)ViewBag.EmployeeId)
+                    {
+                        <span class="text-success">← 對方撥的</span>
+                    }
+                    else
+                    {
+                        <span>-</span>
+                    }
+                </td>
+                <td>
+                    <span class="badge @(log.ReceiverType == ReceiverType.Employee ? "bg-primary" : "bg-success")">
+                        @EnumDisplayHelper.GetDisplayName(log.ReceiverType)
+                    </span>
+                    @if (log.ReceiverType == ReceiverType.Employee && employeeNames.ContainsKey(log.ReceiverId))
+                    {
+                        <span class="ms-1">(@employeeNames[log.ReceiverId])</span>
+                    }
+                    else if (log.ReceiverType == ReceiverType.Member && memberNames.ContainsKey(log.ReceiverId))
+                    {
+                        <span class="ms-1">(@memberNames[log.ReceiverId])</span>
+                    }
+                </td>
+                <td class="fw-bold @(log.CallType == CallType.video ? "text-primary" : "text-info")">
+                    @EnumDisplayHelper.GetDisplayName(log.CallType)
+                </td>
+                <td class="fw-bold @(log.Status switch {
+                    Status.completed => "text-success",
+                    Status.missed => "text-danger",
+                    Status.rejected => "text-warning",
+                    _ => ""
+                })">
+                    @EnumDisplayHelper.GetDisplayName(log.Status)
+                </td>
                 <td>@log.StartTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
                 <td>@log.EndTime?.ToString("yyyy-MM-dd HH:mm:ss")</td>
                 <td>@(log.DurationInSeconds.HasValue ? log.DurationInSeconds + " 秒" : "-")</td>
@@ -35,3 +135,4 @@
         }
     </tbody>
 </table>
+
