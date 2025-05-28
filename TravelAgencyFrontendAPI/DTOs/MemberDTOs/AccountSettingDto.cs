@@ -19,6 +19,7 @@
         public string? ProfileImage { get; set; }
         public string? Note { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public bool IsFakePhone { get; set; }
     }
 
 }

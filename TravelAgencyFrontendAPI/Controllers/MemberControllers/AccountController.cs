@@ -22,6 +22,10 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
         private readonly EmailService _emailService;
         private readonly string _recaptchaSecret;
         private readonly IConfiguration _config;
+        private string GenerateFakePhone()
+        {
+            return "GPHONE" + Guid.NewGuid().ToString("N")[..8]; // 例如 GPHONEabc123ef
+        }
 
 
         public AccountController(AppDbContext context, EmailService emailService, IConfiguration config)
@@ -309,12 +313,18 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 var redirectUri = _config["GoogleOAuth:RedirectUri"];
                 if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret) || string.IsNullOrEmpty(redirectUri))
                 {
+                    Console.WriteLine("❌ Google OAuth 設定缺失");
                     return StatusCode(500, "Google OAuth 設定尚未正確載入");
                 }
+                Console.WriteLine($"使用設定 - ClientId: {clientId}, RedirectUri: {redirectUri}");
                 // 向 Google 換 token
-                var tokenResponse = await new HttpClient().PostAsync(
-                    "https://oauth2.googleapis.com/token",
-                    new FormUrlEncodedContent(new Dictionary<string, string>
+                Console.WriteLine("準備向 Google 請求 token...");
+                using var httpClient = new HttpClient();
+                Console.WriteLine("建立請求內容...");
+                
+                var tokenResponse = await httpClient.PostAsync(
+                    "https://oauth2.googleapis.com/token",                  
+                new FormUrlEncodedContent(new Dictionary<string, string>
                     {
             { "code", dto.Code },
             { "client_id", clientId },
@@ -323,70 +333,130 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
             { "grant_type", "authorization_code" }
                     })
                 );
+                Console.WriteLine("收到 Google 回應，開始讀取內容...");
                 var tokenJson = await tokenResponse.Content.ReadAsStringAsync();
-                Console.WriteLine("Google 回傳 tokenJson：");
-                Console.WriteLine(tokenJson);
                 Console.WriteLine("Google 回傳狀態碼：" + tokenResponse.StatusCode);
                 Console.WriteLine("Google 回傳內容：" + tokenJson);
 
                 if (!tokenResponse.IsSuccessStatusCode)
                 {
+                    Console.WriteLine("❌ Google token 交換失敗");
                     return StatusCode(500, "❌ Google token 交換失敗：" + tokenJson);
                 }
 
                 var tokenDoc = JsonDocument.Parse(tokenJson);
                 if (!tokenDoc.RootElement.TryGetProperty("id_token", out var idTokenElement))
                 {
+                    Console.WriteLine("❌ 回傳中找不到 id_token");
                     return StatusCode(500, "❌ 回傳中找不到 id_token，請確認 scope 是否包含 openid");
                 }
                 var idToken = idTokenElement.GetString();
+                if (string.IsNullOrEmpty(idToken))
+                {
+                    Console.WriteLine("❌ id_token 為空");
+                    return StatusCode(500, "❌ id_token 為空");
+                }
 
+                Console.WriteLine("開始解碼 id_token");
                 var payload = DecodeIdToken(idToken);
+                // 安全地取得使用者資訊
+                if (!payload.TryGetValue("email", out var emailObj) || emailObj == null)
+                {
+                    Console.WriteLine("❌ 無法從 id_token 取得 email");
+                    return StatusCode(500, "❌ 無法從 Google 取得使用者 email");
+                }
 
-                var email = payload["email"].ToString();
-                var name = payload["name"].ToString();
-                var googleId = payload["sub"].ToString();
+                if (!payload.TryGetValue("name", out var nameObj) || nameObj == null)
+                {
+                    Console.WriteLine("❌ 無法從 id_token 取得 name");
+                    return StatusCode(500, "❌ 無法從 Google 取得使用者姓名");
+                }
+
+                if (!payload.TryGetValue("sub", out var subObj) || subObj == null)
+                {
+                    Console.WriteLine("❌ 無法從 id_token 取得 sub");
+                    return StatusCode(500, "❌ 無法從 Google 取得使用者識別碼");
+                }
+                var email = emailObj.ToString();
+                var name = nameObj.ToString();
+                var googleId = subObj.ToString();
+
+                Console.WriteLine($"取得使用者資訊 - Email: {email}, Name: {name}, GoogleId: {googleId}");
 
                 // 查找或建立會員（用 Email 為主）
-                var member = await _context.Members.FirstOrDefaultAsync(m => m.Email == email);
-                if (member != null && !string.IsNullOrEmpty(member.GoogleId) && member.GoogleId != googleId)
+                try
                 {
-                    return BadRequest("此 Email 已是本網站會員");
-                }
+                    var member = await _context.Members.FirstOrDefaultAsync(m => m.Email == email);
 
-                if (member == null)
-                {
-                    member = new Member
+                    if (member != null && !string.IsNullOrEmpty(member.GoogleId) && member.GoogleId != googleId)
                     {
-                        Name = name,
-                        Email = email,
-                        GoogleId = googleId,
-                        IsEmailVerified = true,
-                        RegisterDate = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow,
-                        Status = MemberStatus.Active,
-                        PasswordHash = "-", 
-                        PasswordSalt = "-",
-                        IsBlacklisted = false,
-                        Phone = "-"
-                    };
-                    _context.Members.Add(member);
-                    await _context.SaveChangesAsync();
-                }
+                        Console.WriteLine("❌ Email 已被其他 Google 帳號使用");
+                        return BadRequest("此 Email 已是本網站會員");
+                    }
 
-                return Ok(new
+                    if (member == null)
+                    {
+                        Console.WriteLine("建立新會員");
+                        member = new Member
+                        {
+                            Name = name,
+                            Email = email,
+                            GoogleId = googleId,
+                            IsEmailVerified = true,
+                            RegisterDate = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow,
+                            Status = MemberStatus.Active,
+                            PasswordHash = "-",
+                            PasswordSalt = "-",
+                            IsBlacklisted = false,
+                            //電話是用假號碼，因為google登入並不一定會有電話值
+                            Phone = GenerateFakePhone()
+                        };
+                        _context.Members.Add(member);
+                        await _context.SaveChangesAsync();
+                        Console.WriteLine($"✅ 新會員建立成功，ID: {member.MemberId}");
+                    }
+                    else
+                    {
+                        // 如果會員存在但沒有 GoogleId，更新它
+                        if (string.IsNullOrEmpty(member.GoogleId))
+                        {
+                            member.GoogleId = googleId;
+                            member.UpdatedAt = DateTime.UtcNow;
+                            await _context.SaveChangesAsync();
+                            Console.WriteLine($"✅ 現有會員已綁定 Google 帳號，ID: {member.MemberId}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"✅ 現有 Google 會員登入，ID: {member.MemberId}");
+                        }
+                    }
+
+                    return Ok(new
+                    {
+                        memberId = member.MemberId,
+                        name = member.Name
+                    });
+                }
+                catch (Exception dbEx)
                 {
-                    memberId = member.MemberId,
-                    name = member.Name
-                });
+                    Console.WriteLine("❗ 資料庫操作發生例外：");
+                    Console.WriteLine(dbEx.ToString());
+                    return StatusCode(500, "資料庫操作失敗，請稍後再試");
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine("❗ GoogleLogin 發生例外：");
                 Console.WriteLine(ex.ToString());
+                Console.WriteLine("❗ 例外類型：" + ex.GetType().Name);
+                Console.WriteLine("❗ 例外訊息：" + ex.Message);
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine("❗ 內部例外：" + ex.InnerException.Message);
+                }
                 return StatusCode(500, "伺服器內部錯誤，請稍後再試");
             }
-
         }
         
         private Dictionary<string, object> DecodeIdToken(string idToken)

@@ -43,7 +43,8 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 DocumentNumber = member.DocumentNumber,
                 ProfileImage = member.ProfileImage,
                 Note = member.Note,
-                UpdatedAt = member.UpdatedAt
+                UpdatedAt = member.UpdatedAt,
+                IsFakePhone = member.Phone != null && member.Phone.StartsWith("GPHONE"),
             };
 
             return Ok(dto);
