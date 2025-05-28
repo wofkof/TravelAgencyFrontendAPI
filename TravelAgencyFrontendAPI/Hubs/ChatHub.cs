@@ -78,10 +78,15 @@ namespace TravelAgencyFrontendAPI.Hubs
                          .SendAsync("MessageRead", chatRoomId, readerId, readerType);
         }
 
-        public async Task SendCallOffer(string toConnectionId, object offer)
+        public async Task SendCallOffer(string toConnectionId, object offer, int roomId, string callType)
         {
-            await Clients.Client(toConnectionId)
-                         .SendAsync("ReceiveCallOffer", Context.ConnectionId, offer);
+            await Clients.Client(toConnectionId).SendAsync("ReceiveCallOffer", new
+            {
+                fromId = Context.ConnectionId, 
+                offer,
+                roomId,
+                callType 
+            });
         }
 
         public async Task SendCallAnswer(string toConnectionId, object answer)
@@ -132,9 +137,17 @@ namespace TravelAgencyFrontendAPI.Hubs
 
         public async Task EndCall(string toConnectionId)
         {
-            Console.WriteLine($"[Hub] 來自 {Context.ConnectionId} 通知掛斷給 {toConnectionId}");
-            await Clients.Client(toConnectionId).SendAsync("ReceiveEndCall", Context.ConnectionId);
+            try
+            {
+                Console.WriteLine($"[Hub] 來自 {Context.ConnectionId} 通知掛斷給 {toConnectionId}");
+                await Clients.Client(toConnectionId).SendAsync("ReceiveEndCall", Context.ConnectionId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Hub] EndCall 發生錯誤: {ex.Message}");
+            }
         }
+
 
         public async Task RejectCall(string toConnectionId)
         {

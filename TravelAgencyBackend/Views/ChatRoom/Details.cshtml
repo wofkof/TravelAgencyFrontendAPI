@@ -191,9 +191,10 @@
                 recordCallLog("rejected");
                 endCall(false);
             });
-            connection.on("ReceiveEndCall", () => {
+            connection.on("ReceiveEndCall", (fromConnectionId) => {
+                console.log("收到掛斷通知，來自連線ID：", fromConnectionId);
                 alert("📴 對方已掛斷");
-                endCall(false);
+                endCall(false); 
             });
 
             await connection.start();
@@ -343,7 +344,7 @@
 
             const offer = await peer.createOffer();
             await peer.setLocalDescription(offer);
-            await connection.invoke("SendCallOffer", targetConnId, offer);
+            await connection.invoke("SendCallOffer", targetConnId, offer, chatRoomId, actualCallType);
 
             showCallControls("⏳ 等待對方接聽...");
         }
@@ -422,31 +423,41 @@
         }
 
         async function endCall(sendSignal = true) {
-            let status = "completed";
-            if (!hasCallBeenAnswered) {
-                status = "missed"; 
-            }
-            if (localStream) {
+              let status = hasCallBeenAnswered ? "completed" : "missed";
+
+              if (sendSignal && remoteConnectionId) {
+                console.log("[MVC] 呼叫 EndCall 給：", remoteConnectionId);
+                try {
+                  await connection.invoke("EndCall", remoteConnectionId);
+                } catch (err) {
+                  console.error("呼叫 EndCall 失敗", err);
+                }
+              }
+
+              if (localStream) {
                 localStream.getTracks().forEach(t => t.stop());
                 localStream = null;
                 document.getElementById("localVideo").srcObject = null;
-            }
-            if (peer) {
+              }
+
+              if (peer) {
                 peer.close();
                 peer = null;
+              }
+
+              document.getElementById("remoteAudio").srcObject = null;
+              document.getElementById("remoteVideo").srcObject = null;
+              document.getElementById("callControls").style.display = "none";
+
+              if (callTimerInterval) {
+                clearInterval(callTimerInterval);
+                callTimerInterval = null;
+              }
+
+              if (callStartTime && !isNaN(callStartTime.getTime())) {
+                await recordCallLog(status);
+              }
             }
-            document.getElementById("remoteAudio").srcObject = null;
-            document.getElementById("remoteVideo").srcObject = null;
-            document.getElementById("callControls").style.display = "none";
-            if (!callStartTime || isNaN(callStartTime.getTime())) return;
-
-            if (sendSignal && remoteConnectionId) {
-                await connection.invoke("EndCall", remoteConnectionId);
-            }
-
-            await recordCallLog(status);
-        }
-
 
         function createPeerConnection() {
             const pc = new RTCPeerConnection({
