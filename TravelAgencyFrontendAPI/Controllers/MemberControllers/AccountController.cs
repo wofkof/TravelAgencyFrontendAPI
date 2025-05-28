@@ -8,6 +8,7 @@ using TravelAgency.Shared.Data;
 using TravelAgency.Shared.Models;
 using Newtonsoft.Json.Linq;
 using System.Text.Json;
+using System.Text;
 
 
 
@@ -20,12 +21,15 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
         private readonly AppDbContext _context;
         private readonly EmailService _emailService;
         private readonly string _recaptchaSecret;
+        private readonly IConfiguration _config;
+
 
         public AccountController(AppDbContext context, EmailService emailService, IConfiguration config)
         {
             _context = context;
             _emailService = emailService;
             _recaptchaSecret = config["GoogleReCaptcha:SecretKey"];
+            _config = config;
         }
 
         // POST: api/Account/signup 
@@ -291,5 +295,125 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
             return Ok("密碼已成功更新");
         }
 
-    }
+        
+        // POST: api/Account/GoogleLogin
+        [HttpPost("GoogleLogin")]
+        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDto dto)
+        {
+            Console.WriteLine("收到 Google code: " + dto.Code);
+
+            try
+            {
+                var clientId = _config["GoogleOAuth:ClientId"];
+                var clientSecret = _config["GoogleOAuth:ClientSecret"];
+                var redirectUri = _config["GoogleOAuth:RedirectUri"];
+                if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret) || string.IsNullOrEmpty(redirectUri))
+                {
+                    return StatusCode(500, "Google OAuth 設定尚未正確載入");
+                }
+                // 向 Google 換 token
+                var tokenResponse = await new HttpClient().PostAsync(
+                    "https://oauth2.googleapis.com/token",
+                    new FormUrlEncodedContent(new Dictionary<string, string>
+                    {
+            { "code", dto.Code },
+            { "client_id", clientId },
+            { "client_secret", clientSecret },
+            { "redirect_uri", redirectUri },
+            { "grant_type", "authorization_code" }
+                    })
+                );
+                var tokenJson = await tokenResponse.Content.ReadAsStringAsync();
+                Console.WriteLine("Google 回傳 tokenJson：");
+                Console.WriteLine(tokenJson);
+                Console.WriteLine("Google 回傳狀態碼：" + tokenResponse.StatusCode);
+                Console.WriteLine("Google 回傳內容：" + tokenJson);
+
+                if (!tokenResponse.IsSuccessStatusCode)
+                {
+                    return StatusCode(500, "❌ Google token 交換失敗：" + tokenJson);
+                }
+
+                var tokenDoc = JsonDocument.Parse(tokenJson);
+                if (!tokenDoc.RootElement.TryGetProperty("id_token", out var idTokenElement))
+                {
+                    return StatusCode(500, "❌ 回傳中找不到 id_token，請確認 scope 是否包含 openid");
+                }
+                var idToken = idTokenElement.GetString();
+
+                var payload = DecodeIdToken(idToken);
+
+                var email = payload["email"].ToString();
+                var name = payload["name"].ToString();
+                var googleId = payload["sub"].ToString();
+
+                // 查找或建立會員（用 Email 為主）
+                var member = await _context.Members.FirstOrDefaultAsync(m => m.Email == email);
+                if (member != null && !string.IsNullOrEmpty(member.GoogleId) && member.GoogleId != googleId)
+                {
+                    return BadRequest("此 Email 已是本網站會員");
+                }
+
+                if (member == null)
+                {
+                    member = new Member
+                    {
+                        Name = name,
+                        Email = email,
+                        GoogleId = googleId,
+                        IsEmailVerified = true,
+                        RegisterDate = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow,
+                        Status = MemberStatus.Active,
+                        PasswordHash = "-", 
+                        PasswordSalt = "-",
+                        IsBlacklisted = false,
+                        Phone = "-"
+                    };
+                    _context.Members.Add(member);
+                    await _context.SaveChangesAsync();
+                }
+
+                return Ok(new
+                {
+                    memberId = member.MemberId,
+                    name = member.Name
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("❗ GoogleLogin 發生例外：");
+                Console.WriteLine(ex.ToString());
+                return StatusCode(500, "伺服器內部錯誤，請稍後再試");
+            }
+
+        }
+        
+        private Dictionary<string, object> DecodeIdToken(string idToken)
+        {
+            var parts = idToken.Split('.');
+            if (parts.Length < 2)
+                throw new Exception("id_token 格式錯誤");
+
+            var payload = parts[1];
+            var base64 = payload.Replace('-', '+').Replace('_', '/');
+            switch (base64.Length % 4)
+            {
+                case 2: base64 += "=="; break;
+                case 3: base64 += "="; break;
+                case 1: base64 += "==="; break;
+            }
+
+            try
+            {
+                var json = Encoding.UTF8.GetString(Convert.FromBase64String(base64));
+                return JsonSerializer.Deserialize<Dictionary<string, object>>(json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("DecodeIdToken 發生錯誤：" + ex.Message);
+                throw new Exception("❌ id_token 解碼失敗，內容格式錯誤", ex);
+            }
+        }
+        }
 }
