@@ -172,9 +172,10 @@
                 .build();
 
             connection.on("ReceiveMessage", appendMessage);
-            connection.on("ReceiveCallOffer", async (fromId, offer) => {
-                remoteConnectionId = fromId;
-                incomingOffer = offer;
+            connection.on("ReceiveCallOffer", async (data) => {
+                console.log("[MVC] 收到 call offer 物件：", data);
+                remoteConnectionId = data.fromId;
+                incomingOffer = data.offer;
                 showCallControls("📞 來電中...");
             });
             connection.on("ReceiveCallAnswer", async (fromId, answer) => {
