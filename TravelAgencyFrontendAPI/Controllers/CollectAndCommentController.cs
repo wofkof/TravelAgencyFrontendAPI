@@ -58,6 +58,7 @@ namespace TravelAgencyFrontendAPI.Controllers
 
             
         }
+
         //讀取評論
         [HttpPost("getMyComments")]
         public async Task<ActionResult> GetMyComments(int memberId) 
@@ -100,11 +101,44 @@ namespace TravelAgencyFrontendAPI.Controllers
 
         }
 
-
-        //加入取消收藏
+        //加入收藏
+        //取消收藏
+        [HttpDelete("deleteCollection")]
+        public async Task<ActionResult> DeleteCollection(int collectId)
+        {
+            if (collectId <= 0)
+            {
+                return BadRequest(new { message = "收藏不存在" });
+            }
+            var collect = await _context.Collects.FindAsync(collectId);
+            if (collect == null)
+            {
+                return NotFound(new { message = "收藏不存在" });
+            }
+            _context.Collects.Remove(collect);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "收藏已刪除" });
+        }
         //新增評論
         //修改評論
         //刪除評論
+        [HttpDelete("deleteComment")]
+        public async Task<ActionResult> DeleteComment(int commentId)
+        {
+            if (commentId <= 0)
+            {
+                return BadRequest(new { message = "評論不存在" });
+            }
+            var comment = await _context.Comments.FindAsync(commentId);
+            if (comment == null)
+            {
+                return NotFound(new { message = "評論不存在" });
+            }
+            comment.Status = CommentStatus.Deleted;
+            _context.Comments.Update(comment);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "評論已刪除" });
 
+        }
     }
 }
