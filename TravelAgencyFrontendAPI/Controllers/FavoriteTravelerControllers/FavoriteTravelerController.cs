@@ -28,7 +28,9 @@ namespace TravelAgencyFrontendAPI.Controllers.FavoriteTravelerController
         [HttpGet("{memberId}")]
         public async Task<ActionResult<IEnumerable<FavoriteTravelerResponseDto>>> GetByMemberId(int memberId)
         {
-            var travelers = await _context.MemberFavoriteTravelers
+            try 
+            {
+                var travelers = await _context.MemberFavoriteTravelers
                 .Where(t => t.MemberId == memberId && t.Status == FavoriteStatus.Active)
                 .Select(t => new FavoriteTravelerResponseDto
                 {
@@ -48,84 +50,111 @@ namespace TravelAgencyFrontendAPI.Controllers.FavoriteTravelerController
                     Note = t.Note
                 }).ToListAsync();
 
-            return Ok(travelers);
+                return Ok(travelers);
+            }
+            catch (Exception ex)
+            {
+                // 可用 Logger 記錄 ex.Message
+                return StatusCode(500, "伺服器錯誤，請稍後再試");
+            }           
         }
 
         //新增旅客
         [HttpPost]
         public async Task<IActionResult> CreateTraveler([FromBody] FavoriteTravelerDto dto)
         {
-            var validationResult = ValidateTaiwanId(dto);
-            if (validationResult != null)
-                return validationResult;
-            var traveler = new MemberFavoriteTraveler
+            try
             {
-                MemberId = dto.MemberId,
-                Name = dto.Name,
-                Phone = dto.Phone,
-                IdNumber = dto.IdNumber,
-                BirthDate = dto.BirthDate,
-                Gender = dto.Gender,
-                Email = dto.Email,
-                DocumentType = dto.DocumentType,
-                DocumentNumber = dto.DocumentNumber,
-                PassportSurname = dto.PassportSurname,
-                PassportGivenName = dto.PassportGivenName,
-                PassportExpireDate = dto.PassportExpireDate,
-                Nationality = dto.Nationality,
-                Note = dto.Note,
-                CreatedAt = DateTime.UtcNow,
-                Status = FavoriteStatus.Active
-            };
+                var validationResult = ValidateTaiwanId(dto);
+                if (validationResult != null)
+                    return validationResult;
+                var traveler = new MemberFavoriteTraveler
+                {
+                    MemberId = dto.MemberId,
+                    Name = dto.Name,
+                    Phone = dto.Phone,
+                    IdNumber = dto.IdNumber,
+                    BirthDate = dto.BirthDate,
+                    Gender = dto.Gender,
+                    Email = dto.Email,
+                    DocumentType = dto.DocumentType,
+                    DocumentNumber = dto.DocumentNumber,
+                    PassportSurname = dto.PassportSurname,
+                    PassportGivenName = dto.PassportGivenName,
+                    PassportExpireDate = dto.PassportExpireDate,
+                    Nationality = dto.Nationality,
+                    Note = dto.Note,
+                    CreatedAt = DateTime.UtcNow,
+                    Status = FavoriteStatus.Active
+                };
 
-            _context.MemberFavoriteTravelers.Add(traveler);
-            await _context.SaveChangesAsync();
+                _context.MemberFavoriteTravelers.Add(traveler);
+                await _context.SaveChangesAsync();
 
-            return Ok(new { traveler.FavoriteTravelerId });
+                return Ok(new { traveler.FavoriteTravelerId });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "新增旅客時發生錯誤，請稍後再試");
+            }         
         }
         //更新旅客
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTraveler(int id, [FromBody] FavoriteTravelerDto dto)
         {
-            var validationResult = ValidateTaiwanId(dto);
-            if (validationResult != null)
-                return validationResult;
+            try
+            {
+                var validationResult = ValidateTaiwanId(dto);
+                if (validationResult != null)
+                    return validationResult;
 
-            var traveler = await _context.MemberFavoriteTravelers.FindAsync(id);
-            if (traveler == null || traveler.Status == FavoriteStatus.Deleted)
-                return NotFound();
+                var traveler = await _context.MemberFavoriteTravelers.FindAsync(id);
+                if (traveler == null || traveler.Status == FavoriteStatus.Deleted)
+                    return NotFound();
 
-            traveler.Name = dto.Name;
-            traveler.Phone = dto.Phone;
-            traveler.IdNumber = dto.IdNumber;
-            traveler.BirthDate = dto.BirthDate;
-            traveler.Gender = dto.Gender;
-            traveler.Email = dto.Email;
-            traveler.DocumentType = dto.DocumentType;
-            traveler.DocumentNumber = dto.DocumentNumber;
-            traveler.PassportSurname = dto.PassportSurname;
-            traveler.PassportGivenName = dto.PassportGivenName;
-            traveler.PassportExpireDate = dto.PassportExpireDate;
-            traveler.Nationality = dto.Nationality;
-            traveler.Note = dto.Note;
-            traveler.UpdatedAt = DateTime.UtcNow;
+                traveler.Name = dto.Name;
+                traveler.Phone = dto.Phone;
+                traveler.IdNumber = dto.IdNumber;
+                traveler.BirthDate = dto.BirthDate;
+                traveler.Gender = dto.Gender;
+                traveler.Email = dto.Email;
+                traveler.DocumentType = dto.DocumentType;
+                traveler.DocumentNumber = dto.DocumentNumber;
+                traveler.PassportSurname = dto.PassportSurname;
+                traveler.PassportGivenName = dto.PassportGivenName;
+                traveler.PassportExpireDate = dto.PassportExpireDate;
+                traveler.Nationality = dto.Nationality;
+                traveler.Note = dto.Note;
+                traveler.UpdatedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
-            return NoContent();
+                await _context.SaveChangesAsync();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "更新旅客資料時發生錯誤，請稍後再試");
+            }           
         }
         //軟刪除旅客
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTraveler(int id)
         {
-            var traveler = await _context.MemberFavoriteTravelers.FindAsync(id);
-            if (traveler == null || traveler.Status == FavoriteStatus.Deleted)
-                return NotFound();
+            try
+            {
+                var traveler = await _context.MemberFavoriteTravelers.FindAsync(id);
+                if (traveler == null || traveler.Status == FavoriteStatus.Deleted)
+                    return NotFound();
 
-            traveler.Status = FavoriteStatus.Deleted;
-            traveler.UpdatedAt = DateTime.UtcNow;
+                traveler.Status = FavoriteStatus.Deleted;
+                traveler.UpdatedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
-            return NoContent();
+                await _context.SaveChangesAsync();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "刪除旅客時發生錯誤，請稍後再試");
+            }          
         }
         private IActionResult? ValidateTaiwanId(FavoriteTravelerDto dto)
         {
