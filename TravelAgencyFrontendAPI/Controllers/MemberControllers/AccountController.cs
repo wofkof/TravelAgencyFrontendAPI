@@ -263,7 +263,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                     $@"
                 <div style='font-family:Arial,sans-serif; font-size:16px; color:#333; line-height:1.8'>
                   <div style='text-align:center; margin-bottom:20px'>
-                    <img src='https://i.postimg.cc/kgC50Qfb/logo.png' alt='嶼你同行 LOGO' width='180' />
+                    <img src='https://i.ibb.co/bgLz9Hk3/logo.png' alt='嶼你同行 LOGO' width='180' />
                   </div>
 
                   <p>親愛的旅客您好，</p>

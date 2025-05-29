@@ -64,7 +64,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                         "嶼你同行｜密碼重設-驗證碼通知",
                         $@"<div style='font-family:Arial,sans-serif; font-size:16px; color:#333; line-height:1.8'>
                   <div style='text-align:center; margin-bottom:20px'>
-                    <img src='https://i.postimg.cc/kgC50Qfb/logo.png' alt='嶼你同行 LOGO' width='180' />
+                    <img src='https://i.ibb.co/bgLz9Hk3/logo.png' alt='嶼你同行 LOGO' width='180' />
                   </div>
                   <p>親愛的旅客您好，</p>
                   <p>我們收到您提出的 <strong>密碼重設申請</strong>，以下是您的 Email 驗證碼：</p>
