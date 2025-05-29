@@ -162,7 +162,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
         {
             try
             {
-                // ✅ Step 1：驗證 Google reCAPTCHA token
+                // Step 1：驗證 Google reCAPTCHA token
                 if (string.IsNullOrWhiteSpace(dto.RecaptchaToken))
                 {
                     return BadRequest("請先完成機器人驗證");
@@ -187,7 +187,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 {
                     return BadRequest("reCAPTCHA 驗證失敗");
                 }
-                // 帳號比對已註冊的 Email 或 Phone 欄位
+                //  Step 2：查詢帳號（比對 Email 或 Phone）
                 var member = await _context.Members
                     .SingleOrDefaultAsync(m => m.Email == dto.Account || m.Phone == dto.Account);
 
@@ -195,13 +195,18 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 {
                     return Unauthorized("帳號或密碼錯誤");
                 }
-
+                //  Step 3：判斷是否為 Google 註冊帳號
+                if (member.GoogleId != null)
+                {
+                    return Conflict("此帳號是透過 Google 註冊，請使用 Google 登入");
+                }
+                //  Step 4：密碼驗證
                 bool isValid = PasswordHasher.VerifyPassword(dto.Password, member.PasswordHash, member.PasswordSalt);
                 if (!isValid)
                 {
                     return Unauthorized("帳號或密碼錯誤");
                 }
-
+                //  Step 5：登入成功回傳資料
                 return Ok(new
                 {
                     name = member.Name,
