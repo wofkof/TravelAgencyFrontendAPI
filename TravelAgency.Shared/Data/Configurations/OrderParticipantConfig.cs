@@ -80,9 +80,22 @@ namespace TravelAgency.Shared.Data.Configurations
                   .HasMaxLength(20)
                   .IsRequired();
 
+            entity.Property(e => e.FavoriteTravelerId)
+                  .IsRequired(false);
+
+
             entity.HasOne(e => e.Order)
                   .WithMany(o => o.OrderParticipants)
-                  .HasForeignKey(e => e.OrderId);
+                  .HasForeignKey(e => e.OrderId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.OrderDetail)
+                    .WithMany(od => od.OrderParticipants)
+                    .HasForeignKey(e => e.OrderDetailId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+
+
 
         }
     }

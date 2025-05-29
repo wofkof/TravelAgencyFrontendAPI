@@ -31,6 +31,7 @@ namespace TravelAgency.Shared.Models
         public string? IssuedPlace { get; set; }
 
         public Member Member { get; set; }
-       
+
+
     }
 }
