@@ -34,5 +34,7 @@ namespace TravelAgencyFrontendAPI.DTOs.OrderDTOs
 
         [Required(ErrorMessage = "必須提供會員ID")]
         public int MemberId { get; set; }
+
+        public OrderUpdateDto? ProfileUpdateDetails { get; set; }
     }
 }
