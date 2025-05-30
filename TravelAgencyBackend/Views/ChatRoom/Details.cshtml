@@ -89,6 +89,7 @@
         let isCaller = false;
         let callLogAlreadyRecorded = false;
         let hasCallBeenAnswered = false;
+        let hasEndedCall = false;
         let actualCallType = "audio";
 
         document.getElementById("sendBtn")?.addEventListener("click", sendMessage);
@@ -424,6 +425,12 @@
         }
 
         async function endCall(sendSignal = true) {
+              if (hasEndedCall) {
+                    console.warn("[MVC] endCall 已執行過，略過");
+                    return;
+                }
+                hasEndedCall = true;
+
               let status = hasCallBeenAnswered ? "completed" : "missed";
 
               if (sendSignal && remoteConnectionId) {
