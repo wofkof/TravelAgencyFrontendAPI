@@ -373,6 +373,8 @@
                 alert("聊天室已關閉，無法進行通話");
                 return;
             }
+            hasEndedCall = false;
+            callLogAlreadyRecorded = false;
             hasCallBeenAnswered = false;
             const targetType = "Member";
             const targetId = parseInt("@Model.MemberId");
@@ -400,6 +402,8 @@
         }
 
         async function acceptCall() {
+            hasEndedCall = false;
+            callLogAlreadyRecorded = false;
             hasCallBeenAnswered = true;
             updateCallStatus("⏳ 接通中...");
             const isVideoCall = incomingOffer.sdp?.includes("m=video");
@@ -473,26 +477,21 @@
         }
 
         async function endCall(sendSignal = true) {
-              console.log("[MVC] 結束通話 remoteConnectionId 是：", remoteConnectionId);
-              console.log("[MVC] 嘗試執行 endCall(), hasEndedCall =", hasEndedCall);
+              if (hasEndedCall) {
+                    console.warn("[MVC] endCall 已執行過，略過");
+                    return;
+                }
+                hasEndedCall = true;
+
               let status = hasCallBeenAnswered ? "completed" : "missed";
 
-              if (hasEndedCall && sendSignal) {
-                  console.warn("[MVC] 已發送過 EndCall，但仍清除本地 UI");
-                  sendSignal = false; 
-              }
-
-              if (!hasEndedCall) {
-                  hasEndedCall = true;
-
-                     if (sendSignal && remoteConnectionId) {
-                        console.log("[MVC] 呼叫 EndCall 給：", remoteConnectionId);
-                        try {
-                          await connection.invoke("EndCall", remoteConnectionId);
-                        } catch (err) {
-                          console.error("呼叫 EndCall 失敗", err);
-                        }
-                  }
+              if (sendSignal && remoteConnectionId) {
+                console.log("[MVC] 呼叫 EndCall 給：", remoteConnectionId);
+                try {
+                  await connection.invoke("EndCall", remoteConnectionId);
+                } catch (err) {
+                  console.error("呼叫 EndCall 失敗", err);
+                }
               }
 
               if (localStream) {
@@ -518,6 +517,7 @@
               if (callStartTime && !isNaN(callStartTime.getTime())) {
                 await recordCallLog(status);
               }
+              remoteConnectionId = null;
             }
 
         function createPeerConnection() {
