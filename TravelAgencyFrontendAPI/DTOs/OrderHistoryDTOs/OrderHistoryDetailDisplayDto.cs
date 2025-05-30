@@ -17,6 +17,10 @@ namespace TravelAgencyFrontendAPI.DTOs.OrderDTOs
         public string OrdererName { get; set; } = null!;
         public string OrdererPhone { get; set; } = null!;
         public string OrdererEmail { get; set; } = null!;
+
+        public string OrdererNationality { get; set; } = null!;  //柏亦新增
+        public string OrdererDocumentType { get; set; } = null!; //柏亦新增
+        public string OrdererDocumentNumber { get; set; } = null!; //柏亦新增
         public string? Note { get; set; }
         public List<OrderHistoryParticipantDto> Participants { get; set; } = new();
 

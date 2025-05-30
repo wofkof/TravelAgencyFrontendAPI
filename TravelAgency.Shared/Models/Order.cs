@@ -28,6 +28,8 @@
         public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.ECPay_CreditCard;
         public OrderStatus Status { get; set; } = OrderStatus.Awaiting;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime? UpdatedAt { get; set; }
+
         public DateTime? PaymentDate { get; set; }
         public string? InvoiceDeliveryEmail { get; set; }
         public InvoiceOption InvoiceOption { get; set; } = InvoiceOption.Personal;
@@ -40,6 +42,9 @@
         public string OrdererPhone { get; set; } = null!;
         public string OrdererEmail { get; set; } = null!;
 
+        public string OrdererNationality { get; set; } = null!;
+        public string OrdererDocumentType { get; set; } = null!;
+        public string OrdererDocumentNumber { get; set; } = null!;
         public string? ECPayTradeNo { get; set; } // 綠界交易編號
         public string? MerchantTradeNo { get; set; } // 自訂商店交易編號
         public DateTime? ExpiresAt { get; set; }

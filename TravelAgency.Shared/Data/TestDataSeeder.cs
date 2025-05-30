@@ -127,8 +127,18 @@ namespace TravelAgency.Shared.Data
                 _context.Members.Add(new Member
                 {
                     Name = "葉曄燁",
+                    Birthday = new DateTime(1990, 5, 6),
                     Email = "member1989@gmail.com",
                     Phone = "0925806525",
+                    Gender = GenderType.Male,
+                    IdNumber = "A120738965",
+                    PassportSurname = "YEH",
+                    PassportGivenName = "YEHYEH",
+                    PassportExpireDate = new DateTime(2030, 12, 5),
+                    Nationality ="TW",
+                    DocumentType =DocumentType.ID_CARD_TW,                  
+                    DocumentNumber="317926777201",
+                    Address ="高雄市前金區中正四路211號8樓",
                     PasswordHash = hash,
                     PasswordSalt = salt,
                     GoogleId = null,
@@ -1755,6 +1765,9 @@ namespace TravelAgency.Shared.Data
                     OrdererName = member1.Name, // IsRequired
                     OrdererPhone = member1.Phone ?? "0912345678", // IsRequired, 提供預設電話以防 member1.Phone 為 null
                     OrdererEmail = member1.Email, // IsRequired
+                    OrdererNationality = member1.Nationality ?? "TW",
+                    OrdererDocumentType = member1.DocumentType.ToString(),
+                    OrdererDocumentNumber = member1.DocumentNumber ?? "A123456789", 
                     MerchantTradeNo = $"MNO_{shortGuidPart}_O1",
                     ECPayTradeNo = $"ECP_{shortGuidPart}_T1"
                 };
@@ -1809,6 +1822,9 @@ namespace TravelAgency.Shared.Data
                     OrdererName = member1.Name, // IsRequired
                     OrdererPhone = member1.Phone ?? "0987654321", // IsRequired
                     OrdererEmail = member1.Email, // IsRequired
+                    OrdererNationality = member1.Nationality ?? "TW",
+                    OrdererDocumentType = member1.DocumentType.ToString(),
+                    OrdererDocumentNumber = member1.DocumentNumber ?? "A123456789",
                     MerchantTradeNo = $"MNO_{Guid.NewGuid().ToString("N").Substring(0, 10)}_O2"
                 };
                 order2.OrderDetails.Add(new OrderDetail
@@ -1856,6 +1872,9 @@ namespace TravelAgency.Shared.Data
                     OrdererName = member1.Name, // IsRequired
                     OrdererPhone = member1.Phone ?? "0911223344", // IsRequired
                     OrdererEmail = member1.Email, // IsRequired
+                    OrdererNationality = member1.Nationality ?? "TW",
+                    OrdererDocumentType = member1.DocumentType.ToString(),
+                    OrdererDocumentNumber = member1.DocumentNumber ?? "A123456789",
                     Note = "訂單3: 2位成人，待付款",
                     MerchantTradeNo = $"MNO_{Guid.NewGuid().ToString("N").Substring(0, 10)}_O3"
                 };
@@ -1906,6 +1925,9 @@ namespace TravelAgency.Shared.Data
                     OrdererName = "陳先生", // IsRequired
                     OrdererPhone = "0955667788", // IsRequired
                     OrdererEmail = "chen@example.com", // IsRequired
+                    OrdererNationality = member1.Nationality ?? "TW",
+                    OrdererDocumentType = member1.DocumentType.ToString(),
+                    OrdererDocumentNumber = member1.DocumentNumber ?? "A123456789",
                     Note = "訂單4: 客製化，公司發票待開",
                     MerchantTradeNo = $"MNO_{Guid.NewGuid().ToString("N").Substring(0, 10)}_O4"
                 };
@@ -1957,6 +1979,9 @@ namespace TravelAgency.Shared.Data
                     OrdererName = member1.Name, // IsRequired
                     OrdererPhone = member1.Phone ?? "0900112233", // IsRequired
                     OrdererEmail = member1.Email, // IsRequired
+                    OrdererNationality = member1.Nationality ?? "TW",
+                    OrdererDocumentType = member1.DocumentType.ToString(),
+                    OrdererDocumentNumber = member1.DocumentNumber ?? "A123456789",
                     Note = "訂單5: 付款失敗，或後續處理錯誤",
                     MerchantTradeNo = $"MNO_{Guid.NewGuid().ToString("N").Substring(0, 10)}_O5",
                     ECPayTradeNo = $"ECP_{Guid.NewGuid().ToString("N").Substring(0, 10)}_T5" // 假設 ECPay 交易號

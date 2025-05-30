@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TravelAgency.Shared.Data;
 
@@ -11,9 +12,11 @@ using TravelAgency.Shared.Data;
 namespace TravelAgency.Shared.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250527013918_PaymentMethod")]
+    partial class PaymentMethod
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -186,10 +189,9 @@ namespace TravelAgency.Shared.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<DateTime>("StartTime")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("GETDATE()");
+                    b.Property<DateTime?>("StartTime")
+                        .IsRequired()
+                        .HasColumnType("datetime");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1418,27 +1420,12 @@ namespace TravelAgency.Shared.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("OrdererDocumentNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("OrdererDocumentType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("OrdererEmail")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("OrdererName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("OrdererNationality")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -1456,7 +1443,7 @@ namespace TravelAgency.Shared.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("ECPay_CreditCard");
+                        .HasDefaultValue("Other");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1467,9 +1454,6 @@ namespace TravelAgency.Shared.Migrations
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime");
 
                     b.HasKey("OrderId");
 
@@ -1767,9 +1751,6 @@ namespace TravelAgency.Shared.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("FavoriteTravelerId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Gender")
                         .IsRequired()
                         .HasMaxLength(10)
@@ -1791,9 +1772,6 @@ namespace TravelAgency.Shared.Migrations
                     b.Property<string>("Note")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
-
-                    b.Property<int>("OrderDetailId")
-                        .HasColumnType("int");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
@@ -1818,8 +1796,6 @@ namespace TravelAgency.Shared.Migrations
                     b.HasIndex("Email")
                         .IsUnique()
                         .HasFilter("[Email] IS NOT NULL");
-
-                    b.HasIndex("OrderDetailId");
 
                     b.HasIndex("OrderId");
 
@@ -2442,12 +2418,6 @@ namespace TravelAgency.Shared.Migrations
 
             modelBuilder.Entity("TravelAgency.Shared.Models.OrderParticipant", b =>
                 {
-                    b.HasOne("TravelAgency.Shared.Models.OrderDetail", "OrderDetail")
-                        .WithMany("OrderParticipants")
-                        .HasForeignKey("OrderDetailId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("TravelAgency.Shared.Models.Order", "Order")
                         .WithMany("OrderParticipants")
                         .HasForeignKey("OrderId")
@@ -2455,8 +2425,6 @@ namespace TravelAgency.Shared.Migrations
                         .IsRequired();
 
                     b.Navigation("Order");
-
-                    b.Navigation("OrderDetail");
                 });
 
             modelBuilder.Entity("TravelAgency.Shared.Models.Payment", b =>
@@ -2561,11 +2529,6 @@ namespace TravelAgency.Shared.Migrations
 
                     b.Navigation("OrderInvoices");
 
-                    b.Navigation("OrderParticipants");
-                });
-
-            modelBuilder.Entity("TravelAgency.Shared.Models.OrderDetail", b =>
-                {
                     b.Navigation("OrderParticipants");
                 });
 

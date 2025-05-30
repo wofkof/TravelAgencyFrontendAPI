@@ -6,6 +6,10 @@
 
         public int OrderId { get; set; }
 
+        public int OrderDetailId { get; set; }
+
+        public int? FavoriteTravelerId { get; set; }
+
         public string Name { get; set; } = null!;
         public DateTime BirthDate { get; set; }
         public string? IdNumber { get; set; }
@@ -21,7 +25,10 @@
         public string? Note { get; set; }
 
         public Order Order { get; set; }
-        
+
+        public OrderDetail OrderDetail { get; set; } = null!;
+
+
     }
 
 }

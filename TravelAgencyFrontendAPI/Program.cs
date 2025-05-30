@@ -21,6 +21,8 @@ builder.Services.AddScoped<EmailService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//新增Google登入
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
 
 
@@ -62,7 +64,7 @@ builder.Services.AddAuthorization();
 
 builder.Services.Configure<ECPayConfiguration>(builder.Configuration.GetSection("ECPaySettings"));
 builder.Services.AddScoped<ECPayService>();
-
+builder.Services.AddHostedService<OrderExpirationService>();
 
 
 var app = builder.Build();

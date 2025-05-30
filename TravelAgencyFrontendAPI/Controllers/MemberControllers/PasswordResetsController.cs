@@ -64,7 +64,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                         "嶼你同行｜密碼重設-驗證碼通知",
                         $@"<div style='font-family:Arial,sans-serif; font-size:16px; color:#333; line-height:1.8'>
                   <div style='text-align:center; margin-bottom:20px'>
-                    <img src='https://i.postimg.cc/kgC50Qfb/logo.png' alt='嶼你同行 LOGO' width='180' />
+                    <img src='https://i.ibb.co/bgLz9Hk3/logo.png' alt='嶼你同行 LOGO' width='180' />
                   </div>
                   <p>親愛的旅客您好，</p>
                   <p>我們收到您提出的 <strong>密碼重設申請</strong>，以下是您的 Email 驗證碼：</p>
@@ -104,47 +104,63 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
         [HttpPost("verify-code")]
         public async Task<IActionResult> VerifyCode([FromBody] VerifyCodeDto dto)
         {
-            var record = await _context.EmailVerificationCodes
+            try
+            {
+                var record = await _context.EmailVerificationCodes
                 .Where(v => v.Email == dto.Email && v.VerificationType == EmailVerificationCode.VerificationTypeEnum.ResetPassword)
                 .OrderByDescending(v => v.CreatedAt)
                 .FirstOrDefaultAsync();
 
-            if (record == null || record.IsVerified || record.ExpireAt < DateTime.Now)
-                return BadRequest("驗證碼無效或已過期");
+                if (record == null || record.IsVerified || record.ExpireAt < DateTime.Now)
+                    return BadRequest("驗證碼無效或已過期");
 
-            if (record.VerificationCode != dto.Code)
-                return BadRequest("驗證碼錯誤");
+                if (record.VerificationCode != dto.Code)
+                    return BadRequest("驗證碼錯誤");
 
-            record.IsVerified = true;
-            await _context.SaveChangesAsync();
+                record.IsVerified = true;
+                await _context.SaveChangesAsync();
 
-            return Ok("驗證成功");
+                return Ok("驗證成功");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("❗ VerifyCode 發生例外：" + ex.ToString());
+                return StatusCode(500, "驗證過程中發生錯誤，請稍後再試");
+            }            
         }
 
         // POST: api/PasswordResets/reset
         [HttpPost("reset")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
         {
-            var member = await _context.Members.FirstOrDefaultAsync(m => m.Email == dto.Email);
-            if (member == null)
-                return BadRequest("找不到該會員");
+            try
+            {
+                var member = await _context.Members.FirstOrDefaultAsync(m => m.Email == dto.Email);
+                if (member == null)
+                    return BadRequest("找不到該會員");
 
-            var latestVerification = await _context.EmailVerificationCodes
-                .Where(v => v.Email == dto.Email && v.VerificationType == EmailVerificationCode.VerificationTypeEnum.ResetPassword)
-                .OrderByDescending(v => v.CreatedAt)
-                .FirstOrDefaultAsync();
+                var latestVerification = await _context.EmailVerificationCodes
+                    .Where(v => v.Email == dto.Email && v.VerificationType == EmailVerificationCode.VerificationTypeEnum.ResetPassword)
+                    .OrderByDescending(v => v.CreatedAt)
+                    .FirstOrDefaultAsync();
 
-            if (latestVerification == null || !latestVerification.IsVerified)
-                return BadRequest("尚未完成驗證碼驗證");
+                if (latestVerification == null || !latestVerification.IsVerified)
+                    return BadRequest("尚未完成驗證碼驗證");
 
-            // 密碼雜湊處理（根據你自己的加密邏輯）
-            PasswordHasher.CreatePasswordHash(dto.NewPassword, out string hash, out string salt);
-            member.PasswordHash = hash;
-            member.PasswordSalt = salt;
-            member.UpdatedAt = DateTime.Now;
+                // 密碼雜湊處理（根據你自己的加密邏輯）
+                PasswordHasher.CreatePasswordHash(dto.NewPassword, out string hash, out string salt);
+                member.PasswordHash = hash;
+                member.PasswordSalt = salt;
+                member.UpdatedAt = DateTime.Now;
 
-            await _context.SaveChangesAsync();
-            return Ok("密碼已重設成功");
+                await _context.SaveChangesAsync();
+                return Ok("密碼已重設成功");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("❗ ResetPassword 發生例外：" + ex.ToString());
+                return StatusCode(500, "密碼重設時發生錯誤，請稍後再試");
+            }         
         }
 
     }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TravelAgency.Shared.Data;
 
@@ -11,9 +12,11 @@ using TravelAgency.Shared.Data;
 namespace TravelAgency.Shared.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250528062005_新增Order欄位")]
+    partial class 新增Order欄位
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -187,9 +190,7 @@ namespace TravelAgency.Shared.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime>("StartTime")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("GETDATE()");
+                        .HasColumnType("datetime");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1468,9 +1469,6 @@ namespace TravelAgency.Shared.Migrations
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime");
-
                     b.HasKey("OrderId");
 
                     b.HasIndex("MemberId");
@@ -1767,9 +1765,6 @@ namespace TravelAgency.Shared.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("FavoriteTravelerId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Gender")
                         .IsRequired()
                         .HasMaxLength(10)
@@ -1791,9 +1786,6 @@ namespace TravelAgency.Shared.Migrations
                     b.Property<string>("Note")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
-
-                    b.Property<int>("OrderDetailId")
-                        .HasColumnType("int");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
@@ -1818,8 +1810,6 @@ namespace TravelAgency.Shared.Migrations
                     b.HasIndex("Email")
                         .IsUnique()
                         .HasFilter("[Email] IS NOT NULL");
-
-                    b.HasIndex("OrderDetailId");
 
                     b.HasIndex("OrderId");
 
@@ -2442,12 +2432,6 @@ namespace TravelAgency.Shared.Migrations
 
             modelBuilder.Entity("TravelAgency.Shared.Models.OrderParticipant", b =>
                 {
-                    b.HasOne("TravelAgency.Shared.Models.OrderDetail", "OrderDetail")
-                        .WithMany("OrderParticipants")
-                        .HasForeignKey("OrderDetailId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("TravelAgency.Shared.Models.Order", "Order")
                         .WithMany("OrderParticipants")
                         .HasForeignKey("OrderId")
@@ -2455,8 +2439,6 @@ namespace TravelAgency.Shared.Migrations
                         .IsRequired();
 
                     b.Navigation("Order");
-
-                    b.Navigation("OrderDetail");
                 });
 
             modelBuilder.Entity("TravelAgency.Shared.Models.Payment", b =>
@@ -2561,11 +2543,6 @@ namespace TravelAgency.Shared.Migrations
 
                     b.Navigation("OrderInvoices");
 
-                    b.Navigation("OrderParticipants");
-                });
-
-            modelBuilder.Entity("TravelAgency.Shared.Models.OrderDetail", b =>
-                {
                     b.Navigation("OrderParticipants");
                 });
 

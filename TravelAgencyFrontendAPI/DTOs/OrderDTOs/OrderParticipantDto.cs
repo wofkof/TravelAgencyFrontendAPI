@@ -15,6 +15,8 @@ namespace TravelAgencyFrontendAPI.DTOs.OrderDTOs
         // 另一種方式是前端傳送該旅客對應的 MemberId (如果是系統內的會員)
         public int? MemberIdAsParticipant { get; set; } // 若此旅客本身也是系統會員，則其 MemberId
 
+        public int OrderDetailId { get; set; } // 用於更新或識別旅客
+
         [Required(ErrorMessage = "旅客姓名為必填")]
         [StringLength(100)]
         public string Name { get; set; }
@@ -58,5 +60,6 @@ namespace TravelAgencyFrontendAPI.DTOs.OrderDTOs
 
         [StringLength(255)]
         public string? Note { get; set; } // 個別旅客的備註
+
     }
 }

@@ -141,19 +141,18 @@ namespace TravelAgencyFrontendAPI.ECPay.Services
                 { "MerchantID", _ecpayConfig.MerchantID },          // 金流用 MerchantID
                 { "MerchantTradeNo", merchantTradeNo },
                 { "TotalAmount", paymentTotalAmountString },        // 金流的總金額 (整數)
-                { "CustomField1", order.OrderId.ToString()},       // 訂單 ID // 原有備註
-                { "CustomField2", order.OrdererEmail ?? "" },      // 訂單者 Email // 原有備註
-                { "CustomField3", order.OrdererPhone ?? "" },      // 訂單者電話 // 原有備註
-                { "CustomField4", "" },                            // 自訂欄位4 // 原有備註
+                { "CustomField1", order.OrderId.ToString()},       // 訂單 ID
+                { "CustomField2", order.OrdererEmail ?? "" },      // 訂單者 Email
+                { "CustomField3", order.OrdererPhone ?? "" },      // 訂單者電話
+                { "CustomField4", "" },                            // 自訂欄位4 
                 { "MerchantTradeDate", DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") },
                 { "PaymentType", "aio" },
                 { "ChoosePayment", "Credit" },                     // 預設信用卡
                 { "TradeDesc", tradeDesc },
                 { "ItemName", itemName },                          // 金流用的組合品名
-                { "ReturnURL", $"{_hostUrl.TrimEnd('/')}/api/ECPay/ECPayReturn" },         // 伺服器端背景通知URL // 原有備註
-                { "OrderResultURL", $"{_hostUrl.TrimEnd('/')}/api/ECPay/ECPayOrderResult" }, // 使用者端前景通知URL // 原有備註
-                { "EncryptType", "1" },                            // 使用 SHA256 加密 // 原有備註
-                // { "ClientBackURL", ... } // 可選參數 // 原有備註
+                { "ReturnURL", $"{_hostUrl.TrimEnd('/')}/api/ECPay/ECPayReturn" },         // 伺服器端背景通知URL
+                { "OrderResultURL", $"{_hostUrl.TrimEnd('/')}/api/ECPay/ECPayOrderResult" }, // 使用者端前景通知URL
+                { "EncryptType", "1" },                            // 使用 SHA256 加密
             };
 
             // 計算 CheckMacValue (金流用)
@@ -286,7 +285,6 @@ namespace TravelAgencyFrontendAPI.ECPay.Services
                     { "ItemSeq", itemSeq++ },
                     { "ItemName", SanitizeInvoiceItemName(od.Description ?? "商品") }, // 原有備註 (部分)
                     { "ItemCount", itemCount },
-                    // << 修改點：OrderDetail中無Unit欄位，預設為"式" >>
                     { "ItemWord", "式" },      // 品項單位，例如：套、組、式、個 // 原有備註 (部分)
                     { "ItemPrice", (int)Math.Round(itemPriceAlreadyTaxed, MidpointRounding.AwayFromZero) },  // 含稅單價
                     { "ItemAmount",(int)Math.Round(itemAmountAlreadyTaxed, MidpointRounding.AwayFromZero) }, // 含稅小計
@@ -300,10 +298,7 @@ namespace TravelAgencyFrontendAPI.ECPay.Services
             // 綠界文件："所有商品的ItemAmount加總後四捨五入=SalesAmount(含稅)"
             // 您應確保 Order.TotalAmount 是 OrderDetails 中所有 TotalAmount 加總的結果 (考慮浮點數精度)
             invoiceDataContent["SalesAmount"] = (int)Math.Round(order.TotalAmount, MidpointRounding.AwayFromZero); // 銷售額總計 (含稅) // 原有備註 (部分)
-                                                                                                                   // decimal sumOfItemAmounts = itemAmountsFromDetailsForSum.Sum(a => Math.Round(a, 7));
-                                                                                                                   // if ((int)Math.Round(sumOfItemAmounts, MidpointRounding.AwayFromZero) != (int)invoiceDataContent["SalesAmount"]) {
-                                                                                                                   // _logger.LogWarning($"[Invoice] 訂單 {order.OrderId}: SalesAmount ({invoiceDataContent["SalesAmount"]}) 與品項加總 ({(int)Math.Round(sumOfItemAmounts, MidpointRounding.AwayFromZero)}) 可能不符，請檢查金額計算。");
-                                                                                                                   // }
+
 
             invoiceDataContent["InvoiceRemark"] = $"訂單編號: {order.MerchantTradeNo}"; // 發票備註 (可選) // 原有備註
             invoiceDataContent["InvType"] = "07"; // 發票字軌類別：07=一般稅額計算之電子發票 // 原有備註
@@ -740,7 +735,6 @@ namespace TravelAgencyFrontendAPI.ECPay.Services
             {
                 ["rtnCode"] = formData["RtnCode"].FirstOrDefault(),
                 ["merchantTradeNo"] = merchantTradeNoFromForm,
-                // 可以考慮加入更多綠界回傳的參數，供前端結果頁顯示
                 ["tradeNo"] = formData["TradeNo"].FirstOrDefault(),
                 ["paymentDate"] = formData["PaymentDate"].FirstOrDefault()?.Replace(" ", "T"), // 'T' for JS Date parsing
                 ["paymentType"] = formData["PaymentType"].FirstOrDefault(),

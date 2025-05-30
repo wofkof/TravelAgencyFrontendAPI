@@ -62,6 +62,18 @@ namespace TravelAgency.Shared.Data.Configurations
                         .IsRequired()
                         .HasMaxLength(50);
 
+            builder .Property(o => o.OrdererNationality)
+                       .IsRequired()
+                       .HasMaxLength(50);
+
+            builder.Property(o => o.OrdererDocumentType)
+                        .IsRequired()
+                        .HasMaxLength(50);
+
+            builder.Property(o => o.OrdererDocumentNumber)
+                        .IsRequired()
+                        .HasMaxLength(50);
+
             builder.Property(o => o.ECPayTradeNo)
                    .HasMaxLength(20);
 
@@ -71,6 +83,9 @@ namespace TravelAgency.Shared.Data.Configurations
             builder.Property(o => o.ExpiresAt)
                    .HasColumnType("datetime");
 
+            builder.Property(o => o.UpdatedAt)
+                   .HasColumnType("datetime")
+                   .IsRequired(false);
 
             builder.HasOne(o => o.Member)
                    .WithMany(m => m.Orders)

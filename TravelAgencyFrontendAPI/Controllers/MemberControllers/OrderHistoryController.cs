@@ -23,93 +23,115 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
         [HttpGet("list/{memberId}")]
         public async Task<IActionResult> GetOrderHistoryList(int memberId, [FromQuery] List<OrderStatus> statuses)
         {
-            var query = _context.Orders
+            try
+            {
+                var query = _context.Orders
                 .Where(o => o.MemberId == memberId);
 
-            if (statuses != null && statuses.Any())
-            {
-                query = query.Where(o => statuses.Contains(o.Status));
-            }
-
-            var orders = await query
-                .Include(o => o.OrderDetails)
-                .OrderByDescending(o => o.CreatedAt)
-                .Select(o => new OrderHistoryListItemDto
+                if (statuses != null && statuses.Any())
                 {
-                    OrderId = o.OrderId,
-                    CreatedAt = o.CreatedAt,
-                    Description = o.OrderDetails.FirstOrDefault().Description ?? "(無行程名稱)"
-                })
-                .ToListAsync();
+                    query = query.Where(o => statuses.Contains(o.Status));
+                }
 
-            return Ok(orders);
+                var orders = await query
+                    .Include(o => o.OrderDetails)
+                    .OrderByDescending(o => o.CreatedAt)
+                    .Select(o => new OrderHistoryListItemDto
+                    {
+                        OrderId = o.OrderId,
+                        CreatedAt = o.CreatedAt,
+                        Description = o.OrderDetails.FirstOrDefault().Description ?? "(無行程名稱)",
+                        Status = o.Status.ToString(), //柏亦添加
+                        ExpiresAt = o.ExpiresAt,      //柏亦添加
+                        TotalAmount = o.TotalAmount, //柏亦添加
+                        MerchantTradeNo = o.MerchantTradeNo //柏亦添加
+                    })
+                    .ToListAsync();
+
+                return Ok(orders);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("❗ GetOrderHistoryList 發生例外：" + ex.ToString());
+                return StatusCode(500, "查詢訂單列表時發生錯誤，請稍後再試");
+            }
+            
         }
 
         // GET: api/OrderHistory/detail/{orderId}
         [HttpGet("detail/{orderId}")]
         public async Task<IActionResult> GetOrderHistoryDetail(int orderId)
         {
-            var orderData = await _context.Orders
-                .Include(o => o.OrderParticipants)
-                .Include(o => o.OrderDetails)
-                .Include(o => o.OrderInvoices)
-                .FirstOrDefaultAsync(o => o.OrderId == orderId);
-
-            if (orderData == null)
+            try
             {
-                return NotFound($"找不到訂單 ID {orderId}");
-            }
-
-            var invoice = orderData.OrderInvoices.FirstOrDefault();
-
-            var dto = new OrderHistoryDetailDisplayDto
-            {
-                Description = orderData.OrderDetails.FirstOrDefault()?.Description ?? "(無描述)",
-                StartDate = orderData.OrderDetails.FirstOrDefault()?.StartDate,
-                EndDate = orderData.OrderDetails.FirstOrDefault()?.EndDate,
-                AdultCount = orderData.OrderParticipants.Count(p => p.BirthDate <= DateTime.Today.AddYears(-12)),
-                ChildCount = orderData.OrderParticipants.Count(p => p.BirthDate > DateTime.Today.AddYears(-12)),
-                OrdererName = orderData.OrdererName,
-                OrdererPhone = orderData.OrdererPhone,
-                OrdererEmail = orderData.OrdererEmail,
-                Note = orderData.Note,
-                PaymentMethod = orderData.PaymentMethod.ToString(),
-                Status = orderData.Status.ToString(),
-                CreatedAt = orderData.CreatedAt,
-                PaymentDate = orderData.PaymentDate,
-                TotalAmount = orderData.TotalAmount,
-                Participants = orderData.OrderParticipants.Select(p => new OrderHistoryParticipantDto
+                var orderData = await _context.Orders
+               .Include(o => o.OrderParticipants)
+               .Include(o => o.OrderDetails)
+               .Include(o => o.OrderInvoices)
+               .FirstOrDefaultAsync(o => o.OrderId == orderId);
+                if (orderData == null)
                 {
-                    Name = p.Name,
-                    BirthDate = p.BirthDate,
-                    Gender = p.Gender.ToString(),
-                    Nationality = p.Nationality,
-                    IdNumber = p.IdNumber,
-                    DocumentType = p.DocumentType.ToString(),
-                    DocumentNumber = p.DocumentNumber,
-                    PassportSurname = p.PassportSurname,
-                    PassportGivenName = p.PassportGivenName,
-                    PassportExpireDate = p.PassportExpireDate,
-                    Email = p.Email,
-                    Phone = p.Phone,
-                    Note = p.Note
-                }).ToList(),
-                Invoice = invoice == null ? null : new OrderHistoryInvoiceDto
-                {
-                    InvoiceNumber = invoice.InvoiceNumber,
-                    InvoiceStatus = invoice.InvoiceStatus.ToString(),
-                    InvoiceType = invoice.InvoiceType.ToString(),
-                    BuyerName = invoice.BuyerName,
-                    BuyerUniformNumber = invoice.BuyerUniformNumber,
-                    TotalAmount = invoice.TotalAmount,
-                    CreatedAt = invoice.CreatedAt,
-                    InvoiceFileURL = invoice.InvoiceFileURL,
-                    Note = invoice.Note
+                    return NotFound($"找不到訂單 ID {orderId}");
                 }
-            };
 
-            return Ok(dto);
+                var invoice = orderData.OrderInvoices.FirstOrDefault();
+
+                var dto = new OrderHistoryDetailDisplayDto
+                {
+                    Description = orderData.OrderDetails.FirstOrDefault()?.Description ?? "(無描述)",
+                    StartDate = orderData.OrderDetails.FirstOrDefault()?.StartDate,
+                    EndDate = orderData.OrderDetails.FirstOrDefault()?.EndDate,
+                    AdultCount = orderData.OrderParticipants.Count(p => p.BirthDate <= DateTime.Today.AddYears(-12)),
+                    ChildCount = orderData.OrderParticipants.Count(p => p.BirthDate > DateTime.Today.AddYears(-12)),
+                    OrdererName = orderData.OrdererName,
+                    OrdererPhone = orderData.OrdererPhone,
+                    OrdererEmail = orderData.OrdererEmail,
+                    OrdererNationality = orderData.OrdererNationality, //柏亦新增
+                    OrdererDocumentType = orderData.OrdererDocumentType.ToString(), //柏亦新增
+                    OrdererDocumentNumber = orderData.OrdererDocumentNumber, //柏亦新增
+                    Note = orderData.Note,
+                    PaymentMethod = orderData.PaymentMethod.ToString(),
+                    Status = orderData.Status.ToString(),
+                    CreatedAt = orderData.CreatedAt,
+                    PaymentDate = orderData.PaymentDate,
+                    TotalAmount = orderData.TotalAmount,
+                    Participants = orderData.OrderParticipants.Select(p => new OrderHistoryParticipantDto
+                    {
+                        Name = p.Name,
+                        BirthDate = p.BirthDate,
+                        Gender = p.Gender.ToString(),
+                        Nationality = p.Nationality,
+                        IdNumber = p.IdNumber,
+                        DocumentType = p.DocumentType.ToString(),
+                        DocumentNumber = p.DocumentNumber,
+                        PassportSurname = p.PassportSurname,
+                        PassportGivenName = p.PassportGivenName,
+                        PassportExpireDate = p.PassportExpireDate,
+                        Email = p.Email,
+                        Phone = p.Phone,
+                        Note = p.Note
+                    }).ToList(),
+                    Invoice = invoice == null ? null : new OrderHistoryInvoiceDto
+                    {
+                        InvoiceNumber = invoice.InvoiceNumber,
+                        InvoiceStatus = invoice.InvoiceStatus.ToString(),
+                        InvoiceType = invoice.InvoiceType.ToString(),
+                        BuyerName = invoice.BuyerName,
+                        BuyerUniformNumber = invoice.BuyerUniformNumber,
+                        TotalAmount = invoice.TotalAmount,
+                        CreatedAt = invoice.CreatedAt,
+                        InvoiceFileURL = invoice.InvoiceFileURL,
+                        Note = invoice.Note
+                    }
+                };
+
+                return Ok(dto);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("❗ GetOrderHistoryDetail 發生例外：" + ex.ToString());
+                return StatusCode(500, "查詢訂單詳情時發生錯誤，請稍後再試");
+            }         
         }
-
     }
 }
