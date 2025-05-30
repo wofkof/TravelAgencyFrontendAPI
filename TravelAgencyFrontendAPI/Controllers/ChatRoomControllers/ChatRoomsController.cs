@@ -141,5 +141,16 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
             });
         }
 
+        [HttpPut("{id}/close")]
+        public async Task<IActionResult> CloseChatRoom(int id)
+        {
+            var chatRoom = await _context.ChatRooms.FindAsync(id);
+            if (chatRoom == null) return NotFound();
+
+            chatRoom.Status = ChatStatus.Closed;
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
     }
 }
