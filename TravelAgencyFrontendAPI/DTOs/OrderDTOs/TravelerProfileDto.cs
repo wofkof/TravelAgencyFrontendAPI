@@ -18,7 +18,6 @@ namespace TravelAgencyFrontendAPI.DTOs.OrderDTOs
 
         public GenderType Gender { get; set; } // 性別 (假設 Gender 為枚舉)
 
-        // 常用旅客通常不直接儲存電話/Email，這些通常屬於會員主要聯絡方式
         // public string Phone { get; set; }
         // public string Email { get; set; }
 
@@ -36,6 +35,5 @@ namespace TravelAgencyFrontendAPI.DTOs.OrderDTOs
         [Required(ErrorMessage = "旅客國籍為必填")]
         public string Nationality { get; set; } // 國籍代碼，例如 "TW", "US"
 
-        // public string Note { get; set; } // 旅客在訂單中的備註，是否要存入常用旅客？視需求決定
     }
 }

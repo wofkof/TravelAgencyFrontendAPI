@@ -64,7 +64,7 @@ builder.Services.AddAuthorization();
 
 builder.Services.Configure<ECPayConfiguration>(builder.Configuration.GetSection("ECPaySettings"));
 builder.Services.AddScoped<ECPayService>();
-
+builder.Services.AddHostedService<OrderExpirationService>();
 
 
 var app = builder.Build();

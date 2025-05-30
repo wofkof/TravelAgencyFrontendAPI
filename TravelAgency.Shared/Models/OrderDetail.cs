@@ -11,6 +11,7 @@ namespace TravelAgency.Shared.Models
     {
         public int OrderDetailId { get; set; }
         public int OrderId { get; set; }
+
         public ProductCategory Category { get; set; } 
         public int ItemId { get; set; }
         public string? Description { get; set; }
@@ -25,10 +26,12 @@ namespace TravelAgency.Shared.Models
 
         public Order Order { get; set; } = null!;
 
+
         [NotMapped]
         public GroupTravel? GroupTravel { get; set; } 
         [NotMapped]
-        public CustomTravel? CustomTravel { get; set; } 
+        public CustomTravel? CustomTravel { get; set; }
+        public ICollection<OrderParticipant> OrderParticipants { get; set; } = new List<OrderParticipant>();
     }
 
 }

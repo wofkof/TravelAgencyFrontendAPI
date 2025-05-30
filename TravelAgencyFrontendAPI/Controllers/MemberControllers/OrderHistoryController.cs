@@ -40,7 +40,11 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                     {
                         OrderId = o.OrderId,
                         CreatedAt = o.CreatedAt,
-                        Description = o.OrderDetails.FirstOrDefault().Description ?? "(無行程名稱)"
+                        Description = o.OrderDetails.FirstOrDefault().Description ?? "(無行程名稱)",
+                        Status = o.Status.ToString(), //柏亦添加
+                        ExpiresAt = o.ExpiresAt,      //柏亦添加
+                        TotalAmount = o.TotalAmount, //柏亦添加
+                        MerchantTradeNo = o.MerchantTradeNo //柏亦添加
                     })
                     .ToListAsync();
 
@@ -65,7 +69,6 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                .Include(o => o.OrderDetails)
                .Include(o => o.OrderInvoices)
                .FirstOrDefaultAsync(o => o.OrderId == orderId);
-
                 if (orderData == null)
                 {
                     return NotFound($"找不到訂單 ID {orderId}");
@@ -83,6 +86,9 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                     OrdererName = orderData.OrdererName,
                     OrdererPhone = orderData.OrdererPhone,
                     OrdererEmail = orderData.OrdererEmail,
+                    OrdererNationality = orderData.OrdererNationality, //柏亦新增
+                    OrdererDocumentType = orderData.OrdererDocumentType.ToString(), //柏亦新增
+                    OrdererDocumentNumber = orderData.OrdererDocumentNumber, //柏亦新增
                     Note = orderData.Note,
                     PaymentMethod = orderData.PaymentMethod.ToString(),
                     Status = orderData.Status.ToString(),

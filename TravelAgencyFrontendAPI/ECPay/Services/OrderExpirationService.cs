@@ -18,8 +18,8 @@ namespace TravelAgencyFrontendAPI.Services
         private readonly IServiceScopeFactory _scopeFactory; // 用於在背景服務中正確解析 Scoped 服務 (如 AppDbContext)
 
         // --- 設定檢查間隔 ---
-        // 測試環境：每 10 秒檢查一次 (如先前討論)
-        private readonly TimeSpan _checkInterval = TimeSpan.FromSeconds(10);
+        // 測試環境：每 30 秒檢查一次 (如先前討論)
+        private readonly TimeSpan _checkInterval = TimeSpan.FromSeconds(30);
         // 正式環境建議：例如每分鐘檢查一次
         // private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(1);
 
@@ -51,7 +51,7 @@ namespace TravelAgencyFrontendAPI.Services
                 var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 try
                 {
-                    var nowUtc = DateTime.UtcNow; // 所有時間比較應使用 UTC
+                    var nowUtc = DateTime.Now;
                     var expiredOrders = await dbContext.Orders
                         .Where(o => o.Status == OrderStatus.Awaiting && // 只查找狀態為 Awaiting 的訂單
                                      o.ExpiresAt.HasValue &&           // 確保 ExpiresAt 不是 null

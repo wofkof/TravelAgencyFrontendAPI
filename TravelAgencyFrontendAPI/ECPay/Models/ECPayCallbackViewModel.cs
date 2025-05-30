@@ -21,16 +21,16 @@ namespace TravelAgencyFrontendAPI.ECPay.Models
         public string TradeNo { get; set; } = null!;
 
         [FromForm(Name = "TradeDate")]
-        public string? TradeDate { get; set; } // 確保有 FromForm 並改為 string?
+        public string? TradeDate { get; set; }
 
         [FromForm(Name = "TradeAmt")]
-        public string? TradeAmt { get; set; } // 改為 string? 更安全
+        public string? TradeAmt { get; set; } 
 
         //[FromForm(Name = "PaymentDate")]
-        //public string? PaymentDate { get; set; } // 改為 string? 更安全
+        //public string? PaymentDate { get; set; }
 
         [FromForm(Name = "PaymentType")]
-        public string? PaymentType { get; set; } // 改為 string? 更安全
+        public string? PaymentType { get; set; }
 
         [FromForm(Name = "MerchantTradeDate")]
         public string? MerchantTradeDate { get; set; }
@@ -51,7 +51,7 @@ namespace TravelAgencyFrontendAPI.ECPay.Models
         public string? PaymentTypeChargeFee { get; set; }
 
         [FromForm(Name = "SimulatePaid")]
-        public int? SimulatePaid { get; set; } // 改為 int? 更安全，因非同步回傳有時可能無此欄位
+        public int? SimulatePaid { get; set; }
 
         [FromForm(Name = "gwsr")]
         public string? Gwsr { get; set; } // 信用卡授權識別碼
@@ -71,7 +71,7 @@ namespace TravelAgencyFrontendAPI.ECPay.Models
         [FromForm(Name = "eci")]
         public string? Eci { get; set; } // 3D驗證結果
 
-        // --- 自訂欄位 (如果您在發送時有使用) ---
+        // --- 自訂欄位
         [FromForm(Name = "CustomField1")]
         public string? OrderId { get; set; }
         [FromForm(Name = "CustomField2")]
@@ -81,11 +81,11 @@ namespace TravelAgencyFrontendAPI.ECPay.Models
         [FromForm(Name = "CustomField4")]
         public string? CustomField4 { get; set; }
 
-        // --- 其他可能回傳的欄位 (TradeStatus 較常用於訂單查詢API) ---
+        // --- 可能回傳的欄位 (TradeStatus 較常用於訂單查詢API) ---
         [FromForm(Name = "TradeStatus")] // 雖然主要用於查詢，但有時付款結果也可能帶上
-        public int? TradeStatus { get; set; } // 改為 int?
+        public int? TradeStatus { get; set; } 
 
-        // --- 以下欄位若確定只用信用卡，則通常不會出現 ---
+        // --- 只用信用卡，則通常不會出現 ---
         // [FromForm(Name = "BankCode")]
         // public string? BankCode { get; set; }
 
