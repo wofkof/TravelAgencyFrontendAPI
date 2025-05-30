@@ -35,11 +35,13 @@ namespace TravelAgencyFrontendAPI.Controllers.Comments
                 .FirstOrDefaultAsync(od =>
                     od.OrderDetailId == dto.OrderDetailId &&
                     od.Order.MemberId == dto.MemberId &&
-                    od.Order.Status == OrderStatus.Completed);
+                    od.Order.Status == OrderStatus.Completed &&
+                    od.EndDate != null &&
+                    od.EndDate < DateTime.Now);
 
             if (orderDetail == null)
             {
-                return BadRequest("該行程未完成或不存在。");
+                return BadRequest("該行程尚未完成或尚未結束，無法評論。");
             }
 
             // 防止重複評論
