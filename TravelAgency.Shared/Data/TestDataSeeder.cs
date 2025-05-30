@@ -127,8 +127,18 @@ namespace TravelAgency.Shared.Data
                 _context.Members.Add(new Member
                 {
                     Name = "葉曄燁",
+                    Birthday = new DateTime(1990, 5, 6),
                     Email = "member1989@gmail.com",
                     Phone = "0925806525",
+                    Gender = GenderType.Male,
+                    IdNumber = "A120738965",
+                    PassportSurname = "YEH",
+                    PassportGivenName = "YEHYEH",
+                    PassportExpireDate = new DateTime(2030, 12, 5),
+                    Nationality ="TW",
+                    DocumentType =DocumentType.ID_CARD_TW,                  
+                    DocumentNumber="317926777201",
+                    Address ="高雄市前金區中正四路211號8樓",
                     PasswordHash = hash,
                     PasswordSalt = salt,
                     GoogleId = null,

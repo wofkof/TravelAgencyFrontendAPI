@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Controllers\AuthController\" />
     <Folder Include="wwwroot\Uploads\chat\" />
   </ItemGroup>
 
