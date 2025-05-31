@@ -36,7 +36,7 @@ namespace TravelAgencyBackend.ViewModels
     // ✏️ 編輯會員用
     public class MemberEditViewModel
     {
-        [DisplayName("編號")]
+        [DisplayName("會員編號")]
         public int MemberId { get; set; }
 
         [Required(ErrorMessage = "請輸入姓名")]

@@ -21,7 +21,10 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
 
         // GET: api/OrderHistory/list/{memberId}?statuses=Completed&statuses=Expired
         [HttpGet("list/{memberId}")]
-        public async Task<IActionResult> GetOrderHistoryList(int memberId, [FromQuery] List<OrderStatus> statuses)
+        public async Task<IActionResult> GetOrderHistoryList(int memberId,
+        [FromQuery] List<OrderStatus> statuses,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 5)
         {
             try
             {
@@ -33,9 +36,13 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                     query = query.Where(o => statuses.Contains(o.Status));
                 }
 
+                var totalCount = await query.CountAsync();
+
                 var orders = await query
                     .Include(o => o.OrderDetails)
                     .OrderByDescending(o => o.CreatedAt)
+                    .Skip((page - 1) * pageSize) 
+                    .Take(pageSize)              
                     .Select(o => new OrderHistoryListItemDto
                     {
                         OrderId = o.OrderId,
@@ -48,7 +55,11 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                     })
                     .ToListAsync();
 
-                return Ok(orders);
+                return Ok(new
+                {
+                    items = orders,
+                    totalCount
+                });
             }
             catch (Exception ex)
             {
