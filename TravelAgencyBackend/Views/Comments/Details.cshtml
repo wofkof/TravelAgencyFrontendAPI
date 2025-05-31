@@ -1,0 +1,35 @@
+﻿@model TravelAgencyBackend.ViewModels.CommentViewModel
+@using TravelAgencyBackend.Helpers
+
+@{
+    ViewData["Title"] = "評論詳細";
+}
+
+<h1>評論詳細資料</h1>
+<hr />
+
+<dl class="row">
+    <dt class="col-sm-2">會員</dt>
+    <dd class="col-sm-10">@Model.MemberName</dd>
+
+    <dt class="col-sm-2">行程</dt>
+    <dd class="col-sm-10">@Model.ProductTitle</dd>
+
+    <dt class="col-sm-2">分類</dt>
+    <dd class="col-sm-10">@EnumDisplayHelper.GetDisplayName(Model.Category)</dd>
+
+    <dt class="col-sm-2">評分</dt>
+    <dd class="col-sm-10">@Model.Rating</dd>
+
+    <dt class="col-sm-2">內容</dt>
+    <dd class="col-sm-10">@Model.Content</dd>
+
+    <dt class="col-sm-2">建立時間</dt>
+    <dd class="col-sm-10">@Model.CreatedAt.ToString("yyyy/MM/dd HH:mm")</dd>
+
+    <dt class="col-sm-2">狀態</dt>
+    <dd class="col-sm-10">@EnumDisplayHelper.GetDisplayName(Model.Status)</dd>
+</dl>
+
+<a asp-action="Edit" asp-route-id="@Model.CommentId" class="btn btn-warning">編輯</a>
+<a asp-action="Index" class="btn btn-secondary">返回列表</a>
