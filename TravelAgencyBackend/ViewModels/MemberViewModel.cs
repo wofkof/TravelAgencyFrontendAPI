@@ -100,11 +100,11 @@ namespace TravelAgencyBackend.ViewModels
         public DateTime? Birthday { get; set; }
         [DisplayName("國籍")]
         public string? Nationality { get; set; }
-        [DisplayName("護照姓")]
+        [DisplayName("護照英文姓 (Surname)")]
         public string? PassportSurname { get; set; }
-        [DisplayName("護照名")]
+        [DisplayName("護照英文名 (Given name)")]
         public string? PassportGivenName { get; set; }
-        [DisplayName("身分證")]
+        [DisplayName("身分證字號")]
         public string? IdNumber { get; set; }
         [DisplayName("地址")]
         public string? Address { get; set; }
@@ -113,7 +113,7 @@ namespace TravelAgencyBackend.ViewModels
         public MemberStatus Status { get; set; }
 
         [DisplayName("註冊時間")]
-        public DateTime CreatedAt { get; set; }
+        public DateTime RegisterDate { get; set; }
 
         [DisplayName("更新時間")]
         public DateTime? UpdatedAt { get; set; }
