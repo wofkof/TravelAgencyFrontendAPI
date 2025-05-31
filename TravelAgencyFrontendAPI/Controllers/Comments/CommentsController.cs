@@ -70,6 +70,25 @@ namespace TravelAgencyFrontendAPI.Controllers.Comments
 
             return Ok(new { message = "評論成功發表。" });
         }
+
+        // GET: api/comments/member/{memberId}
+        [HttpGet("member/{memberId}")]
+        public async Task<IActionResult> GetCommentsByMember(int memberId)
+        {
+            var comments = await _context.Comments
+                .Where(c => c.MemberId == memberId)
+                .Select(c => new
+                {
+                    c.OrderDetailId,
+                    c.Rating,
+                    c.Content,
+                    c.CreatedAt
+                })
+                .ToListAsync();
+
+            return Ok(comments);
+        }
+
     }
 
 }
