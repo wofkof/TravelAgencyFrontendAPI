@@ -4,64 +4,46 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>日程目錄</h1>
+<h1>Index</h1>
 
 <p>
-    @if (PermissionChecker.CanManageOfficialTravels)
-    {
-        <a asp-action="Create">新增</a>
-    }
-    else
-    {
-        <a asp-action="Create" class="disabled"
-        tabindex="-1" aria-disabled="true" onclick="return false;">
-            新增
-        </a>
-    }
-    |
-    @if (PermissionChecker.CanViewOfficialTravels)
-    {
-        <a asp-controller="OfficialTravelDetails" asp-action="Index">回到行程細節</a>
-
-    }
-    else
-    {
-        <a asp-controller="OfficialTravelDetails" asp-action="Index" class="disabled"
-        tabindex="-1" aria-disabled="true" onclick="return false;">
-            回到行程細節
-        </a>
-    }
-    |
-    @if (PermissionChecker.CanViewOfficialTravels)
-    {
-        <a asp-controller="OfficialTravels" asp-action="Index">回到專案管理</a>
-    }
-    else
-    {
-        <a asp-controller="OfficialTravels" asp-action="Index" class="disabled"
-        tabindex="-1" aria-disabled="true" onclick="return false;">
-            回到專案管理
-        </a>
-    }
+    <a asp-action="Create">Create New</a>
 </p>
-<table id="myTable" class="display">
+<table class="table">
     <thead>
         <tr>
-            @* 楷茵 *@
-            @* <th> *@
-            @*     @Html.DisplayNameFor(model => model.Category) *@
-            @* </th> *@
             <th>
                 @Html.DisplayNameFor(model => model.Day)
             </th>
-            @* <th> *@
-            @*     @Html.DisplayNameFor(model => model.StartTime) *@
-            @* </th> *@
-            @* <th> *@
-            @*     @Html.DisplayNameFor(model => model.Date) *@
-            @* </th> *@
             <th>
                 @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Breakfast)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Lunch)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Dinner)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Hotel)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Attraction1)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Attraction2)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Attraction3)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Attraction4)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Attraction5)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Note1)
@@ -70,85 +52,62 @@
                 @Html.DisplayNameFor(model => model.Note2)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.OfficialTravelDetail.OfficialTravel.Title)
+                @Html.DisplayNameFor(model => model.OfficialTravelDetail)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model) {
-            <tr>
-                @* 楷茵 *@
-                @* <td> *@
-                @*     @Html.DisplayFor(modelItem => item.Category) *@
-                @* </td> *@
-                <td>
-                    @Html.DisplayFor(modelItem => item.Day)
-                </td>
-                @* <td> *@
-                @*     @Html.DisplayFor(modelItem => item.StartTime) *@
-                @* </td> *@
-                @* <td> *@
-                @*     @Html.DisplayFor(modelItem => item.Date) *@
-                @* </td> *@
-                <td>
-                    @Html.DisplayFor(modelItem => item.Description)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Note1)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Note2)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.OfficialTravelDetail.OfficialTravel.Title)
-                </td>
-                <td>
-                    @if (PermissionChecker.CanManageOfficialTravels)
-                    {
-                        <a asp-action="Edit" asp-route-id="@item.OfficialTravelScheduleId">編輯</a>
-                    }
-                    else
-                    {
-                        <a asp-action="Edit" asp-route-id="@item.OfficialTravelScheduleId" class="disabled"
-                        tabindex="-1" aria-disabled="true" onclick="return false;">
-                            編輯
-                        </a>
-                    }
-                    |
-                    @if (PermissionChecker.CanViewOfficialTravels)
-                    {
-                        <a asp-action="Details" asp-route-id="@item.OfficialTravelScheduleId">檢視</a>
-                    }
-                    else
-                    {
-                        <a asp-action="Details" asp-route-id="@item.OfficialTravelScheduleId" class="disabled"
-                        tabindex="-1" aria-disabled="true" onclick="return false;">
-                            檢視
-                        </a>
-                    }
-                    |
-                    @if (PermissionChecker.CanManageOfficialTravels)
-                    {
-                        <a asp-action="Delete" asp-route-id="@item.OfficialTravelScheduleId">刪除</a>
-                    }
-                    else
-                    {
-                        <a asp-action="Delete" asp-route-id="@item.OfficialTravelScheduleId" class="disabled"
-                           tabindex="-1" aria-disabled="true" onclick="return false;">
-                        刪除
-                        </a>
-                    }
-                </td>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Day)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Breakfast)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Lunch)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Dinner)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Hotel)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Attraction1)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Attraction2)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Attraction3)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Attraction4)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Attraction5)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Note1)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Note2)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.OfficialTravelDetail.OfficialTravelDetailId)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.OfficialTravelScheduleId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.OfficialTravelScheduleId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.OfficialTravelScheduleId">Delete</a>
+            </td>
         </tr>
 }
     </tbody>
 </table>
-
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            $('#myTable').DataTable();
-        });
-    </script>
-}

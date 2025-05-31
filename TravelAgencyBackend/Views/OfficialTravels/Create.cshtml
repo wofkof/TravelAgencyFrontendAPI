@@ -1,91 +1,94 @@
-﻿@model TravelAgencyBackend.ViewModels.OfficialTravelViewModel
+﻿@model TravelAgency.Shared.Models.OfficialTravel
 
 @{
     ViewData["Title"] = "Create";
 }
 
-<h1>新增專案</h1>
+<h1>Create</h1>
+
+<h4>OfficialTravel</h4>
 <hr />
-<div class="row d-flex justify-content-around">
-    <div class="col-6">
-        <form asp-action="Create" enctype="multipart/form-data">
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group mb-4">
-                <label asp-for="CreatedByEmployeeId" class="control-label h4"></label>
-                <select asp-for="CreatedByEmployeeId" class="form-control" asp-items="ViewBag.CreatedByEmployeeId"></select>
+            <div class="form-group">
+                <label asp-for="CreatedByEmployeeId" class="control-label"></label>
+                <select asp-for="CreatedByEmployeeId" class ="form-control" asp-items="ViewBag.CreatedByEmployeeId"></select>
             </div>
-            <div class="form-group mb-4">
-                <label asp-for="RegionId" class="control-label h4"></label>
-                <select asp-for="RegionId" class="form-control" asp-items="ViewBag.RegionId"></select>
+            <div class="form-group">
+                <label asp-for="RegionId" class="control-label"></label>
+                <select asp-for="RegionId" class ="form-control" asp-items="ViewBag.RegionId"></select>
             </div>
-            <div class="form-group mb-4">
-                <label asp-for="Title" class="control-label h4"></label>
+            <div class="form-group">
+                <label asp-for="ItemId" class="control-label"></label>
+                <input asp-for="ItemId" class="form-control" />
+                <span asp-validation-for="ItemId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Category" class="control-label"></label>
+                <select asp-for="Category" class="form-control"></select>
+                <span asp-validation-for="Category" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Title" class="control-label"></label>
                 <input asp-for="Title" class="form-control" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
-            <div class="form-group mb-4">
-                <label asp-for="ProjectYear" class="control-label h4"></label>
-                <input asp-for="ProjectYear" class="form-control" />
-                <span asp-validation-for="ProjectYear" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-4">
-                <label asp-for="AvailableFrom" class="control-label h4"></label>
-                <input asp-for="AvailableFrom" class="form-control" type="date" />
+            <div class="form-group">
+                <label asp-for="AvailableFrom" class="control-label"></label>
+                <input asp-for="AvailableFrom" class="form-control" />
                 <span asp-validation-for="AvailableFrom" class="text-danger"></span>
             </div>
-            <div class="form-group mb-4">
-                <label asp-for="AvailableUntil" class="control-label h4"></label>
-                <input asp-for="AvailableUntil" class="form-control" type="date" />
+            <div class="form-group">
+                <label asp-for="AvailableUntil" class="control-label"></label>
+                <input asp-for="AvailableUntil" class="form-control" />
                 <span asp-validation-for="AvailableUntil" class="text-danger"></span>
             </div>
-            <div class="form-group mb-4">
-                <label asp-for="Description" class="control-label h4"></label>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
                 <input asp-for="Description" class="form-control" />
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
-            <div class="form-group mb-4">
-                <label asp-for="Days" class="control-label h4"></label>
+            <div class="form-group">
+                <label asp-for="TotalTravelCount" class="control-label"></label>
+                <input asp-for="TotalTravelCount" class="form-control" />
+                <span asp-validation-for="TotalTravelCount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TotalDepartureCount" class="control-label"></label>
+                <input asp-for="TotalDepartureCount" class="form-control" />
+                <span asp-validation-for="TotalDepartureCount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Days" class="control-label"></label>
                 <input asp-for="Days" class="form-control" />
                 <span asp-validation-for="Days" class="text-danger"></span>
             </div>
-            <div class="form-group mb-4">
-                <label asp-for="CoverImage" class="control-label h4"></label>
-                <input asp-for="CoverImage" class="form-control" type="file" />
-                <span asp-validation-for="CoverImage" class="text-danger"></span>
+            <div class="form-group">
+                <label asp-for="CoverPath" class="control-label"></label>
+                <input asp-for="CoverPath" class="form-control" />
+                <span asp-validation-for="CoverPath" class="text-danger"></span>
             </div>
-            <div class="form-group mb-4">
-                <label asp-for="Status" class="control-label h4"></label>
-                <select asp-for="Status" class="form-control" asp-items="Html.GetEnumSelectList<TravelStatus>()"></select>
+            <div class="form-group">
+                <label asp-for="UpdatedAt" class="control-label"></label>
+                <input asp-for="UpdatedAt" class="form-control" />
+                <span asp-validation-for="UpdatedAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Status" class="control-label"></label>
+                <input asp-for="Status" class="form-control" />
                 <span asp-validation-for="Status" class="text-danger"></span>
             </div>
-            <div class="form-group mb-4 d-flex justify-content-end gx-4">
-                <div class="col">
-                    @if (PermissionChecker.CanViewOfficialTravels)
-                    {
-                        <a asp-action="Index" class="btn btn-outline-primary text-decoration-none">回前頁</a>
-                    }
-                    else
-                    {
-                        <a asp-action="Index" class="btn btn-outline-primary text-decoration-none disabled"
-                        tabindex="-1" aria-disabled="true" onclick="return false;">
-                            回前頁
-                        </a>
-                    }
-                </div>
-                <div class="col d-flex justify-content-end">
-                    @if (PermissionChecker.CanManageOfficialTravels)
-                    {
-                        <input type="submit" value="新增" class="btn btn-primary " />
-                    }
-                    else
-                    {
-                        <input type="submit" value="新增" class="btn btn-primary disabled"
-                               tabindex="-1" aria-disabled="true" onclick="return false;" />
-                    }
-                </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
             </div>
         </form>
     </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {

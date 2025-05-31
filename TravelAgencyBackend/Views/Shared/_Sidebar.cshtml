@@ -252,19 +252,34 @@
                     <ul>
                         @if (PermissionChecker.CanViewOfficialTravels)
                         {
+                             <li> 
+                                 <a asp-controller="OfficialTravels" asp-action="Index">
+									<i class="metismenu-icon"></i>官方行程管理
+                                 </a> 
+                            </li>
                             <li>
-                                <a asp-controller="OfficialTravels" asp-action="Index">
-                                    <i class="metismenu-icon"></i>管理官方行程
+                                <a asp-controller="OfficialTravelDetails" asp-action="Index">
+                                    <i class="metismenu-icon"></i>行程細節管理
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-controller="OfficialTravelSchedules" asp-action="Index">
+                                    <i class="metismenu-icon"></i>行程日程管理
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-controller="GroupTravels" asp-action="Index">
+                                    <i class="metismenu-icon"></i>出團表管理
                                 </a>
                             </li>
                             <li>
                                 <a asp-controller="TravelSuppliers" asp-action="Index">
-                                    <i class="metismenu-icon"></i>供應商業務管理
+									<i class="metismenu-icon"></i>供應商管理
                                 </a>
                             </li>
                             <li>
                                 <a asp-controller="Regions" asp-action="Index">
-                                    <i class="metismenu-icon"></i>
+									<i class="metismenu-icon"></i>地區管理
                                 </a>
                             </li>
                         }
