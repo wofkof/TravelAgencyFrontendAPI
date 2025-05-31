@@ -89,6 +89,32 @@ namespace TravelAgencyFrontendAPI.Controllers.Comments
             return Ok(comments);
         }
 
+        // GET: /api/comments/latest?count=6
+        [HttpGet("latest")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetLatestComments([FromQuery] int count = 6)
+        {
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+
+            var latestComments = await _context.Comments
+                .Include(c => c.Member)
+                .Where(c => c.Status == CommentStatus.Visible)
+                .OrderByDescending(c => c.CreatedAt)
+                .Take(count)
+                .Select(c => new
+                {
+                    c.Content,
+                    c.Rating,
+                    c.CreatedAt,
+                    Name = $"會員 {c.MemberId}", // 匿名顯示
+                    Avatar = baseUrl + "/images/default-avatar.jpg", // 固定頭像
+                    Title = c.Category.ToString()
+                })
+                .ToListAsync();
+
+            return Ok(latestComments);
+        }
+
     }
 
 }
