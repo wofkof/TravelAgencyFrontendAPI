@@ -35,11 +35,11 @@ namespace TravelAgencyFrontendAPI.Controllers
         [HttpPost("initiate")]
         public async Task<ActionResult<OrderSummaryDto>> InitiateOrderAsync([FromBody] OrderCreateDto orderCreateDto)
         {
-            _logger.LogInformation("接收到初步訂單建立請求: {@OrderCreateDto}", orderCreateDto); // << 新增：日誌記錄 >>
+            _logger.LogInformation("接收到初步訂單建立請求: {@OrderCreateDto}", orderCreateDto);
 
             if (!ModelState.IsValid)
             {
-                _logger.LogWarning("初步訂單模型驗證失敗: {@ModelState}", ModelState); // << 新增：日誌記錄 >>
+                _logger.LogWarning("初步訂單模型驗證失敗: {@ModelState}", ModelState);
                 return BadRequest(ModelState);
             }
 
@@ -100,6 +100,9 @@ namespace TravelAgencyFrontendAPI.Controllers
                 string optionSpecificDescription = cartItemDto.OptionType; // 選項的描述
                 ProductCategory itemCategory; // 用來儲存轉換後的 ProductCategory
 
+                DateTime? itemSpecificStartDate = null;
+                DateTime? itemSpecificEndDate = null;
+
                 if (!Enum.TryParse<ProductCategory>(cartItemDto.ProductType, true, out var parsedCategory))
                 {
                     _logger.LogWarning($"無效的 ProductType: {cartItemDto.ProductType}。");
@@ -140,6 +143,8 @@ namespace TravelAgencyFrontendAPI.Controllers
                         _logger.LogWarning($"團體行程 '{productName}' 選項 '{cartItemDto.OptionType}' 的價格異常 ({unitPrice})。");
                         return BadRequest($"商品 '{productName}' 選項 '{cartItemDto.OptionType}' 的價格資料異常。");
                     }
+                    itemSpecificStartDate = groupTravel.DepartureDate;
+                    itemSpecificEndDate = groupTravel.ReturnDate;
                 }
                 else if (itemCategory == ProductCategory.CustomTravel)
                 {
@@ -152,7 +157,7 @@ namespace TravelAgencyFrontendAPI.Controllers
 
                     unitPrice = customTravel.TotalAmount; // CustomTravel 的價格是其 TotalAmount
                     productName = customTravel.Note ?? $"客製化行程 {customTravel.CustomTravelId}"; // 使用 Note 作為名稱，或預設名稱
-                    optionSpecificDescription = cartItemDto.OptionType; // 例如 "全包方案" 或前端傳來的選項描述
+                    //optionSpecificDescription = cartItemDto.OptionType; // 例如 "全包方案" 或前端傳來的選項描述
 
                     if (unitPrice <= 0 && cartItemDto.Quantity > 0)
                     {
@@ -174,7 +179,9 @@ namespace TravelAgencyFrontendAPI.Controllers
                     Quantity = cartItemDto.Quantity,
                     Price = unitPrice,
                     TotalAmount = cartItemDto.Quantity * unitPrice,
-                    OrderParticipants = new List<OrderParticipant>()
+                    OrderParticipants = new List<OrderParticipant>(),
+                    StartDate = itemSpecificStartDate,
+                    EndDate = itemSpecificEndDate
                 };
                 order.OrderDetails.Add(orderDetail);
                 calculatedServerTotalAmount += orderDetail.TotalAmount;
@@ -674,10 +681,13 @@ namespace TravelAgencyFrontendAPI.Controllers
             }
 
             var orderData = await _context.Orders
-                .Include(o => o.OrderParticipants)
+                .Include(o => o.OrderParticipants) // 如果 OrderParticipant 也需要
                 .Include(o => o.OrderDetails)
-                //    .ThenInclude(od => od.GroupTravel) // 如果需要在訂單詳情中顯示 GroupTravel 的資訊
-                //    .ThenInclude(od => od.CustomTravel)   // 如果需要在訂單詳情中顯示 CustomTravel 的資訊
+                //    .ThenInclude(od => od.GroupTravel) // 預先載入 GroupTravel
+                //        .ThenInclude(gt => gt.OfficialTravelDetail) // 如果需要更深層的
+                //            .ThenInclude(otd => otd.OfficialTravel) // 同上
+                //.Include(o => o.OrderDetails)
+                //    .ThenInclude(od => od.CustomTravel) // 預先載入 CustomTravel
                 .FirstOrDefaultAsync(o => o.OrderId == id && o.MemberId == memberId.Value);
 
             if (orderData == null)
@@ -698,14 +708,14 @@ namespace TravelAgencyFrontendAPI.Controllers
                         // 確保你GroupTravel 實體有與 detail.ItemId 對應的主鍵，例如 GroupTravelId
                         detail.GroupTravel = await _context.GroupTravels
                             .Include(gt => gt.OfficialTravelDetail)
-                            .ThenInclude(otd => otd.OfficialTravel)
+                                .ThenInclude(otd => otd.OfficialTravel)
+                            .AsNoTracking()
                             .FirstOrDefaultAsync(gt => gt.GroupTravelId == detail.ItemId);
                     }
                     else if (detail.Category == ProductCategory.CustomTravel)
                     {
-                        // 使用 ItemId 從 _context.CustomTravels 查詢
-                        // 確保 CustomTravel 實體有與 detail.ItemId 對應的主鍵，例如 CustomTravelId
                         detail.CustomTravel = await _context.CustomTravels
+                            .AsNoTracking()
                             .FirstOrDefaultAsync(ct => ct.CustomTravelId == detail.ItemId);
                     }
                 }
@@ -759,21 +769,21 @@ namespace TravelAgencyFrontendAPI.Controllers
                 OrderDetails = orderData.OrderDetails?.Select(od =>
                 {
                     string productTitle = string.Empty;
-                    DateTime? itemStartDate = null;
-                    DateTime? itemEndDate = null;
+                    //DateTime? itemStartDate = null;
+                    //DateTime? itemEndDate = null;
                     if (od.Category == ProductCategory.GroupTravel && od.GroupTravel != null)
                     {
                         productTitle = od.GroupTravel.OfficialTravelDetail?.OfficialTravel?.Title ?? string.Empty;
                         // 假設 OfficialTravelDetail 或 GroupTravel 有 StartDate/EndDate
-                        itemStartDate = od.GroupTravel.DepartureDate;
-                        itemEndDate = od.GroupTravel.ReturnDate;
+                        //itemStartDate = od.GroupTravel.DepartureDate;
+                        //itemEndDate = od.GroupTravel.ReturnDate;
                     }
                     else if (od.Category == ProductCategory.CustomTravel && od.CustomTravel != null)
                     {
                         productTitle = od.CustomTravel.Note ?? $"客製化行程 {od.CustomTravel.CustomTravelId}";
                         // 假設 CustomTravel 有 StartDate/EndDate
-                        itemStartDate = od.CustomTravel.DepartureDate;
-                        itemEndDate = od.CustomTravel.EndDate;
+                        //itemStartDate = od.CustomTravel.DepartureDate;
+                        //itemEndDate = od.CustomTravel.EndDate;
                     }
 
                     if (string.IsNullOrEmpty(productTitle) && !string.IsNullOrEmpty(od.Description))
@@ -794,8 +804,8 @@ namespace TravelAgencyFrontendAPI.Controllers
                         TotalAmount = od.TotalAmount,
                         ProductType = od.Category.ToString(),
                         OptionType = ParseOptionTypeFromDescription(od.Description, productTitle),
-                        StartDate = itemStartDate,
-                        EndDate = itemEndDate,   
+                        StartDate = od.StartDate,
+                        EndDate = od.EndDate,   
                     };
                 }).ToList() ?? new List<OrderDetailItemDto>(),
             };
@@ -976,6 +986,10 @@ namespace TravelAgencyFrontendAPI.Controllers
                         string optionSpecificDescription = cartItemDto.OptionType;
                         ProductCategory itemCategory;
 
+                        // 新增：用於儲存從產品獲取的日期
+                        DateTime? itemSpecificStartDate = null;
+                        DateTime? itemSpecificEndDate = null;
+
                         if (!Enum.TryParse<ProductCategory>(cartItemDto.ProductType, true, out var parsedCategory))
                         {
                             _logger.LogWarning($"訂單更新 {orderId}：無效的 ProductType: {cartItemDto.ProductType}。");
@@ -1006,6 +1020,10 @@ namespace TravelAgencyFrontendAPI.Controllers
                                 default: return BadRequest($"商品 '{productName}' 的選項類型 '{cartItemDto.OptionType}' 無法識別。");
                             }
                             if (unitPrice <= 0 && cartItemDto.Quantity > 0) return BadRequest($"商品 '{productName}' 選項 '{cartItemDto.OptionType}' 的價格資料異常。");
+                            
+                            // 從 GroupTravel 獲取日期
+                            itemSpecificStartDate = groupTravel.DepartureDate;
+                            itemSpecificEndDate = groupTravel.ReturnDate;
                         }
                         else if (itemCategory == ProductCategory.CustomTravel)
                         {
@@ -1027,7 +1045,9 @@ namespace TravelAgencyFrontendAPI.Controllers
                             Quantity = cartItemDto.Quantity,
                             Price = unitPrice,
                             TotalAmount = cartItemDto.Quantity * unitPrice,
-                            OrderParticipants = new List<OrderParticipant>() // 初始化
+                            OrderParticipants = new List<OrderParticipant>(), // 初始化
+                            StartDate = itemSpecificStartDate,
+                            EndDate = itemSpecificEndDate
                         };
                         newOrderDetails.Add(orderDetail);
                         calculatedServerTotalAmount += orderDetail.TotalAmount;
