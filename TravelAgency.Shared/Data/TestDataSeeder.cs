@@ -49,6 +49,7 @@ namespace TravelAgency.Shared.Data
             await SeedPaymentMethodAsync();
             await SeedCompletedOrderDetailAsync();
             await SeedAnnouncementAsync();
+            await SeedCommentsAsync();
         }
 
         private async Task SeedRolesAsync()
@@ -2371,6 +2372,36 @@ namespace TravelAgency.Shared.Data
             }
         }
 
-    }
+        public async Task SeedCommentsAsync()
+        {
+            var completedOrderDetail = await _context.OrderDetails
+                .Include(od => od.Order)
+                .FirstOrDefaultAsync(od => od.Order.Status == OrderStatus.Completed);
 
+            if (completedOrderDetail == null)
+                return; 
+
+            var alreadyExists = await _context.Comments.AnyAsync(c =>
+                c.OrderDetailId == completedOrderDetail.OrderDetailId &&
+                c.MemberId == completedOrderDetail.Order.MemberId);
+
+            if (alreadyExists)
+                return;
+
+            var comment = new Comment
+            {
+                MemberId = completedOrderDetail.Order.MemberId,
+                OrderDetailId = completedOrderDetail.OrderDetailId,
+                Category = completedOrderDetail.Category,
+                Rating = 4,
+                Content = "這次行程真的很棒，導遊很專業！",
+                Status = CommentStatus.Visible,
+                CreatedAt = DateTime.Now
+            };
+
+            _context.Comments.Add(comment);
+            await _context.SaveChangesAsync();
+        }
+
+    }
 }

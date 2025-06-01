@@ -12,12 +12,12 @@ namespace TravelAgency.Shared.Data.Configurations
 
             entity.HasKey(e => e.CommentId);
 
-            entity.Property(e => e.TravelType)
+            entity.Property(e => e.Category)
                   .HasConversion<string>()
                   .HasMaxLength(20)
                   .IsRequired();
 
-            entity.Property(e => e.TravelId)
+            entity.Property(e => e.OrderDetailId)
                   .IsRequired();
 
             entity.Property(e => e.Rating)
@@ -38,9 +38,17 @@ namespace TravelAgency.Shared.Data.Configurations
             
             entity.HasCheckConstraint("CK_Comment_Rating", "[Rating] BETWEEN 1 AND 5");
 
+            entity.HasIndex(e => new { e.MemberId, e.OrderDetailId }).IsUnique();
+
             entity.HasOne(e => e.Member)
-                  .WithMany()
-                  .HasForeignKey(e => e.MemberId);
+                    .WithMany(m => m.Comments)
+                    .HasForeignKey(e => e.MemberId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.OrderDetail)
+                      .WithMany(od => od.Comments)
+                      .HasForeignKey(e => e.OrderDetailId)
+                      .OnDelete(DeleteBehavior.Restrict);
         }
     }
 
