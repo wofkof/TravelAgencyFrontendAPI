@@ -16,6 +16,7 @@ using Microsoft.Extensions.Options;       // 用於 IOptions
 using TravelAgency.Shared.Data;
 using TravelAgency.Shared.Models;     
 using TravelAgencyFrontendAPI.ECPay.Models;
+using TravelAgencyFrontendAPI.Helpers;
 
 namespace TravelAgencyFrontendAPI.ECPay.Services
 {
@@ -26,6 +27,7 @@ namespace TravelAgencyFrontendAPI.ECPay.Services
         private readonly ILogger<ECPayService> _logger;
         private readonly string _hostUrl; // 後端 API 部署網址
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly EmailService _emailService;
 
         // --- 輔助類別：用於解析綠界發票 API (JSON+AES) 的回應 ---
         private class ECPayInvoiceResponseOuter
@@ -55,7 +57,6 @@ namespace TravelAgencyFrontendAPI.ECPay.Services
             public string InvoiceDate { get; set; } // 發票開立時間
             public string RandomNumber { get; set; } // 隨機碼
         }
-        // --- END 輔助類別 ---
 
         public class ECPayPaymentRequestViewModel // 金流用 ViewModel
         {
@@ -63,14 +64,14 @@ namespace TravelAgencyFrontendAPI.ECPay.Services
             public Dictionary<string, string> Parameters { get; set; } // 送往綠界的參數
         }
 
-        public ECPayService(IOptions<ECPayConfiguration> ecpayConfig, AppDbContext dbContext, IConfiguration configuration, ILogger<ECPayService> logger, IHttpClientFactory httpClientFactory)
+        public ECPayService(IOptions<ECPayConfiguration> ecpayConfig, AppDbContext dbContext, IConfiguration configuration, ILogger<ECPayService> logger, IHttpClientFactory httpClientFactory, EmailService emailService )
         {
             _ecpayConfig = ecpayConfig.Value;
             _dbContext = dbContext;
             _logger = logger;
             _hostUrl = configuration.GetValue<string>("HostURL") ?? throw new ArgumentNullException("HostURL is not configured in appSettings.json");
             _httpClientFactory = httpClientFactory;
-
+            _emailService = emailService;
         }
 
 
@@ -601,15 +602,19 @@ namespace TravelAgencyFrontendAPI.ECPay.Services
                                 // << 修改點：儲存 RandomCode >>
                                 RandomCode = invoiceResult.GetValueOrDefault("RandomNumber"),
                                 Note = $"ECPay API RtnMsg: {invoiceResult.GetValueOrDefault("RtnMsg")}" // 將綠界API的訊息存到Note
-                                // InvoiceFileURL: 綠界新版API文件未直接提供查詢PDF的URL，可能需透過廠商後台或另外的查詢API // 原有備註 (部分)
+                                // InvoiceFileURL: 綠界新版API文件未直接提供查詢PDF的URL，可能需透過廠商後台或另外的查詢API
                             };
 
                             if (invoiceRtnCode == "1" && !string.IsNullOrEmpty(invoiceNumber))
                             {
-                                _logger.LogInformation($"[PaymentReturn] 訂單 {order.OrderId} 的發票 {invoiceNumber} 已成功開立。"); // 原有備註
+                                _logger.LogInformation($"[PaymentReturn] 訂單 {order.OrderId} 的發票 {invoiceNumber} 已成功開立。");
                                 newInvoice.InvoiceNumber = invoiceNumber;
-                                newInvoice.InvoiceStatus = InvoiceStatus.Opened; // 已開立發票 // 原有備註
-                                // order.Status = OrderStatus.Completed; // 已在前面預設 // 原有備註 (部分)
+                                newInvoice.InvoiceStatus = InvoiceStatus.Opened; // 已開立發票
+                                newInvoice.RandomCode = invoiceResult.GetValueOrDefault("RandomNumber"); // 確保 RandomCode 也儲存了
+                                newInvoice.Note = $"ECPay API RtnMsg: {invoiceResult.GetValueOrDefault("RtnMsg")}";
+
+                                // 新增呼叫郵件通知
+                                await SendInvoiceNotificationEmailAsync(order, invoiceResult);
                             }
                             else
                             {
@@ -753,18 +758,112 @@ namespace TravelAgencyFrontendAPI.ECPay.Services
             { // 付款成功
                 frontendQueryParams["status"] = "success";
                 // RtnMsg 通常是 "交易成功" 或類似，前端可以直接顯示綠界回傳的，或者您自訂更友好的訊息
-                frontendQueryParams["rtnMsg"] = formData["RtnMsg"].FirstOrDefault() ?? "付款成功"; // 原有備註 (部分)
+                frontendQueryParams["rtnMsg"] = formData["RtnMsg"].FirstOrDefault() ?? "付款成功"; 
             }
             else
             { // 付款失敗或其他非成功狀態
                 frontendQueryParams["status"] = "failure";
-                frontendQueryParams["rtnMsg"] = formData["RtnMsg"].FirstOrDefault() ?? "付款失敗"; // 原有備註 (部分)
+                frontendQueryParams["rtnMsg"] = formData["RtnMsg"].FirstOrDefault() ?? "付款失敗"; 
             }
 
             string finalFrontendUrl = QueryHelpers.AddQueryString(baseUrl, frontendQueryParams.Where(kvp => !string.IsNullOrEmpty(kvp.Value)));
             _logger.LogInformation($"[PaymentResult] 將返回的前端 URL: {finalFrontendUrl}"); // 原有備註
             return finalFrontendUrl;
         }
+
+        private async Task SendInvoiceNotificationEmailAsync(Order order, Dictionary<string, string> invoiceApiResult)
+        {
+            string recipientEmail = !string.IsNullOrWhiteSpace(order.InvoiceDeliveryEmail) ? order.InvoiceDeliveryEmail : order.OrdererEmail;
+
+            if (string.IsNullOrWhiteSpace(recipientEmail))
+            {
+                _logger.LogWarning($"[InvoiceEmail] 訂單 {order.OrderId}: 找不到有效的收件人Email，無法寄送發票通知。");
+                return;
+            }
+
+            string invoiceNumber = invoiceApiResult.GetValueOrDefault("InvoiceNo");
+            string invoiceDate = invoiceApiResult.GetValueOrDefault("InvoiceDate");
+            string randomNumber = invoiceApiResult.GetValueOrDefault("RandomNumber");
+
+            if (string.IsNullOrEmpty(invoiceNumber) || string.IsNullOrEmpty(invoiceDate) || string.IsNullOrEmpty(randomNumber))
+            {
+                _logger.LogWarning($"[InvoiceEmail] 訂單 {order.OrderId}: 從綠界回傳的發票資訊不完整，無法寄送通知。 InvoiceNo: {invoiceNumber}, InvoiceDate: {invoiceDate}, RandomNumber: {randomNumber}");
+                return;
+            }
+
+            // 確保 OrderDetails 被載入 (如果 ProcessEcPayCallback 中載入的 order 沒有包含它們)
+            // 通常 ProcessEcPayCallback 查詢 order 時應該已經 .Include(o => o.OrderDetails)
+            if (order.OrderDetails == null || !order.OrderDetails.Any())
+            {
+                var orderWithDetails = await _dbContext.Orders
+                                                .Include(o => o.OrderDetails)
+                                                .FirstOrDefaultAsync(o => o.OrderId == order.OrderId);
+                if (orderWithDetails != null)
+                {
+                    order.OrderDetails = orderWithDetails.OrderDetails;
+                }
+            }
+
+
+            string subject = $"[嶼你同行] 電子發票開立通知 - 訂單 {order.MerchantTradeNo}";
+
+            var bodyBuilder = new StringBuilder();
+            bodyBuilder.Append($"<p>親愛的 {order.OrdererName} 您好，</p>");
+            bodyBuilder.Append($"<p>感謝您的訂購！您的訂單 {order.MerchantTradeNo} 已成功付款，電子發票已隨之開立。</p>");
+            bodyBuilder.Append("<p><strong>發票資訊：</strong></p>");
+            bodyBuilder.Append("<ul>");
+            bodyBuilder.Append($"<li>發票號碼：{invoiceNumber}</li>");
+            bodyBuilder.Append($"<li>發票日期：{invoiceDate}</li>");
+            bodyBuilder.Append($"<li>隨機碼：{randomNumber}</li>");
+            bodyBuilder.Append($"<li>發票金額：NT$ {order.TotalAmount:N0}</li>");
+
+            // 判斷是否為公司戶發票
+            if (order.InvoiceOption == InvoiceOption.Company && !string.IsNullOrWhiteSpace(order.InvoiceUniformNumber))
+            {
+                bodyBuilder.Append($"<li>買方統一編號：{order.InvoiceUniformNumber}</li>");
+                if (!string.IsNullOrWhiteSpace(order.InvoiceTitle))
+                {
+                    bodyBuilder.Append($"<li>買方抬頭：{order.InvoiceTitle}</li>");
+                }
+            }
+            bodyBuilder.Append("</ul>");
+
+            if (order.OrderDetails != null && order.OrderDetails.Any())
+            {
+                bodyBuilder.Append("<p><strong>訂購商品明細：</strong></p>");
+                bodyBuilder.Append("<table border='1' cellpadding='5' style='border-collapse: collapse;'><thead><tr><th>品名</th><th>數量</th><th>單價</th><th>小計</th></tr></thead><tbody>");
+                foreach (var detail in order.OrderDetails)
+                {
+                    bodyBuilder.Append("<tr>");
+                    bodyBuilder.Append($"<td>{HttpUtility.HtmlEncode(detail.Description)}</td>");
+                    bodyBuilder.Append($"<td style='text-align:right;'>{detail.Quantity}</td>");
+                    bodyBuilder.Append($"<td style='text-align:right;'>NT$ {detail.Price:N0}</td>");
+                    bodyBuilder.Append($"<td style='text-align:right;'>NT$ {detail.TotalAmount:N0}</td>");
+                    bodyBuilder.Append("</tr>");
+                }
+                bodyBuilder.Append("</tbody></table>");
+            }
+
+            bodyBuilder.Append("<p>您可以至財政部電子發票整合服務平台查詢此張發票的詳細資訊：<br/>");
+            bodyBuilder.Append("<a href='https://www.einvoice.nat.gov.tw/'>https://www.einvoice.nat.gov.tw/</a></p>");
+            bodyBuilder.Append("<p>請注意：此為電子發票開立作業完成的通知。根據綠界科技的作業流程，您可能也會收到由綠界科技系統直接寄送的發票通知郵件。</p>");
+            bodyBuilder.Append("<p>再次感謝您的惠顧！</p>");
+            bodyBuilder.Append("<p>祝您有個美好的一天，<br/>[嶼你同行] 敬上</p>");
+
+            try
+            {
+                await _emailService.SendEmailAsync(recipientEmail, subject, bodyBuilder.ToString());
+                _logger.LogInformation($"[InvoiceEmail] 訂單 {order.OrderId} (發票號碼: {invoiceNumber}) 的通知郵件已成功準備寄送至 {recipientEmail}。");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"[InvoiceEmail] 訂單 {order.OrderId} (發票號碼: {invoiceNumber}) 的通知郵件寄送失敗至 {recipientEmail}。");
+                // 即使郵件發送失敗，通常不應影響主流程 (例如給綠界的回應)
+            }
+        }
+
+
+
 
         /// <summary>
         /// 計算 CheckMacValue (綠界金流驗證碼 - SHA256)
