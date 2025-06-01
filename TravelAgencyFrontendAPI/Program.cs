@@ -7,6 +7,8 @@ using Microsoft.Extensions.FileProviders;
 using TravelAgencyFrontendAPI.ECPay.Models; // 引入 ECPayConfiguration
 using TravelAgencyFrontendAPI.ECPay.Services; // 引入 ECPayService
 using TravelAgencyFrontendAPI.Services;
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
 
 //using Microsoft.AspNetCore.Authentication.JwtBearer;
 //using Microsoft.IdentityModel.Tokens;
@@ -31,20 +33,38 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("https://localhost:3000", "https://localhost:7107", "https://localhost:7258", "https://192.168.1.122:3000", "https://172.18.132.158:3000", "https://9621-49-159-210-217.ngrok-free.app")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+        policy.WithOrigins(
+            "https://travel-api.local:3000",
+            "https://localhost:3000",
+            "https://localhost:7107",
+            "https://localhost:7258",
+            "https://192.168.1.122:3000",
+            "https://172.18.132.158:3000",
+            "https://9621-49-159-210-217.ngrok-free.app")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
     });
 });
 
-//builder.WebHost.ConfigureKestrel(options =>
-//{
-//    options.ListenAnyIP(7265, listenOptions =>
-//    {
-//        listenOptions.UseHttps("certs/travel-api.pfx", "1234");
-//    });
-//});
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Listen(IPAddress.Any, 7265, listenOptions =>
+    {
+        listenOptions.UseHttps(httpsOptions =>
+        {
+            httpsOptions.ServerCertificateSelector = (context, hostname) =>
+            {
+                return hostname switch
+                {
+                    "localhost" => new X509Certificate2("certs/localhost.pfx", "1234"),
+                    "travel-api.local" => new X509Certificate2("certs/travel-api.pfx", "1234"),
+                    _ => null
+                };
+            };
+        });
+    });
+});
 
 builder.Services.AddSignalR();
 
