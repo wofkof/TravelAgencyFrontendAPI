@@ -2056,6 +2056,69 @@ namespace TravelAgency.Shared.Data
                 });
                 ordersToAdd.Add(order5);
             }
+            // --- 訂單 6 (發票開立失敗，InvoiceNumber 為 null) ---
+            // 假設混合了團體旅遊和一個額外項目
+            if (member1 != null && groupTravelItem1 != null && groupTravelItem1.OfficialTravelDetail != null && customTravelItem1 != null)
+            {
+                decimal extraItemPrice = 150.00m;
+                var order6TotalAmount = (groupTravelItem1.OfficialTravelDetail.AdultPrice ?? 0) + extraItemPrice;
+                var order6 = new Order
+                {
+                    MemberId = member1.MemberId,
+                    TotalAmount = order6TotalAmount, // IsRequired
+                    PaymentMethod = PaymentMethod.ECPay_CreditCard, // IsRequired
+                    Status = OrderStatus.Cancelled, // IsRequired (假設付款或訂單處理失敗)
+                    //CreatedAt = now.AddDays(-1), // 有 SQL 預設值
+                    // PaymentDate might be null or set if payment attempted and failed
+                    InvoiceOption = InvoiceOption.Personal, // IsRequired
+                    InvoiceDeliveryEmail = member1.Email,
+                    OrdererName = member1.Name, // IsRequired
+                    OrdererPhone = member1.Phone ?? "0900112233", // IsRequired
+                    OrdererEmail = member1.Email, // IsRequired
+                    OrdererNationality = member1.Nationality ?? "TW",
+                    OrdererDocumentType = member1.DocumentType.ToString(),
+                    OrdererDocumentNumber = member1.DocumentNumber ?? "A123456789",
+                    Note = "訂單5: 付款失敗，或後續處理錯誤",
+                    MerchantTradeNo = $"MNO_{Guid.NewGuid().ToString("N").Substring(0, 10)}_O5",
+                    ECPayTradeNo = $"ECP_{Guid.NewGuid().ToString("N").Substring(0, 10)}_T5" // 假設 ECPay 交易號
+                };
+                order6.OrderDetails.Add(new OrderDetail
+                {
+                    Category = ProductCategory.GroupTravel, // IsRequired
+                    ItemId = groupTravelItem1.GroupTravelId,
+                    Description = groupTravelItem1.OfficialTravelDetail.OfficialTravel.Title,
+                    Quantity = 1, // 有預設值
+                    Price = groupTravelItem1.OfficialTravelDetail.AdultPrice ?? 0, // IsRequired
+                    TotalAmount = groupTravelItem1.OfficialTravelDetail.AdultPrice ?? 0, // IsRequired
+                    CreatedAt = order6.CreatedAt, // 有 SQL 預設值
+                    UpdatedAt = order6.CreatedAt, // 有 SQL 預設值
+                    StartDate = groupTravelItem1.DepartureDate
+                });
+                order6.OrderDetails.Add(new OrderDetail
+                {
+                    Category = ProductCategory.CustomTravel, // IsRequired
+                    ItemId = 999, // 假設一個額外項目的 ID
+                    Description = "機場接送服務",
+                    Quantity = 1, // 有預設值
+                    Price = extraItemPrice, // IsRequired
+                    TotalAmount = extraItemPrice, // IsRequired
+                    CreatedAt = order6.CreatedAt, // 有 SQL 預設值
+                    UpdatedAt = order6.CreatedAt, // 有 SQL 預設值
+                });
+                order6.OrderInvoices.Add(new OrderInvoice
+                {
+                    InvoiceNumber = null, // 保持為 null
+                    BuyerName = member1.Name,
+                    InvoiceItemDesc = "混合商品 - 發票開立失敗",
+                    TotalAmount = order6.TotalAmount, // IsRequired
+                    CreatedAt = order6.CreatedAt, // 有 SQL 預設值
+                    UpdatedAt = order6.CreatedAt, // 有 SQL 預設值
+                    InvoiceType = InvoiceType.ElectronicInvoice, // IsRequired
+                    InvoiceStatus = InvoiceStatus.Voided, // IsRequired
+                    Note = "系統開立發票失敗，請手動處理"
+                });
+                ordersToAdd.Add(order6);
+            }
 
             // --- 最後的 AddRangeAsync 和 SaveChangesAsync 邏輯不變 ---
             if (ordersToAdd.Any())
