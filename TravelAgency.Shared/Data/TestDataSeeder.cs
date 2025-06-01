@@ -1199,12 +1199,9 @@ namespace TravelAgency.Shared.Data
 
         private async Task SeedTravelSupplierAsync()
         {
-            if (_context.TravelSuppliers.Any())
+            if (!_context.TravelSuppliers.Any())
             {
-                _context.TravelSuppliers.RemoveRange(_context.TravelSuppliers);
-                await _context.SaveChangesAsync();
-            }
-            _context.TravelSuppliers.AddRange(
+                _context.TravelSuppliers.AddRange(
                 // 日本北海道
                 new TravelSupplier
                 {
@@ -4464,6 +4461,8 @@ new TravelSupplier { SupplierName = "成都背包青年旅館", SupplierType = S
     new TravelSupplier { SupplierName = "Dusit Thani Guam Resort", SupplierType = SupplierType.Accommodation, ContactName = "Noah Cruz", ContactPhone = "+1-671-7949343", ContactEmail = "dusitthaniguamresort@guam.com", SupplierNote = "關島全區 Accommodation - Dusit Thani Guam Resort" }
                 );
             await _context.SaveChangesAsync();
+            }
+            
         }
 
         private async Task SeedOfficialAccommodationAsync()
