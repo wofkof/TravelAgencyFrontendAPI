@@ -7,10 +7,10 @@ namespace TravelAgencyFrontendAPI.DTOs.PassportVisaDTOs
         public int OrderId { get; set; }
 
         public int MemberId { get; set; }
-        public Member Member { get; set; } = null!;
+        public Member? Member { get; set; }
 
         public int DocumentMenuId { get; set; }
-        public DocumentMenu DocumentMenu { get; set; } = null!;
+        public DocumentMenu? DocumentMenu { get; set; }
 
         public DateTime DepartureDate { get; set; }
 
