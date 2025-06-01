@@ -78,10 +78,15 @@ namespace TravelAgencyFrontendAPI.Hubs
                          .SendAsync("MessageRead", chatRoomId, readerId, readerType);
         }
 
-        public async Task SendCallOffer(string toConnectionId, object offer)
+        public async Task SendCallOffer(string toConnectionId, object offer, int roomId, string callType)
         {
-            await Clients.Client(toConnectionId)
-                         .SendAsync("ReceiveCallOffer", Context.ConnectionId, offer);
+            await Clients.Client(toConnectionId).SendAsync("ReceiveCallOffer", new
+            {
+                fromId = Context.ConnectionId, 
+                offer,
+                roomId,
+                callType 
+            });
         }
 
         public async Task SendCallAnswer(string toConnectionId, object answer)

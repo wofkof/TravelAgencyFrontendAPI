@@ -187,7 +187,9 @@ namespace TravelAgency.Shared.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -299,6 +301,11 @@ namespace TravelAgency.Shared.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
 
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<string>("Content")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -311,6 +318,9 @@ namespace TravelAgency.Shared.Migrations
                     b.Property<int>("MemberId")
                         .HasColumnType("int");
 
+                    b.Property<int>("OrderDetailId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Rating")
                         .HasColumnType("int");
 
@@ -321,17 +331,12 @@ namespace TravelAgency.Shared.Migrations
                         .HasColumnType("nvarchar(20)")
                         .HasDefaultValue("Visible");
 
-                    b.Property<int>("TravelId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TravelType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
                     b.HasKey("CommentId");
 
-                    b.HasIndex("MemberId");
+                    b.HasIndex("OrderDetailId");
+
+                    b.HasIndex("MemberId", "OrderDetailId")
+                        .IsUnique();
 
                     b.ToTable("T_Comment", null, t =>
                         {
@@ -2177,12 +2182,20 @@ namespace TravelAgency.Shared.Migrations
             modelBuilder.Entity("TravelAgency.Shared.Models.Comment", b =>
                 {
                     b.HasOne("TravelAgency.Shared.Models.Member", "Member")
-                        .WithMany()
+                        .WithMany("Comments")
                         .HasForeignKey("MemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TravelAgency.Shared.Models.OrderDetail", "OrderDetail")
+                        .WithMany("Comments")
+                        .HasForeignKey("OrderDetailId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Member");
+
+                    b.Navigation("OrderDetail");
                 });
 
             modelBuilder.Entity("TravelAgency.Shared.Models.CompletedOrderDetail", b =>
@@ -2536,6 +2549,8 @@ namespace TravelAgency.Shared.Migrations
                 {
                     b.Navigation("ChatRooms");
 
+                    b.Navigation("Comments");
+
                     b.Navigation("MemberFavoriteTravelers");
 
                     b.Navigation("Orders");
@@ -2564,6 +2579,8 @@ namespace TravelAgency.Shared.Migrations
 
             modelBuilder.Entity("TravelAgency.Shared.Models.OrderDetail", b =>
                 {
+                    b.Navigation("Comments");
+
                     b.Navigation("OrderParticipants");
                 });
 

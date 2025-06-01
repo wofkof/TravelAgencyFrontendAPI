@@ -11,6 +11,37 @@
         <a asp-action="Index" class="btn btn-secondary">返回聊天室列表</a>
     </div>
 
+    <div class="d-flex justify-content-between align-items-center my-3">
+        <div>
+            <span class="fw-bold">狀態：</span>
+            @if (Model.Status == ChatStatus.Opened)
+            {
+                <span class="text-success">開啟中</span>
+            }
+            else if (Model.Status == ChatStatus.Closed)
+            {
+                <span class="text-danger">已關閉</span>
+            }
+        </div>
+
+        <div>
+            @if (Model.Status == ChatStatus.Opened)
+            {
+                <form asp-action="Close" asp-route-id="@Model.ChatRoomId" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('確定要關閉聊天室嗎？')">關閉聊天室</button>
+                </form>
+            }
+            else if (Model.Status == ChatStatus.Closed)
+            {
+                <form asp-action="Open" asp-route-id="@Model.ChatRoomId" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('確定要重新開啟聊天室嗎？')">開啟聊天室</button>
+                </form>
+            }
+        </div>
+    </div>
+
     <!-- 聊天訊息顯示 -->
     <div id="chatArea"></div>
 
@@ -76,15 +107,22 @@
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script>
+        const chatRoomStatus = "@Model.Status";
         const chatRoomId = @Model.ChatRoomId;
         const senderType = "Employee";
         const senderId = @senderId;
+        const receiverId = @Model.MemberId;
         const api = "https://localhost:7265";
         // const api = "https:travel-api.local:7265"
 
         let connection, localStream, remoteConnectionId, peer, incomingOffer;
         let callTimerInterval, callStartTime;
         let mediaRecorder, audioChunks = [], audioBlob = null, audioDuration = 0;
+        let isCaller = false;
+        let callLogAlreadyRecorded = false;
+        let hasCallBeenAnswered = false;
+        let hasEndedCall = false;
+        let actualCallType = "audio";
 
         document.getElementById("sendBtn")?.addEventListener("click", sendMessage);
         document.getElementById("recordBtn").addEventListener("click", handleRecording);
@@ -142,6 +180,10 @@
 
         // 發送貼圖
         async function sendSticker(url) {
+            if (chatRoomStatus === "Closed") {
+                alert("聊天室已關閉，無法傳送貼圖");
+                return;
+            }
             const payload = {
                 chatRoomId,
                 senderType,
@@ -167,12 +209,14 @@
                 .build();
 
             connection.on("ReceiveMessage", appendMessage);
-            connection.on("ReceiveCallOffer", async (fromId, offer) => {
-                remoteConnectionId = fromId;
-                incomingOffer = offer;
+            connection.on("ReceiveCallOffer", async (data) => {
+                console.log("[MVC] 收到 call offer 物件：", data);
+                remoteConnectionId = data.fromId;
+                incomingOffer = data.offer;
                 showCallControls("📞 來電中...");
             });
             connection.on("ReceiveCallAnswer", async (fromId, answer) => {
+                hasCallBeenAnswered = true;
                 await peer.setRemoteDescription(new RTCSessionDescription(answer));
                 updateCallStatus("✅ 通話中");
                 startCallTimer();
@@ -182,11 +226,13 @@
             });
             connection.on("CallRejected", () => {
                 alert("❌ 對方已拒絕通話");
+                recordCallLog("rejected");
                 endCall(false);
             });
-            connection.on("ReceiveEndCall", () => {
+            connection.on("ReceiveEndCall", (fromConnectionId) => {
+                console.log("收到掛斷通知，來自連線ID：", fromConnectionId);
                 alert("📴 對方已掛斷");
-                endCall(false);
+                endCall(false); 
             });
 
             await connection.start();
@@ -196,6 +242,10 @@
         }
 
         async function sendMessage() {
+            if (chatRoomStatus === "Closed") {
+                alert("聊天室已關閉，無法傳送訊息");
+                return;
+            }
             const messageInput = document.getElementById("messageInput");
             const fileInput = document.getElementById("fileInput");
             const audioPreview = document.getElementById("audioPreview");
@@ -256,6 +306,10 @@
         }
 
         function handleRecording() {
+            if (chatRoomStatus === "Closed") {
+                alert("聊天室已關閉，無法錄音");
+                return;
+            }
             const btn = document.getElementById("recordBtn");
             if (mediaRecorder && mediaRecorder.state === "recording") {
                 mediaRecorder.stop();
@@ -315,8 +369,19 @@
 
         // 通話相關邏輯
         async function startCall(useVideo = false) {
+            if (chatRoomStatus === "Closed") {
+                alert("聊天室已關閉，無法進行通話");
+                return;
+            }
+            hasEndedCall = false;
+            callLogAlreadyRecorded = false;
+            hasCallBeenAnswered = false;
             const targetType = "Member";
             const targetId = parseInt("@Model.MemberId");
+            isCaller = true;
+            actualCallType = useVideo ? "video" : "audio";
+            callStartTime = new Date();
+            callLogAlreadyRecorded = false;
 
             const targetConnId = await connection.invoke("GetConnectionId", targetType, targetId);
             if (!targetConnId) return alert("對方未連線");
@@ -331,12 +396,15 @@
 
             const offer = await peer.createOffer();
             await peer.setLocalDescription(offer);
-            await connection.invoke("SendCallOffer", targetConnId, offer);
+            await connection.invoke("SendCallOffer", targetConnId, offer, chatRoomId, actualCallType);
 
             showCallControls("⏳ 等待對方接聽...");
         }
 
         async function acceptCall() {
+            hasEndedCall = false;
+            callLogAlreadyRecorded = false;
+            hasCallBeenAnswered = true;
             updateCallStatus("⏳ 接通中...");
             const isVideoCall = incomingOffer.sdp?.includes("m=video");
             const mediaConstraints = isVideoCall
@@ -364,28 +432,93 @@
 
         async function rejectCall() {
             await connection.invoke("RejectCall", remoteConnectionId);
+            await recordCallLog("rejected");
             endCall(false);
         }
 
+        async function recordCallLog(status) {
+            if (!isCaller || callLogAlreadyRecorded) return;
+            if (!callStartTime || isNaN(callStartTime.getTime())) return;
+            console.log("[CallLog] 正在記錄:", status, callStartTime?.toISOString());
+            const now = new Date();
+            const duration = Math.floor((now - callStartTime) / 1000);
+            if (status === "completed" && duration <= 0) return;
+
+            callLogAlreadyRecorded = true;
+
+            const payload = {
+                    chatRoomId,
+                    callerType: 0,
+                    callerId: senderId,
+                    receiverType: 1,
+                    receiverId,
+                    callType: actualCallType,
+                    status,
+                    startTime: callStartTime.toISOString(),
+                    endTime: status === "completed" ? now.toISOString() : null,
+                    durationInSeconds: status === "completed" ? duration : null
+            };
+
+            try {
+                const res = await fetch(`${api}/api/calllogs`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) {
+                    const text = await res.text();
+                    console.error("[CallLog] 寫入失敗", res.status, text);
+                } else {
+                    console.log("[CallLog] 已記錄狀態:", status);
+                }
+            } catch (err) {
+                console.error("[CallLog] 請求發生錯誤", err);
+            }
+        }
+
         async function endCall(sendSignal = true) {
-            if (localStream) {
+              if (hasEndedCall) {
+                    console.warn("[MVC] endCall 已執行過，略過");
+                    return;
+                }
+                hasEndedCall = true;
+
+              let status = hasCallBeenAnswered ? "completed" : "missed";
+
+              if (sendSignal && remoteConnectionId) {
+                console.log("[MVC] 呼叫 EndCall 給：", remoteConnectionId);
+                try {
+                  await connection.invoke("EndCall", remoteConnectionId);
+                } catch (err) {
+                  console.error("呼叫 EndCall 失敗", err);
+                }
+              }
+
+              if (localStream) {
                 localStream.getTracks().forEach(t => t.stop());
                 localStream = null;
                 document.getElementById("localVideo").srcObject = null;
-            }
-            if (peer) {
+              }
+
+              if (peer) {
                 peer.close();
                 peer = null;
-            }
-            document.getElementById("remoteAudio").srcObject = null;
-            document.getElementById("remoteVideo").srcObject = null;
-            document.getElementById("callControls").style.display = "none";
-            stopCallTimer();
+              }
 
-            if (sendSignal && remoteConnectionId) {
-                await connection.invoke("EndCall", remoteConnectionId);
+              document.getElementById("remoteAudio").srcObject = null;
+              document.getElementById("remoteVideo").srcObject = null;
+              document.getElementById("callControls").style.display = "none";
+
+              if (callTimerInterval) {
+                clearInterval(callTimerInterval);
+                callTimerInterval = null;
+              }
+
+              if (callStartTime && !isNaN(callStartTime.getTime())) {
+                await recordCallLog(status);
+              }
+              remoteConnectionId = null;
             }
-        }
 
         function createPeerConnection() {
             const pc = new RTCPeerConnection({

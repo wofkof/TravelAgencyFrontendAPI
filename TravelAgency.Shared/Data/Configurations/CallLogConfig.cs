@@ -19,7 +19,7 @@ namespace TravelAgency.Shared.Data.Configurations
             entity.Property(c => c.CallType).HasMaxLength(20).HasConversion<string>().IsRequired();
             entity.Property(c => c.Status).HasMaxLength(20).HasConversion<string>().IsRequired();
 
-            entity.Property(c => c.StartTime).HasColumnType("datetime").IsRequired();
+            entity.Property(c => c.StartTime).HasColumnType("datetime").IsRequired().HasDefaultValueSql("GETDATE()"); ;
             entity.Property(c => c.EndTime).HasColumnType("datetime").IsRequired(false);
             entity.Property(c => c.DurationInSeconds).IsRequired(false);
 

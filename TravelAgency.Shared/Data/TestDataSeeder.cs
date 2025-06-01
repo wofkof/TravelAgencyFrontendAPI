@@ -18,6 +18,7 @@ namespace TravelAgency.Shared.Data
             await SeedRolesAsync();
             await SeedEmployeesAsync();
             await SeedMembersAsync();
+            await SeedCollectionAsync();
             await SeedChatRoomsAsync();
             await SeedMessagesAsync();
             await SeedCityAsync();
@@ -48,6 +49,7 @@ namespace TravelAgency.Shared.Data
             await SeedPaymentMethodAsync();
             await SeedCompletedOrderDetailAsync();
             await SeedAnnouncementAsync();
+            await SeedCommentsAsync();
         }
 
         private async Task SeedRolesAsync()
@@ -127,8 +129,18 @@ namespace TravelAgency.Shared.Data
                 _context.Members.Add(new Member
                 {
                     Name = "葉曄燁",
+                    Birthday = new DateTime(1990, 5, 6),
                     Email = "member1989@gmail.com",
                     Phone = "0925806525",
+                    Gender = GenderType.Male,
+                    IdNumber = "A120738965",
+                    PassportSurname = "YEH",
+                    PassportGivenName = "YEHYEH",
+                    PassportExpireDate = new DateTime(2030, 12, 5),
+                    Nationality ="TW",
+                    DocumentType =DocumentType.ID_CARD_TW,                  
+                    DocumentNumber="317926777201",
+                    Address ="高雄市前金區中正四路211號8樓",
                     PasswordHash = hash,
                     PasswordSalt = salt,
                     GoogleId = null,
@@ -186,6 +198,37 @@ namespace TravelAgency.Shared.Data
                 await _context.SaveChangesAsync();
             }
         }
+        private async Task SeedCollectionAsync()
+        {
+            if (!_context.Collects.Any())
+            {
+                _context.Collects.AddRange(
+                    new Collect
+                    {
+                        MemberId = 11110,
+                        TravelId = 1,
+                        TravelType = CollectType.Official,
+                        CreatedAt = DateTime.UtcNow.AddDays(-5)
+                    },
+                    new Collect
+                    {
+                        MemberId = 11110,
+                        TravelId = 2,
+                        TravelType = CollectType.Official,
+                        CreatedAt = DateTime.UtcNow.AddDays(-2)
+                    },
+                    new Collect
+                    {
+                        MemberId = 11110,
+                        TravelId = 3,
+                        TravelType = CollectType.Official,
+                        CreatedAt = DateTime.UtcNow
+                    }
+                );
+                await _context.SaveChangesAsync();
+            }
+        }
+
 
         private async Task SeedChatRoomsAsync()
         {
@@ -1937,6 +1980,69 @@ namespace TravelAgency.Shared.Data
             {
                 Console.WriteLine("SeedOrdersAndRelatedDataAsync: 因前置資料不足或條件不符，未建立訂單5。");
             }
+            // --- 訂單 6 (發票開立失敗，InvoiceNumber 為 null) ---
+            // 假設混合了團體旅遊和一個額外項目
+            if (member1 != null && groupTravelItem1 != null && groupTravelItem1.OfficialTravelDetail != null && customTravelItem1 != null)
+            {
+                decimal extraItemPrice = 150.00m;
+                var order6TotalAmount = (groupTravelItem1.OfficialTravelDetail.AdultPrice ?? 0) + extraItemPrice;
+                var order6 = new Order
+                {
+                    MemberId = member1.MemberId,
+                    TotalAmount = order6TotalAmount, // IsRequired
+                    PaymentMethod = PaymentMethod.ECPay_CreditCard, // IsRequired
+                    Status = OrderStatus.Cancelled, // IsRequired (假設付款或訂單處理失敗)
+                    //CreatedAt = now.AddDays(-1), // 有 SQL 預設值
+                    // PaymentDate might be null or set if payment attempted and failed
+                    InvoiceOption = InvoiceOption.Personal, // IsRequired
+                    InvoiceDeliveryEmail = member1.Email,
+                    OrdererName = member1.Name, // IsRequired
+                    OrdererPhone = member1.Phone ?? "0900112233", // IsRequired
+                    OrdererEmail = member1.Email, // IsRequired
+                    OrdererNationality = member1.Nationality ?? "TW",
+                    OrdererDocumentType = member1.DocumentType.ToString(),
+                    OrdererDocumentNumber = member1.DocumentNumber ?? "A123456789",
+                    Note = "訂單5: 付款失敗，或後續處理錯誤",
+                    MerchantTradeNo = $"MNO_{Guid.NewGuid().ToString("N").Substring(0, 10)}_O5",
+                    ECPayTradeNo = $"ECP_{Guid.NewGuid().ToString("N").Substring(0, 10)}_T5" // 假設 ECPay 交易號
+                };
+                order6.OrderDetails.Add(new OrderDetail
+                {
+                    Category = ProductCategory.GroupTravel, // IsRequired
+                    ItemId = groupTravelItem1.GroupTravelId,
+                    Description = groupTravelItem1.OfficialTravelDetail.OfficialTravel.Title,
+                    Quantity = 1, // 有預設值
+                    Price = groupTravelItem1.OfficialTravelDetail.AdultPrice ?? 0, // IsRequired
+                    TotalAmount = groupTravelItem1.OfficialTravelDetail.AdultPrice ?? 0, // IsRequired
+                    CreatedAt = order6.CreatedAt, // 有 SQL 預設值
+                    UpdatedAt = order6.CreatedAt, // 有 SQL 預設值
+                    StartDate = groupTravelItem1.DepartureDate
+                });
+                order6.OrderDetails.Add(new OrderDetail
+                {
+                    Category = ProductCategory.CustomTravel, // IsRequired
+                    ItemId = 999, // 假設一個額外項目的 ID
+                    Description = "機場接送服務",
+                    Quantity = 1, // 有預設值
+                    Price = extraItemPrice, // IsRequired
+                    TotalAmount = extraItemPrice, // IsRequired
+                    CreatedAt = order6.CreatedAt, // 有 SQL 預設值
+                    UpdatedAt = order6.CreatedAt, // 有 SQL 預設值
+                });
+                order6.OrderInvoices.Add(new OrderInvoice
+                {
+                    InvoiceNumber = null, // 保持為 null
+                    BuyerName = member1.Name,
+                    InvoiceItemDesc = "混合商品 - 發票開立失敗",
+                    TotalAmount = order6.TotalAmount, // IsRequired
+                    CreatedAt = order6.CreatedAt, // 有 SQL 預設值
+                    UpdatedAt = order6.CreatedAt, // 有 SQL 預設值
+                    InvoiceType = InvoiceType.ElectronicInvoice, // IsRequired
+                    InvoiceStatus = InvoiceStatus.Voided, // IsRequired
+                    Note = "系統開立發票失敗，請手動處理"
+                });
+                ordersToAdd.Add(order6);
+            }
 
             // --- 實際新增到資料庫 ---
             if (ordersToAdd.Any())
@@ -2201,6 +2307,36 @@ namespace TravelAgency.Shared.Data
             }
         }
 
-    }
+        public async Task SeedCommentsAsync()
+        {
+            var completedOrderDetail = await _context.OrderDetails
+                .Include(od => od.Order)
+                .FirstOrDefaultAsync(od => od.Order.Status == OrderStatus.Completed);
 
+            if (completedOrderDetail == null)
+                return; 
+
+            var alreadyExists = await _context.Comments.AnyAsync(c =>
+                c.OrderDetailId == completedOrderDetail.OrderDetailId &&
+                c.MemberId == completedOrderDetail.Order.MemberId);
+
+            if (alreadyExists)
+                return;
+
+            var comment = new Comment
+            {
+                MemberId = completedOrderDetail.Order.MemberId,
+                OrderDetailId = completedOrderDetail.OrderDetailId,
+                Category = completedOrderDetail.Category,
+                Rating = 4,
+                Content = "這次行程真的很棒，導遊很專業！",
+                Status = CommentStatus.Visible,
+                CreatedAt = DateTime.Now
+            };
+
+            _context.Comments.Add(comment);
+            await _context.SaveChangesAsync();
+        }
+
+    }
 }

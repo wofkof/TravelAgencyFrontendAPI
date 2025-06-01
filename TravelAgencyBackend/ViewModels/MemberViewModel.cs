@@ -7,30 +7,36 @@ namespace TravelAgencyBackend.ViewModels
     // 建立會員用
     public class MemberCreateViewModel
     {
-        [Required(ErrorMessage = "請輸入信箱")]
-        [DisplayName("信箱")]
-        [EmailAddress(ErrorMessage = "格式不正確")]
-        public string Email { get; set; } = null!;
-
-        [Required(ErrorMessage = "請輸入密碼")]
-        [DisplayName("密碼")]
-        public string Password { get; set; } = null!;
-
         [Required(ErrorMessage = "請輸入姓名")]
         [DisplayName("姓名")]
         public string Name { get; set; } = null!;
 
+
         [Required(ErrorMessage = "請輸入手機")]
         [DisplayName("手機")]
-        [RegularExpression(@"^09\d{8}$", ErrorMessage = "手機號碼格式不正確")]
+        [RegularExpression(@"^09\d{8}$", ErrorMessage = "手機號碼格式不正確，應為 09 開頭共 10 碼")]
         [StringLength(10, MinimumLength = 10)]
         public string Phone { get; set; } = null!;
+
+        [Required(ErrorMessage = "請輸入信箱")]
+        [DisplayName("信箱")]
+        [EmailAddress(ErrorMessage = "Email格式錯誤")]
+        [StringLength(100, ErrorMessage = "信箱長度不可超過 100 字")]
+        public string Email { get; set; } = null!;
+
+        [Required(ErrorMessage = "請輸入密碼")]
+        [DisplayName("密碼")]
+        [StringLength(12, MinimumLength = 6, ErrorMessage = "密碼長度需為 6 到 12 字")]
+        [RegularExpression(@"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,12}$",
+        ErrorMessage = "密碼需包含英文字母與數字，且長度為 6~12 字")]
+        public string Password { get; set; } = null!;
+        
     }
 
     // ✏️ 編輯會員用
     public class MemberEditViewModel
     {
-        [DisplayName("編號")]
+        [DisplayName("會員編號")]
         public int MemberId { get; set; }
 
         [Required(ErrorMessage = "請輸入姓名")]
@@ -94,11 +100,11 @@ namespace TravelAgencyBackend.ViewModels
         public DateTime? Birthday { get; set; }
         [DisplayName("國籍")]
         public string? Nationality { get; set; }
-        [DisplayName("護照姓")]
+        [DisplayName("護照英文姓 (Surname)")]
         public string? PassportSurname { get; set; }
-        [DisplayName("護照名")]
+        [DisplayName("護照英文名 (Given name)")]
         public string? PassportGivenName { get; set; }
-        [DisplayName("身分證")]
+        [DisplayName("身分證字號")]
         public string? IdNumber { get; set; }
         [DisplayName("地址")]
         public string? Address { get; set; }
@@ -107,7 +113,7 @@ namespace TravelAgencyBackend.ViewModels
         public MemberStatus Status { get; set; }
 
         [DisplayName("註冊時間")]
-        public DateTime CreatedAt { get; set; }
+        public DateTime RegisterDate { get; set; }
 
         [DisplayName("更新時間")]
         public DateTime? UpdatedAt { get; set; }

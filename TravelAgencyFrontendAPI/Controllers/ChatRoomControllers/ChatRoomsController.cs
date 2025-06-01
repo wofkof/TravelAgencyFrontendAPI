@@ -34,7 +34,8 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
                     IsBlocked = c.IsBlocked,
                     CreatedAt = c.CreatedAt,
                     LastMessageAt = c.LastMessageAt,
-                    EmployeeName = c.Employee.Name
+                    EmployeeName = c.Employee.Name,
+                    Status = c.Status
                 })
                 .ToListAsync();
 
@@ -141,5 +142,16 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
             });
         }
 
+        [HttpPut("{id}/close")]
+        public async Task<IActionResult> CloseChatRoom(int id)
+        {
+            var chatRoom = await _context.ChatRooms.FindAsync(id);
+            if (chatRoom == null) return NotFound();
+
+            chatRoom.Status = ChatStatus.Closed;
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
     }
 }
