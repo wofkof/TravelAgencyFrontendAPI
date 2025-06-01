@@ -292,16 +292,16 @@ namespace TravelAgencyFrontendAPI.ECPay.Services
                 });
                 // itemAmountsFromDetailsForSum.Add(itemAmountAlreadyTaxed);
             }
-            invoiceDataContent["Items"] = itemsForInvoice; // **發票品項 (Item Properties)** - 極重要！ // 原有備註
+            invoiceDataContent["Items"] = itemsForInvoice; // 發票品項 (Item Properties)
 
             // SalesAmount: 使用訂單的總含稅金額，並轉為整數
             // 綠界文件："所有商品的ItemAmount加總後四捨五入=SalesAmount(含稅)"
             // 您應確保 Order.TotalAmount 是 OrderDetails 中所有 TotalAmount 加總的結果 (考慮浮點數精度)
-            invoiceDataContent["SalesAmount"] = (int)Math.Round(order.TotalAmount, MidpointRounding.AwayFromZero); // 銷售額總計 (含稅) // 原有備註 (部分)
+            invoiceDataContent["SalesAmount"] = (int)Math.Round(order.TotalAmount, MidpointRounding.AwayFromZero); // 銷售額總計 (含稅)
 
 
-            invoiceDataContent["InvoiceRemark"] = $"訂單編號: {order.MerchantTradeNo}"; // 發票備註 (可選) // 原有備註
-            invoiceDataContent["InvType"] = "07"; // 發票字軌類別：07=一般稅額計算之電子發票 // 原有備註
+            invoiceDataContent["InvoiceRemark"] = $"訂單編號: {order.MerchantTradeNo}"; // 發票備註 (可選)
+            invoiceDataContent["InvType"] = "07"; // 發票字軌類別：07=一般稅額計算之電子發票 
 
             // --- Step 2-6: 序列化, URL編碼, AES加密, 組裝外部JSON, 發送請求 ---
             var jsonOptions = new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
@@ -328,7 +328,7 @@ namespace TravelAgencyFrontendAPI.ECPay.Services
             var requestPayloadOuter = new
             {
                 MerchantID = _ecpayConfig.Invoice_MerchantID, // << 使用發票專用 MerchantID >>
-                RqHeader = new { Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds() }, // 時間戳 // 原有備註
+                RqHeader = new { Timestamp = DateTimeOffset.Now.ToUnixTimeSeconds() }, // 時間戳 // 原有備註
                 Data = encryptedData
             };
             string jsonRequestPayloadOuterString = JsonSerializer.Serialize(requestPayloadOuter, jsonOptions);
@@ -573,7 +573,7 @@ namespace TravelAgencyFrontendAPI.ECPay.Services
                 if (order.Status == OrderStatus.Awaiting)
                 {
                     _logger.LogInformation($"[PaymentReturn] 訂單 {order.OrderId} (MTN: {merchantTradeNoFromForm}) 付款成功。準備開立發票。"); // 原有備註
-                    order.PaymentDate = DateTime.TryParse(formData["PaymentDate"].FirstOrDefault(), out var pDate) ? pDate : DateTime.UtcNow; // 原有備註
+                    order.PaymentDate = DateTime.TryParse(formData["PaymentDate"].FirstOrDefault(), out var pDate) ? pDate : DateTime.Now; // 原有備註
                     order.ECPayTradeNo = ecpayTradeNoFromForm; // 儲存綠界交易編號 // 原有備註
 
                     // << 修改點：預設訂單狀態為 Completed，如果發票失敗再改為 InvoiceFailed >>
@@ -594,8 +594,8 @@ namespace TravelAgencyFrontendAPI.ECPay.Services
                                 BuyerName = (order.InvoiceOption == InvoiceOption.Company && !string.IsNullOrWhiteSpace(order.InvoiceTitle)) ? order.InvoiceTitle : order.OrdererName, // 原有備註 (部分)
                                 InvoiceItemDesc = string.Join(" | ", order.OrderDetails.Select(od => SanitizeInvoiceItemName(od.Description ?? "商品")).Take(3)) + (order.OrderDetails.Count > 3 ? "..." : ""), // 原有備註 + 更新品項分隔符
                                 TotalAmount = order.TotalAmount, // 這裡通常存訂單金額 // 原有備註
-                                CreatedAt = DateTime.UtcNow,
-                                UpdatedAt = DateTime.UtcNow,
+                                CreatedAt = DateTime.Now,
+                                UpdatedAt = DateTime.Now,
                                 InvoiceType = order.InvoiceOption == InvoiceOption.Company ? InvoiceType.Triplet : InvoiceType.ElectronicInvoice, // 原有備註 (部分)
                                 BuyerUniformNumber = order.InvoiceOption == InvoiceOption.Company ? order.InvoiceUniformNumber : null, // 原有備註 (部分)
                                 // << 修改點：儲存 RandomCode >>
@@ -631,8 +631,8 @@ namespace TravelAgencyFrontendAPI.ECPay.Services
                                 Note = $"開票例外: {ex.Message}", // 原有備註
                                 TotalAmount = order.TotalAmount,
                                 InvoiceType = order.InvoiceOption == InvoiceOption.Company ? InvoiceType.Triplet : InvoiceType.ElectronicInvoice,
-                                CreatedAt = DateTime.UtcNow,
-                                UpdatedAt = DateTime.UtcNow,
+                                CreatedAt = DateTime.Now,
+                                UpdatedAt = DateTime.Now,
                                 BuyerName = (order.InvoiceOption == InvoiceOption.Company && !string.IsNullOrWhiteSpace(order.InvoiceTitle)) ? order.InvoiceTitle : order.OrdererName,
                                 BuyerUniformNumber = order.InvoiceOption == InvoiceOption.Company ? order.InvoiceUniformNumber : null,
                             });

@@ -765,15 +765,15 @@ namespace TravelAgencyFrontendAPI.Controllers
                     {
                         productTitle = od.GroupTravel.OfficialTravelDetail?.OfficialTravel?.Title ?? string.Empty;
                         // 假設 OfficialTravelDetail 或 GroupTravel 有 StartDate/EndDate
-                        // itemStartDate = od.GroupTravel.OfficialTravelDetail?.StartDate;
-                        // itemEndDate = od.GroupTravel.OfficialTravelDetail?.EndDate;
+                        itemStartDate = od.GroupTravel.DepartureDate;
+                        itemEndDate = od.GroupTravel.ReturnDate;
                     }
                     else if (od.Category == ProductCategory.CustomTravel && od.CustomTravel != null)
                     {
                         productTitle = od.CustomTravel.Note ?? $"客製化行程 {od.CustomTravel.CustomTravelId}";
                         // 假設 CustomTravel 有 StartDate/EndDate
-                        // itemStartDate = od.CustomTravel.StartDate;
-                        // itemEndDate = od.CustomTravel.EndDate;
+                        itemStartDate = od.CustomTravel.DepartureDate;
+                        itemEndDate = od.CustomTravel.EndDate;
                     }
 
                     if (string.IsNullOrEmpty(productTitle) && !string.IsNullOrEmpty(od.Description))
