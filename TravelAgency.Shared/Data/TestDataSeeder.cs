@@ -1199,12 +1199,9 @@ namespace TravelAgency.Shared.Data
 
         private async Task SeedTravelSupplierAsync()
         {
-            if (_context.TravelSuppliers.Any())
+            if (!_context.TravelSuppliers.Any())
             {
-                _context.TravelSuppliers.RemoveRange(_context.TravelSuppliers);
-                await _context.SaveChangesAsync();
-            }
-            _context.TravelSuppliers.AddRange(
+                _context.TravelSuppliers.AddRange(
                 // 日本北海道
                 new TravelSupplier
                 {
@@ -4334,7 +4331,14 @@ new TravelSupplier { SupplierName = "成都背包青年旅館", SupplierType = S
     new TravelSupplier { SupplierName = "箭鎮", SupplierType = SupplierType.Attraction, ContactName = "Lily Hall", ContactPhone = "+64-3-7577454", ContactEmail = "箭鎮@queenstown.nz", SupplierNote = "紐西蘭皇后鎮 Attraction - 箭鎮" },
     new TravelSupplier { SupplierName = "米爾福德峽灣一日遊", SupplierType = SupplierType.Attraction, ContactName = "Ruby Clarke", ContactPhone = "+64-3-5381498", ContactEmail = "米爾福德峽灣一日遊@queenstown.nz", SupplierNote = "紐西蘭皇后鎮 Attraction - 米爾福德峽灣一日遊" },
     new TravelSupplier { SupplierName = "Skyline滑板車", SupplierType = SupplierType.Attraction, ContactName = "Ruby Nelson", ContactPhone = "+64-3-5032037", ContactEmail = "skyline滑板車@queenstown.nz", SupplierNote = "紐西蘭皇后鎮 Attraction - Skyline滑板車" },
-    new TravelSupplier { SupplierName = "冰川直升機之旅", SupplierType = SupplierType.Attraction, ContactName = "Ruby Hall", ContactPhone = "+64-3-7184825", ContactEmail = "冰川直升機之旅@queenstown.nz", SupplierNote = "紐西蘭皇后鎮 Attraction - 冰川直升機之旅" },
+    new TravelSupplier 
+    { 
+        SupplierName = "冰川直升機之旅",
+        SupplierType = SupplierType.Attraction, 
+        ContactName = "Ruby Hall", ContactPhone = "+64-3-7184825",
+        ContactEmail = "冰川直升機之旅@queenstown.nz",
+        SupplierNote = "紐西蘭皇后鎮 Attraction - 冰川直升機之旅" 
+    },
     new TravelSupplier { SupplierName = "皇后鎮酒莊之旅", SupplierType = SupplierType.Attraction, ContactName = "Ruby Phillips", ContactPhone = "+64-3-9922481", ContactEmail = "皇后鎮酒莊之旅@queenstown.nz", SupplierNote = "紐西蘭皇后鎮 Attraction - 皇后鎮酒莊之旅" },
     new TravelSupplier { SupplierName = "TSS蒸汽船", SupplierType = SupplierType.Attraction, ContactName = "Mason Clarke", ContactPhone = "+64-3-5014962", ContactEmail = "tss蒸汽船@queenstown.nz", SupplierNote = "紐西蘭皇后鎮 Attraction - TSS蒸汽船" },
     new TravelSupplier { SupplierName = "皇后鎮滑雪場", SupplierType = SupplierType.Attraction, ContactName = "Lily Phillips", ContactPhone = "+64-3-1008408", ContactEmail = "皇后鎮滑雪場@queenstown.nz", SupplierNote = "紐西蘭皇后鎮 Attraction - 皇后鎮滑雪場" },
@@ -4464,6 +4468,8 @@ new TravelSupplier { SupplierName = "成都背包青年旅館", SupplierType = S
     new TravelSupplier { SupplierName = "Dusit Thani Guam Resort", SupplierType = SupplierType.Accommodation, ContactName = "Noah Cruz", ContactPhone = "+1-671-7949343", ContactEmail = "dusitthaniguamresort@guam.com", SupplierNote = "關島全區 Accommodation - Dusit Thani Guam Resort" }
                 );
             await _context.SaveChangesAsync();
+            }
+            
         }
 
         private async Task SeedOfficialAccommodationAsync()
