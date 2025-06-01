@@ -11,6 +11,37 @@
         <a asp-action="Index" class="btn btn-secondary">返回聊天室列表</a>
     </div>
 
+    <div class="d-flex justify-content-between align-items-center my-3">
+        <div>
+            <span class="fw-bold">狀態：</span>
+            @if (Model.Status == ChatStatus.Opened)
+            {
+                <span class="text-success">開啟中</span>
+            }
+            else if (Model.Status == ChatStatus.Closed)
+            {
+                <span class="text-danger">已關閉</span>
+            }
+        </div>
+
+        <div>
+            @if (Model.Status == ChatStatus.Opened)
+            {
+                <form asp-action="Close" asp-route-id="@Model.ChatRoomId" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('確定要關閉聊天室嗎？')">關閉聊天室</button>
+                </form>
+            }
+            else if (Model.Status == ChatStatus.Closed)
+            {
+                <form asp-action="Open" asp-route-id="@Model.ChatRoomId" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('確定要重新開啟聊天室嗎？')">開啟聊天室</button>
+                </form>
+            }
+        </div>
+    </div>
+
     <!-- 聊天訊息顯示 -->
     <div id="chatArea"></div>
 
@@ -76,6 +107,7 @@
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script>
+        const chatRoomStatus = "@Model.Status";
         const chatRoomId = @Model.ChatRoomId;
         const senderType = "Employee";
         const senderId = @senderId;
@@ -148,6 +180,10 @@
 
         // 發送貼圖
         async function sendSticker(url) {
+            if (chatRoomStatus === "Closed") {
+                alert("聊天室已關閉，無法傳送貼圖");
+                return;
+            }
             const payload = {
                 chatRoomId,
                 senderType,
@@ -206,6 +242,10 @@
         }
 
         async function sendMessage() {
+            if (chatRoomStatus === "Closed") {
+                alert("聊天室已關閉，無法傳送訊息");
+                return;
+            }
             const messageInput = document.getElementById("messageInput");
             const fileInput = document.getElementById("fileInput");
             const audioPreview = document.getElementById("audioPreview");
@@ -266,6 +306,10 @@
         }
 
         function handleRecording() {
+            if (chatRoomStatus === "Closed") {
+                alert("聊天室已關閉，無法錄音");
+                return;
+            }
             const btn = document.getElementById("recordBtn");
             if (mediaRecorder && mediaRecorder.state === "recording") {
                 mediaRecorder.stop();
@@ -325,6 +369,12 @@
 
         // 通話相關邏輯
         async function startCall(useVideo = false) {
+            if (chatRoomStatus === "Closed") {
+                alert("聊天室已關閉，無法進行通話");
+                return;
+            }
+            hasEndedCall = false;
+            callLogAlreadyRecorded = false;
             hasCallBeenAnswered = false;
             const targetType = "Member";
             const targetId = parseInt("@Model.MemberId");
@@ -352,6 +402,8 @@
         }
 
         async function acceptCall() {
+            hasEndedCall = false;
+            callLogAlreadyRecorded = false;
             hasCallBeenAnswered = true;
             updateCallStatus("⏳ 接通中...");
             const isVideoCall = incomingOffer.sdp?.includes("m=video");
@@ -465,6 +517,7 @@
               if (callStartTime && !isNaN(callStartTime.getTime())) {
                 await recordCallLog(status);
               }
+              remoteConnectionId = null;
             }
 
         function createPeerConnection() {

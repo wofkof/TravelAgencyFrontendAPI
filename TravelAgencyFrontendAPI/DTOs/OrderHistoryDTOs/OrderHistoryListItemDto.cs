@@ -16,5 +16,10 @@ namespace TravelAgencyFrontendAPI.DTOs.OrderHistoryDTOs
         public DateTime? ExpiresAt { get; set; } // 猶豫期/付款到期時間
         public decimal TotalAmount { get; set; } // 訂單總金額
         public string MerchantTradeNo { get; set; } // 廠商交易編號
+
+        public DateTime? EndDate { get; set; } // 聖凱新增
+        public string Category { get; set; } = null!; // 聖凱新增
+        public int OrderDetailId { get; set; } // 聖凱新增
+        public bool IsCommented { get; set; } // 聖凱新增
     }
 }

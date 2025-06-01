@@ -1,4 +1,6 @@
-﻿namespace TravelAgencyFrontendAPI.DTOs.ChatRoomDTOs
+﻿using TravelAgency.Shared.Models;
+
+namespace TravelAgencyFrontendAPI.DTOs.ChatRoomDTOs
 {
     public class ChatRoomDto
     {
@@ -9,6 +11,7 @@
         public bool IsBlocked { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? LastMessageAt { get; set; }
+        public ChatStatus Status { get; set; }
     }
     public class StartChatRequest
     {

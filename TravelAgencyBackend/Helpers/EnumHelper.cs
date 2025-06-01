@@ -6,7 +6,6 @@ namespace TravelAgencyBackend.Helpers
 {
     public static class EnumHelper
     {
-        // ✅ 這個方法會產生顯示中文的下拉選單清單
         public static List<SelectListItem> GetSelectListWithDisplayName<TEnum>(bool excludeDeleted = false) where TEnum : Enum
         {
             var values = Enum.GetValues(typeof(TEnum)).Cast<TEnum>();
@@ -26,7 +25,6 @@ namespace TravelAgencyBackend.Helpers
             }).ToList();
         }
 
-        // ✅ 如果你之前有這段，也可以保留
         public static string GetDisplayName(this Enum value)
         {
             return value.GetType()

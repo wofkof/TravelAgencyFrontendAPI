@@ -62,6 +62,25 @@ namespace TravelAgencyBackend.Controllers
             return RedirectToAction("Details", new { id });
         }
 
+        // 開啟聊天室
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Open(int id)
+        {
+            var check = CheckPermissionOrForbid("管理聊天室");
+            if (check != null) return check;
+
+            var chatRoom = _context.ChatRooms
+                .FirstOrDefault(c => c.ChatRoomId == id);
+            if (chatRoom == null) return NotFound("聊天室已不存在");
+
+            chatRoom.Status = ChatStatus.Opened;
+            _context.SaveChanges();
+
+            return RedirectToAction("Details", new { id });
+        }
+
+
         // 發送訊息
         [HttpPost]
         [ValidateAntiForgeryToken]

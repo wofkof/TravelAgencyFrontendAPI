@@ -34,7 +34,8 @@ namespace TravelAgencyFrontendAPI.Controllers.ChatRoomControllers
                     IsBlocked = c.IsBlocked,
                     CreatedAt = c.CreatedAt,
                     LastMessageAt = c.LastMessageAt,
-                    EmployeeName = c.Employee.Name
+                    EmployeeName = c.Employee.Name,
+                    Status = c.Status
                 })
                 .ToListAsync();
 

@@ -32,6 +32,7 @@ namespace TravelAgency.Shared.Models
         [NotMapped]
         public CustomTravel? CustomTravel { get; set; }
         public ICollection<OrderParticipant> OrderParticipants { get; set; } = new List<OrderParticipant>();
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     }
 
 }
