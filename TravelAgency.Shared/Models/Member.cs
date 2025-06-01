@@ -59,6 +59,7 @@ namespace TravelAgency.Shared.Models
         public ICollection<Order> Orders { get; set; } = new List<Order>();
         public ICollection<MemberFavoriteTraveler> MemberFavoriteTravelers { get; set; } = new List<MemberFavoriteTraveler>();
         public ICollection<ChatRoom> ChatRooms { get; set; } = new List<ChatRoom>();
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
     }
 }

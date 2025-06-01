@@ -204,6 +204,30 @@
                         </li>
                     </ul>
                 </li>
+                @* 查看評論 *@
+                <li>
+                    <a href="#">
+                        <i class="metismenu-icon pe-7s-comment"></i>評論
+                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                    </a>
+                    <ul>
+                        <li>
+                            @if (PermissionChecker.CanManageChatRooms)
+                            {
+                                <a asp-controller="Comments" asp-action="Index">
+                                    <i class="metismenu-icon"></i>查看評論
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Comments" asp-action="Index"
+                                   class="bg-light disabled" tabindex="-1" aria-disabled="true" onclick="return false">
+                                    <i class="metismenu-icon"></i>查看評論
+                                </a>
+                            }
+                        </li>
+                    </ul>
+                </li>
                 @* 公告 *@
                 <li>
                     <a href="#">

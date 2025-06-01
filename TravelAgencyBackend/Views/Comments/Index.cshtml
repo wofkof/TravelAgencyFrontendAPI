@@ -1,0 +1,50 @@
+﻿@model IEnumerable<TravelAgencyBackend.ViewModels.CommentViewModel>
+@using TravelAgencyBackend.Helpers
+
+@{
+    ViewData["Title"] = "評論列表";
+}
+
+<h1>評論列表</h1>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>會員</th>
+            <th>行程名稱</th>
+            <th>分類</th>
+            <th>評分</th>
+            <th>內容</th>
+            <th>狀態</th>
+            <th>建立時間</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.MemberName</td>
+                <td>@item.ProductTitle</td>
+                <td>@EnumDisplayHelper.GetDisplayName(item.Category)</td>
+                <td>@item.Rating</td>
+                <td title="@item.Content">
+                    @{
+                        var content = item.Content ?? "";
+                        var preview = content.Length > 30 ? content.Substring(0, 30) + "..." : content;
+                    }
+                    @preview
+                </td>
+                <td>@EnumDisplayHelper.GetDisplayName(item.Status)</td>
+                <td>@item.CreatedAt.ToString("yyyy/MM/dd HH:mm")</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.CommentId" class="btn btn-sm btn-outline-info">查看</a>
+                    <a asp-action="Edit" asp-route-id="@item.CommentId" class="btn btn-sm btn-outline-warning">編輯</a>
+                    <a asp-action="Delete" asp-route-id="@item.CommentId" class="btn btn-sm btn-outline-danger">刪除</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Create" class="btn btn-primary">新增評論</a>

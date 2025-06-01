@@ -26,7 +26,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
             try
             {
                 var query = _context.Orders
-                .Where(o => o.MemberId == memberId);
+                    .Where(o => o.MemberId == memberId);
 
                 if (statuses != null && statuses.Any())
                 {
@@ -36,15 +36,31 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 var orders = await query
                     .Include(o => o.OrderDetails)
                     .OrderByDescending(o => o.CreatedAt)
-                    .Select(o => new OrderHistoryListItemDto
+                    .Select(o => new
                     {
-                        OrderId = o.OrderId,
-                        CreatedAt = o.CreatedAt,
-                        Description = o.OrderDetails.FirstOrDefault().Description ?? "(無行程名稱)",
-                        Status = o.Status.ToString(), //柏亦添加
-                        ExpiresAt = o.ExpiresAt,      //柏亦添加
-                        TotalAmount = o.TotalAmount, //柏亦添加
-                        MerchantTradeNo = o.MerchantTradeNo //柏亦添加
+                        Order = o,
+                        MainDetailDesc = o.OrderDetails.OrderBy(d => d.OrderDetailId).Select(d => d.Description).FirstOrDefault(),
+                        MainDetailEndDate = o.OrderDetails.OrderBy(d => d.OrderDetailId).Select(d => d.EndDate).FirstOrDefault(),
+                        MainDetailCategory = o.OrderDetails.OrderBy(d => d.OrderDetailId).Select(d => d.Category).FirstOrDefault(),
+                        MainDetailId = o.OrderDetails.OrderBy(d => d.OrderDetailId).Select(d => d.OrderDetailId).FirstOrDefault()
+                    })
+                    .Select(x => new OrderHistoryListItemDto
+                    {
+                        OrderId = x.Order.OrderId,
+                        CreatedAt = x.Order.CreatedAt,
+                        Description = x.MainDetailDesc ?? "(無行程名稱)",
+                        Status = x.Order.Status.ToString(),
+                        OriginalStatus = x.Order.Status,
+                        ExpiresAt = x.Order.ExpiresAt,
+                        TotalAmount = x.Order.TotalAmount,
+                        MerchantTradeNo = x.Order.MerchantTradeNo,
+                        EndDate = x.MainDetailEndDate,
+                        Category = x.MainDetailCategory.ToString(),
+                        OrderDetailId = x.MainDetailId,
+
+                        IsCommented = _context.Comments.Any(c =>
+                            c.OrderDetailId == x.MainDetailId &&
+                            c.MemberId == memberId)
                     })
                     .ToListAsync();
 
@@ -55,7 +71,6 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                 Console.WriteLine("❗ GetOrderHistoryList 發生例外：" + ex.ToString());
                 return StatusCode(500, "查詢訂單列表時發生錯誤，請稍後再試");
             }
-            
         }
 
         // GET: api/OrderHistory/detail/{orderId}
