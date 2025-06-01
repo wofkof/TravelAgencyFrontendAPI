@@ -4,12 +4,24 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>檢視</h1>
+<h1>Details</h1>
 
 <div>
-    <h4>@Html.DisplayFor(model => model.Title)</h4>
+    <h4>OfficialTravel</h4>
     <hr />
     <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.ItemId)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.ItemId)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Category)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Category)
+        </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Title)
         </dt>
@@ -35,6 +47,18 @@
             @Html.DisplayFor(model => model.Description)
         </dd>
         <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TotalTravelCount)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TotalTravelCount)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TotalDepartureCount)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TotalDepartureCount)
+        </dd>
+        <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Days)
         </dt>
         <dd class = "col-sm-10">
@@ -44,10 +68,7 @@
             @Html.DisplayNameFor(model => model.CoverPath)
         </dt>
         <dd class = "col-sm-10">
-            @if (!string.IsNullOrEmpty(Model.CoverPath))
-            {
-                <img src="@Model.CoverPath" alt="封面圖片" style="max-width: 200px;" />
-            }
+            @Html.DisplayFor(model => model.CoverPath)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.CreatedAt)
@@ -71,7 +92,7 @@
             @Html.DisplayNameFor(model => model.CreatedByEmployee)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedByEmployee.Name)
+            @Html.DisplayFor(model => model.CreatedByEmployee.Email)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Region)
@@ -82,27 +103,6 @@
     </dl>
 </div>
 <div>
-    @if (PermissionChecker.CanManageOfficialTravels)
-    {
-        <a asp-action="Edit" asp-route-id="@Model?.OfficialTravelId">編輯</a>
-    }
-    else
-    {
-        <a asp-action="Edit" asp-route-id="@Model?.OfficialTravelId" class="disabled"
-        tabindex="-1" aria-disabled="true" onclick="return false;">
-            編輯
-        </a>
-    }
-    |
-    @if (PermissionChecker.CanViewOfficialTravels)
-    {
-        <a asp-action="Index">回到專案管理</a>
-    }
-    else
-    {
-        <a asp-action="Index" class="disabled"
-           tabindex="-1" aria-disabled="true" onclick="return false;">
-        回到專案管理
-        </a>
-    }
+    <a asp-action="Edit" asp-route-id="@Model?.OfficialTravelId">Edit</a> |
+    <a asp-action="Index">Back to List</a>
 </div>

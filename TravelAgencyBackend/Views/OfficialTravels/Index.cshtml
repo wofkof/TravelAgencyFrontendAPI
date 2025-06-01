@@ -4,25 +4,20 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>專案檢視</h1>
+<h1>Index</h1>
 
 <p>
-    @if (PermissionChecker.CanManageOfficialTravels)
-    {
-        <a asp-action="Create">新增專案</a>
-
-    }
-    else
-    {
-        <a asp-action="Create">新增專案</a>
-
-    }
-    |
-    @Html.ActionLink("檢視行程細節", "Index", "OfficialTravelDetails")
+    <a asp-action="Create">Create New</a>
 </p>
-<table id="myTable" class="display">
+<table class="table">
     <thead>
         <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ItemId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Category)
+            </th>
             <th>
                 @Html.DisplayNameFor(model => model.Title)
             </th>
@@ -33,7 +28,22 @@
                 @Html.DisplayNameFor(model => model.AvailableUntil)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalTravelCount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalDepartureCount)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.Days)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CoverPath)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedAt)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.UpdatedAt)
@@ -51,78 +61,59 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model) {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Title)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.AvailableFrom)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.AvailableUntil)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Days)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.UpdatedAt)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Status)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.CreatedByEmployee.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Region.Country)
-                </td>
-                <td>
-                    @if (PermissionChecker.CanManageOfficialTravels)
-                    {
-                        <a asp-action="Edit" asp-route-id="@item.OfficialTravelId">編輯</a>
-                    }
-                    else
-                    {
-                        <a asp-action="Edit" asp-route-id="@item.OfficialTravelId" class="disabled"
-                        tabindex="-1" aria-disabled="true" onclick="return false;">
-                            編輯
-                        </a>
-                    }
-                    |
-                    @if (PermissionChecker.CanViewOfficialTravels)
-                    {
-                        <a asp-action="Details" asp-route-id="@item.OfficialTravelId">檢視</a>
-                    }
-                    else
-                    {
-                        <a asp-action="Details" asp-route-id="@item.OfficialTravelId" class="disabled"
-                        tabindex="-1" aria-disabled="true" onclick="return false;">
-                            檢視
-                        </a>
-                    }
-                    |
-                    @if (PermissionChecker.CanManageOfficialTravels)
-                    {
-                        <a asp-action="Delete" asp-route-id="@item.OfficialTravelId">刪除</a>
-                    }
-                    else
-                    {
-                        <a asp-action="Delete" asp-route-id="@item.OfficialTravelId" class="disabled"
-                           tabindex="-1" aria-disabled="true" onclick="return false;">
-                        刪除
-                        </a>
-                    }
-                </td>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ItemId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Category)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AvailableFrom)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AvailableUntil)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TotalTravelCount)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TotalDepartureCount)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Days)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CoverPath)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedAt)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UpdatedAt)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Status)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedByEmployee.Email)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Region.Country)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.OfficialTravelId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.OfficialTravelId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.OfficialTravelId">Delete</a>
+            </td>
         </tr>
 }
     </tbody>
 </table>
-
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            $('#myTable').DataTable();
-        });
-    </script>
-}

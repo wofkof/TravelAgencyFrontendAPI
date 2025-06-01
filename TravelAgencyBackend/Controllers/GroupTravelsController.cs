@@ -10,23 +10,23 @@ using TravelAgency.Shared.Models;
 
 namespace TravelAgencyBackend.Controllers
 {
-    public class GrouptestController : Controller
+    public class GroupTravelsController : Controller
     {
         private readonly AppDbContext _context;
 
-        public GrouptestController(AppDbContext context)
+        public GroupTravelsController(AppDbContext context)
         {
             _context = context;
         }
 
-        // GET: Grouptest
+        // GET: GroupTravels
         public async Task<IActionResult> Index()
         {
             var appDbContext = _context.GroupTravels.Include(g => g.OfficialTravelDetail);
             return View(await appDbContext.ToListAsync());
         }
 
-        // GET: Grouptest/Details/5
+        // GET: GroupTravels/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -45,14 +45,14 @@ namespace TravelAgencyBackend.Controllers
             return View(groupTravel);
         }
 
-        // GET: Grouptest/Create
+        // GET: GroupTravels/Create
         public IActionResult Create()
         {
             ViewData["OfficialTravelDetailId"] = new SelectList(_context.OfficialTravelDetails, "OfficialTravelDetailId", "OfficialTravelDetailId");
             return View();
         }
 
-        // POST: Grouptest/Create
+        // POST: GroupTravels/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -69,7 +69,7 @@ namespace TravelAgencyBackend.Controllers
             return View(groupTravel);
         }
 
-        // GET: Grouptest/Edit/5
+        // GET: GroupTravels/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -86,7 +86,7 @@ namespace TravelAgencyBackend.Controllers
             return View(groupTravel);
         }
 
-        // POST: Grouptest/Edit/5
+        // POST: GroupTravels/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -122,7 +122,7 @@ namespace TravelAgencyBackend.Controllers
             return View(groupTravel);
         }
 
-        // GET: Grouptest/Delete/5
+        // GET: GroupTravels/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -141,7 +141,7 @@ namespace TravelAgencyBackend.Controllers
             return View(groupTravel);
         }
 
-        // POST: Grouptest/Delete/5
+        // POST: GroupTravels/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
