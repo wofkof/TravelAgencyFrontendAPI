@@ -43,7 +43,7 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                     .OrderByDescending(o => o.CreatedAt)
                     .Skip((page - 1) * pageSize) 
                     .Take(pageSize)              
-                    .Select(o => new OrderHistoryListItemDto
+                    .Select(o => new 
                     {
                         Order = o,
                         MainDetailDesc = o.OrderDetails.OrderBy(d => d.OrderDetailId).Select(d => d.Description).FirstOrDefault(),
