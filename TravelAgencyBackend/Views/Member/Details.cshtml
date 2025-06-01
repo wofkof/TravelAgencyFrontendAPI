@@ -2,182 +2,221 @@
 @using TravelAgencyBackend.ViewComponent
 @model TravelAgencyBackend.ViewModels.MemberDetailViewModel
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "會員資料";
 }
 
-<h1>會員資料</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">會員詳細資料</h1>
 
-<div>
-    <h4>@Html.DisplayNameFor(model => model.Name): @Html.DisplayFor(model => model.Name)</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MemberId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MemberId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Phone)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Phone)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Gender)
-        </dt>
-        <dd class="col-sm-10">
-            @EnumDisplayHelper.GetDisplayName(Model.Gender)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Birthday)
-        </dt>
-        <dd class="col-sm-10">
-            @(Model.Birthday?.ToString("yyyy-MM-dd"))
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Nationality)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Nationality)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.PassportSurname)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.PassportSurname)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.PassportGivenName)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.PassportGivenName)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.IdNumber)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.IdNumber)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Address)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Address)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UpdatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UpdatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-			@EnumDisplayHelper.GetDisplayName(Model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Note)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Note)
-        </dd>
-    </dl>
+    <div class="d-flex gap-2">
+        @* 查看參與人 *@
+        @if (PermissionChecker.CanViewParticipants)
+        {
+            <a asp-controller="Participants" asp-action="Index" asp-route-memberId="@Model.MemberId" class="btn btn-success">
+                查看參與人
+            </a>
+        }
+        else
+        {
+            <a asp-controller="Participants" asp-action="Index" asp-route-memberId="@Model.MemberId" class="btn btn-success disabled"
+               tabindex="-1" aria-disabled="true" onclick="return false;">
+                查看參與人
+            </a>
+        }
+
+        @* 管理參與人 *@
+        @if (PermissionChecker.CanManageParticipants)
+        {
+            <a asp-controller="Participants" asp-action="Create" asp-route-memberId="@Model.MemberId" class="btn btn-success">
+                新增參與人
+            </a>
+        }
+        else
+        {
+            <a asp-controller="Participants" asp-action="Create" asp-route-memberId="@Model.MemberId" class="btn btn-success disabled"
+               tabindex="-1" aria-disabled="true" onclick="return false;">
+                新增參與人
+            </a>
+        }
+    </div>
 </div>
-<div>
 
-    @* 查看參與人 *@
-    @if (PermissionChecker.CanViewParticipants)
-    {
-        <a asp-controller="Participants" asp-action="Index" asp-route-memberId="@Model.MemberId" class="btn btn-outline-primary">
-            查看參與人
-        </a>
-    }
-    else
-    {
-        <a asp-controller="Participants" asp-action="Index" asp-route-memberId="@Model.MemberId" class="btn btn-success disabled"
-        tabindex="-1" aria-disabled="true" onclick="return false;">
-            查看參與人
-        </a>
-    }
 
-    @* 管理參與人 *@
-    @if (PermissionChecker.CanManageParticipants)
-    {
-        <a asp-controller="Participants" asp-action="Create" asp-route-memberId="@Model.MemberId" class="btn btn-outline-primary">
-            新增參與人
-        </a>
-    }
-    else
-    {
-        <a asp-controller="Participants" asp-action="Create" asp-route-memberId="@Model.MemberId" class="btn btn-success disabled"
-        tabindex="-1" aria-disabled="true" onclick="return false;">
-            新增參與人
-        </a>
-    }
-
+@* <div> *@
+@*     <h4>@Html.DisplayNameFor(model => model.Name): @Html.DisplayFor(model => model.Name)</h4> *@
+@*     <hr /> *@
+@*     <dl class="row"> *@
+@*         <dt class = "col-sm-2"> *@
+@*             @Html.DisplayNameFor(model => model.MemberId) *@
+@*         </dt> *@
+@*         <dd class = "col-sm-10"> *@
+@*             @Html.DisplayFor(model => model.MemberId) *@
+@*         </dd> *@
+@*         <dt class = "col-sm-2"> *@
+@*             @Html.DisplayNameFor(model => model.Email) *@
+@*         </dt> *@
+@*         <dd class = "col-sm-10"> *@
+@*             @Html.DisplayFor(model => model.Email) *@
+@*         </dd> *@
+@*         <dt class = "col-sm-2"> *@
+@*             @Html.DisplayNameFor(model => model.Phone) *@
+@*         </dt> *@
+@*         <dd class = "col-sm-10"> *@
+@*             @Html.DisplayFor(model => model.Phone) *@
+@*         </dd> *@
+@*         <dt class="col-sm-2"> *@
+@*             @Html.DisplayNameFor(model => model.Gender) *@
+@*         </dt> *@
+@*         <dd class="col-sm-10"> *@
+@*             @EnumDisplayHelper.GetDisplayName(Model.Gender) *@
+@*         </dd> *@
+@*         <dt class="col-sm-2"> *@
+@*             @Html.DisplayNameFor(model => model.Birthday) *@
+@*         </dt> *@
+@*         <dd class="col-sm-10"> *@
+@*             @(Model.Birthday?.ToString("yyyy-MM-dd")) *@
+@*         </dd> *@
+@*         <dt class="col-sm-2"> *@
+@*             @Html.DisplayNameFor(model => model.Nationality) *@
+@*         </dt> *@
+@*         <dd class="col-sm-10"> *@
+@*             @Html.DisplayFor(model => model.Nationality) *@
+@*         </dd> *@
+@*         <dt class="col-sm-2"> *@
+@*             @Html.DisplayNameFor(model => model.PassportSurname) *@
+@*         </dt> *@
+@*         <dd class="col-sm-10"> *@
+@*             @Html.DisplayFor(model => model.PassportSurname) *@
+@*         </dd> *@
+@*         <dt class="col-sm-2"> *@
+@*             @Html.DisplayNameFor(model => model.PassportGivenName) *@
+@*         </dt> *@
+@*         <dd class="col-sm-10"> *@
+@*             @Html.DisplayFor(model => model.PassportGivenName) *@
+@*         </dd> *@
+@*         <dt class="col-sm-2"> *@
+@*             @Html.DisplayNameFor(model => model.IdNumber) *@
+@*         </dt> *@
+@*         <dd class="col-sm-10"> *@
+@*             @Html.DisplayFor(model => model.IdNumber) *@
+@*         </dd> *@
+@*         <dt class="col-sm-2"> *@
+@*             @Html.DisplayNameFor(model => model.Address) *@
+@*         </dt> *@
+@*         <dd class="col-sm-10"> *@
+@*             @Html.DisplayFor(model => model.Address) *@
+@*         </dd> *@
+@*         <dt class = "col-sm-2"> *@
+@*             @Html.DisplayNameFor(model => model.CreatedAt) *@
+@*         </dt> *@
+@*         <dd class = "col-sm-10"> *@
+@*             @Html.DisplayFor(model => model.CreatedAt) *@
+@*         </dd> *@
+@*         <dt class = "col-sm-2"> *@
+@*             @Html.DisplayNameFor(model => model.UpdatedAt) *@
+@*         </dt> *@
+@*         <dd class = "col-sm-10"> *@
+@*             @Html.DisplayFor(model => model.UpdatedAt) *@
+@*         </dd> *@
+@*         <dt class = "col-sm-2"> *@
+@*             @Html.DisplayNameFor(model => model.Status) *@
+@*         </dt> *@
+@*         <dd class = "col-sm-10"> *@
+@* 			@EnumDisplayHelper.GetDisplayName(Model.Status) *@
+@*         </dd> *@
+@*         <dt class = "col-sm-2"> *@
+@*             @Html.DisplayNameFor(model => model.Note) *@
+@*         </dt> *@
+@*         <dd class = "col-sm-10"> *@
+@*             @Html.DisplayFor(model => model.Note) *@
+@*         </dd> *@
+@*     </dl> *@
+@* </div> *@
+@* <div> *@
+<table class="table table-bordered table-hover">
+    <tbody>
+        <tr>
+            <th style="width: 20%">@Html.DisplayNameFor(m => m.MemberId)</th>
+            <td>@Html.DisplayFor(m => m.MemberId)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.Name)</th>
+            <td>@Html.DisplayFor(m => m.Name)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.Email)</th>
+            <td>@Html.DisplayFor(m => m.Email)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.Phone)</th>
+            <td>@Html.DisplayFor(m => m.Phone)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.Gender)</th>
+            <td>@EnumDisplayHelper.GetDisplayName(Model.Gender)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.Birthday)</th>
+            <td>@(Model.Birthday?.ToString("yyyy-MM-dd"))</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.Nationality)</th>
+            <td>@Html.DisplayFor(m => m.Nationality)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.PassportSurname)</th>
+            <td>@Html.DisplayFor(m => m.PassportSurname)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.PassportGivenName)</th>
+            <td>@Html.DisplayFor(m => m.PassportGivenName)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.IdNumber)</th>
+            <td>@Html.DisplayFor(m => m.IdNumber)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.Address)</th>
+            <td>@Html.DisplayFor(m => m.Address)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.RegisterDate)</th>
+            <td>@Html.DisplayFor(m => m.RegisterDate)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.UpdatedAt)</th>
+            <td>@Html.DisplayFor(m => m.UpdatedAt)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.Status)</th>
+            <td>@EnumDisplayHelper.GetDisplayName(Model.Status)</td>
+        </tr>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.Note)</th>
+            <td>@Html.DisplayFor(m => m.Note)</td>
+        </tr>
+    </tbody>
+</table>
+   
+    <div class="mt-4 d-flex gap-3">
     @* 管理會員 *@
     @if (PermissionChecker.CanManageMembers)
     {
-        <a asp-action="Edit" asp-route-id="@Model.MemberId" class="btn btn-outline-success">修改</a>
+        <a asp-action="Edit" asp-route-id="@Model.MemberId" class="btn btn-outline-primary">編輯</a>
     }
     else
     {
         <a asp-action="Edit" asp-route-id="@Model.MemberId" class="btn btn-success disabled"
-        tabindex="-1" aria-disabled="true" onclick="return false;">
-            修改
+           tabindex="-1" aria-disabled="true" onclick="return false;">
+            編輯
         </a>
     }
-
-    @* 查看會員 *@
-    @if (PermissionChecker.CanViewMembers)
-    {
-        <a asp-action="Index" class="btn btn-secondary">返回列表</a>
-    }
-    else
-    {
-        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">返回首頁</a>
-    }
-
-    <hr>
-
-    @* 管理會員 *@
-
-    <form asp-action="Delete" asp-route-id="@Model.MemberId" method="post" onsubmit="return confirm('確定要刪除嗎？')">
-        @Html.AntiForgeryToken()
-        <input type="hidden" asp-for="MemberId" />
-        @if (PermissionChecker.CanManageMembers)
-        {
-            <button type="submit" class="btn btn-danger">確認刪除</button>
-        }
-        else
-        {
-            <button type="submit" class="btn btn-danger disabled"
-                    tabindex="-1" aria-disabled="true" onclick="return false;">
-                確認刪除
-            </button>
-        }
-    </form>
-
     @* 修改會員密碼 *@
     <div>
-        
+
         @if (PermissionChecker.CanEditMemberPassword)
         {
-            <a asp-action="ChangePassword" asp-route-id="@Model.MemberId" class="btn btn-sm btn-danger mt-2">變更密碼</a>
+            <a asp-action="ChangePassword" asp-route-id="@Model.MemberId" class="btn btn-outline-primary">變更密碼</a>
         }
         else
         {
@@ -187,4 +226,32 @@
             </a>
         }
     </div>
+    @* 查看會員 *@
+    @if (PermissionChecker.CanViewMembers)
+    {
+        <a asp-action="Index" class="btn btn-outline-secondary">返回列表</a>
+    }
+    else
+    {
+        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">返回首頁</a>
+    }
+    
+    @* 管理會員 *@
+
+    <form asp-action="Delete" asp-route-id="@Model.MemberId" method="post" onsubmit="return confirm('確定要刪除嗎？')">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="MemberId" />
+        @if (PermissionChecker.CanManageMembers)
+        {
+            <button type="submit" class="btn btn-outline-danger">確認刪除</button>
+        }
+        else
+        {
+            <button type="submit" class="btn btn-danger disabled"
+                    tabindex="-1" aria-disabled="true" onclick="return false;">
+                確認刪除
+            </button>
+        }
+    </form>
+    </div>  
 </div>

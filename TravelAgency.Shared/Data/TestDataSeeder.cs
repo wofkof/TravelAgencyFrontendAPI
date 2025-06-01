@@ -18,6 +18,7 @@ namespace TravelAgency.Shared.Data
             await SeedRolesAsync();
             await SeedEmployeesAsync();
             await SeedMembersAsync();
+            await SeedCollectionAsync();
             await SeedChatRoomsAsync();
             await SeedMessagesAsync();
             await SeedCityAsync();
@@ -197,6 +198,37 @@ namespace TravelAgency.Shared.Data
                 await _context.SaveChangesAsync();
             }
         }
+        private async Task SeedCollectionAsync()
+        {
+            if (!_context.Collects.Any())
+            {
+                _context.Collects.AddRange(
+                    new Collect
+                    {
+                        MemberId = 11110,
+                        TravelId = 1,
+                        TravelType = CollectType.Official,
+                        CreatedAt = DateTime.UtcNow.AddDays(-5)
+                    },
+                    new Collect
+                    {
+                        MemberId = 11110,
+                        TravelId = 2,
+                        TravelType = CollectType.Official,
+                        CreatedAt = DateTime.UtcNow.AddDays(-2)
+                    },
+                    new Collect
+                    {
+                        MemberId = 11110,
+                        TravelId = 3,
+                        TravelType = CollectType.Official,
+                        CreatedAt = DateTime.UtcNow
+                    }
+                );
+                await _context.SaveChangesAsync();
+            }
+        }
+
 
         private async Task SeedChatRoomsAsync()
         {
