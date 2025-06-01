@@ -1066,13 +1066,9 @@ namespace TravelAgency.Shared.Data
 
         private async Task SeedRegionAsync()
         {
-            if (_context.Regions.Any())
+            if (!_context.Regions.Any())
             {
-                _context.Regions.RemoveRange(_context.Regions);
-                await _context.SaveChangesAsync();
-            }
-
-            _context.Regions.AddRange(
+               _context.Regions.AddRange(
                 // 日本
                 new Region { Country = "日本", Name = "北海道" },
                 new Region { Country = "日本", Name = "東北" },
@@ -1157,6 +1153,9 @@ namespace TravelAgency.Shared.Data
             );
 
             await _context.SaveChangesAsync();
+            }
+
+            
         }
 
 
