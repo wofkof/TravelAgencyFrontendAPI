@@ -1068,8 +1068,8 @@ namespace TravelAgency.Shared.Data
         {
             if (_context.Regions.Any())
             {
-                _context.Regions.RemoveRange(_context.Regions);
-                await _context.SaveChangesAsync();
+                //_context.Regions.RemoveRange(_context.Regions);
+                //await _context.SaveChangesAsync();
             }
 
             _context.Regions.AddRange(
