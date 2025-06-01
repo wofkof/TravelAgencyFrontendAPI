@@ -1,12 +1,13 @@
 ﻿// 路徑：TravelAgencyFrontendAPI/Controllers/OrderControllers/ECPayController.cs
 
 using Microsoft.AspNetCore.Mvc;
-using TravelAgencyFrontendAPI.ECPay.Services; // 引入您剛建立的 ECPayService
-using TravelAgencyFrontendAPI.ECPay.Models; // 引入 ECPay 相關模型
+using TravelAgencyFrontendAPI.ECPay.Services;
+using TravelAgencyFrontendAPI.ECPay.Models;
 using Microsoft.Extensions.Logging; // 引入日誌記錄
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options; // 用於 IFormCollection (雖然現在使用 FromForm 屬性會自動綁定) 和 Redirect
+using Microsoft.Extensions.Options;
+using TravelAgencyFrontendAPI.Helpers;
 
 namespace TravelAgencyFrontendAPI.Controllers.OrderControllers
 {
@@ -17,12 +18,14 @@ namespace TravelAgencyFrontendAPI.Controllers.OrderControllers
         private readonly ECPayService _ecpayService;
         private readonly ILogger<ECPayController> _logger;
         private readonly ECPayConfiguration _ecpayConfig;
+        private readonly EmailService _emailService;
 
-        public ECPayController(ECPayService ecpayService, ILogger<ECPayController> logger, IOptions<ECPayConfiguration> ecpayConfigOptions)
+        public ECPayController(ECPayService ecpayService, ILogger<ECPayController> logger, IOptions<ECPayConfiguration> ecpayConfigOptions, EmailService emailService )
         {
             _ecpayService = ecpayService;
             _logger = logger;
             _ecpayConfig = ecpayConfigOptions.Value;
+            _emailService = emailService;
         }
 
         /// <summary>
@@ -179,6 +182,9 @@ namespace TravelAgencyFrontendAPI.Controllers.OrderControllers
             }
 
         }
+
+
+
 
         // 您也可以新增一個用於查詢訂單狀態的 API，但這通常需要綠界提供專門的查詢 API
         // [HttpGet("Query/{orderId}")]
