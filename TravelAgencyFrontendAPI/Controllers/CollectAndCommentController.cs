@@ -182,6 +182,39 @@ namespace TravelAgencyFrontendAPI.Controllers
 
 
         //加入收藏
+        //聖凱新增
+        [HttpPost("toggleCollection")]
+        public async Task<ActionResult> ToggleCollection([FromBody] ToggleCollectionDto dto)
+        {
+            if (dto.MemberId <= 0 || dto.TravelId <= 0 || dto.TravelType != CollectType.Official)
+            {
+                return BadRequest(new { message = "請確認資料正確" });
+            }
+
+            var existing = await _context.Collects.FirstOrDefaultAsync(c =>
+                c.MemberId == dto.MemberId &&
+                c.TravelId == dto.TravelId &&
+                c.TravelType == dto.TravelType);
+
+            if (existing != null)
+            {
+                _context.Collects.Remove(existing);
+                await _context.SaveChangesAsync();
+                return Ok(new { collected = false, collectId = existing.CollectId });
+            }
+
+            var collect = new Collect
+            {
+                MemberId = dto.MemberId,
+                TravelId = dto.TravelId,
+                TravelType = dto.TravelType,
+                CreatedAt = DateTime.Now
+            };
+            _context.Collects.Add(collect);
+            await _context.SaveChangesAsync();
+            return Ok(new { collected = true, collectId = collect.CollectId });
+        }
+
         //取消收藏
         [HttpDelete("deleteCollection")]
         public async Task<ActionResult> DeleteCollection(int collectId)
@@ -220,5 +253,6 @@ namespace TravelAgencyFrontendAPI.Controllers
             return Ok(new { message = "評論已刪除" });
 
         }
+
     }
 }
