@@ -36,7 +36,8 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                                    t.Region.Name.Contains(dto.Destination))
                             from d in t.OfficialTravelDetails
                             from g in d.GroupTravels
-                            where g.TotalSeats - g.SoldSeats >= dto.PeopleCount
+                            where g.TotalSeats - g.SoldSeats >= dto.PeopleCount &&
+                                  g.DepartureDate >= DateTime.Now
                             select new
                             {
                                 t.OfficialTravelId,
