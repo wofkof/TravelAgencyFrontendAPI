@@ -27,6 +27,10 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
 
             try
             {
+                // 除錯輸出檢查日期
+                Console.WriteLine("StartDate: " + dto.StartDate);
+                Console.WriteLine("EndDate: " + dto.EndDate);
+
                 // 先展開 GroupTravel 為主體
                 var query = from t in _context.OfficialTravels
                             where t.Status == TravelStatus.Active &&
@@ -36,8 +40,7 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                                    t.Region.Name.Contains(dto.Destination))
                             from d in t.OfficialTravelDetails
                             from g in d.GroupTravels
-                            where g.TotalSeats - g.SoldSeats >= dto.PeopleCount &&
-                                  g.DepartureDate >= DateTime.Now
+                            where g.TotalSeats - g.SoldSeats >= dto.PeopleCount
                             select new
                             {
                                 t.OfficialTravelId,
@@ -55,7 +58,7 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                                 g.GroupStatus
                             };
 
-                // 加上動態條件
+                // 加上動態條件（確保 DepartureDate 不為 null）
                 if (dto.StartDate.HasValue)
                 {
                     query = query.Where(x => x.DepartureDate >= dto.StartDate.Value);
@@ -66,33 +69,31 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                     query = query.Where(x => x.DepartureDate <= dto.EndDate.Value);
                 }
 
-                // 最後 GroupBy 移除重複行程
+                // 最後 GroupBy 移除重複行程，僅取最早一筆出團
                 var result = await query
-                .GroupBy(x => new {
-                    x.OfficialTravelId
-
-                })
-                .Select(g => g
-                    .OrderBy(x => x.DepartureDate)
-                    .Select(x => new SearchOutput
-                    {
-                        ProjectId = x.OfficialTravelId,
-                        Title = x.Title,
-                        Description = x.Description,
-                        Category = x.Category,
-                        Cover = x.CoverPath,
-                        Price = x.AdultPrice,
-                        DetailId = x.OfficialTravelDetailId,
-                        GroupId = x.GroupTravelId,
-                        DepartureDate = x.DepartureDate,
-                        ReturnDate = x.ReturnDate,
-                        Days = x.DepartureDate != null && x.ReturnDate != null ? (x.ReturnDate.Value - x.DepartureDate.Value).Days : 0,
-                        Status = x.GroupStatus,
-                        Country = x.Country,
-                        Region = x.Name,
-                    }).FirstOrDefault()
-                )
-                .ToListAsync();
+                    .GroupBy(x => x.OfficialTravelId)
+                    .Select(g => g
+                        .OrderBy(x => x.DepartureDate)
+                        .Select(x => new SearchOutput
+                        {
+                            ProjectId = x.OfficialTravelId,
+                            Title = x.Title,
+                            Description = x.Description,
+                            Category = x.Category,
+                            Cover = x.CoverPath,
+                            Price = x.AdultPrice,
+                            DetailId = x.OfficialTravelDetailId,
+                            GroupId = x.GroupTravelId,
+                            DepartureDate = x.DepartureDate,
+                            ReturnDate = x.ReturnDate,
+                            Days = x.DepartureDate != null && x.ReturnDate != null
+                                ? (x.ReturnDate.Value - x.DepartureDate.Value).Days
+                                : 0,
+                            Status = x.GroupStatus,
+                            Country = x.Country,
+                            Region = x.Name
+                        }).FirstOrDefault())
+                    .ToListAsync();
 
                 return Ok(result);
             }
@@ -101,6 +102,7 @@ namespace TravelAgencyFrontendAPI.Controllers.OfficialTravelControllers
                 Console.WriteLine("SearchBox API Error: " + ex.ToString());
                 return StatusCode(500, new { message = ex.Message });
             }
+
         }
 
         [HttpGet("getMainInfo/{projectId}/{detailId}/{groupId}")]
