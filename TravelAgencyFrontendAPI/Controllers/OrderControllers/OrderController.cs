@@ -115,7 +115,7 @@ namespace TravelAgencyFrontendAPI.Controllers
                     var groupTravel = await _context.GroupTravels
                                                 .Include(gt => gt.OfficialTravelDetail)
                                                     .ThenInclude(otd => otd.OfficialTravel)
-                                                .FirstOrDefaultAsync(gt => gt.GroupTravelId == cartItemDto.ProductId && gt.GroupStatus == "開團");
+                                                .FirstOrDefaultAsync(gt => gt.GroupTravelId == cartItemDto.ProductId && gt.GroupStatus == "可報名");
 
                     if (groupTravel == null || groupTravel.OfficialTravelDetail == null || groupTravel.OfficialTravelDetail.OfficialTravel == null || groupTravel.OfficialTravelDetail.State != DetailState.Locked)
                     { 
