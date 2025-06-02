@@ -42,7 +42,16 @@ namespace TravelAgencyFrontendAPI.Controllers
                     Description = c.TravelType == CollectType.Custom ?
                              "" :_context.OfficialTravels.Where(ot => ot.OfficialTravelId == c.TravelId).Select(ot => ot.Description).FirstOrDefault(),
                     CoverPath = c.TravelType == CollectType.Custom ?
-                             "" :_context.OfficialTravels.Where(ot => ot.OfficialTravelId == c.TravelId).Select(ot => ot.CoverPath).FirstOrDefault()
+                             "" :_context.OfficialTravels.Where(ot => ot.OfficialTravelId == c.TravelId).Select(ot => ot.CoverPath).FirstOrDefault(),
+                    ProjectId = c.TravelType == CollectType.Official
+                                ? _context.OfficialTravels.Where(ot => ot.OfficialTravelId == c.TravelId).Select(ot => ot.OfficialTravelId).FirstOrDefault()
+                                : 0,
+                                        DetailId = c.TravelType == CollectType.Official
+                                ? _context.OfficialTravelDetails.Where(d => d.OfficialTravelId == c.TravelId).Select(d => d.OfficialTravelDetailId).FirstOrDefault()
+                                : 0,
+                                        GroupId = c.TravelType == CollectType.Official
+                                ? _context.GroupTravels.Where(g => g.OfficialTravelDetail.OfficialTravelId == c.TravelId).OrderBy(g => g.DepartureDate).Select(g => g.GroupTravelId).FirstOrDefault()
+                                : 0
                 }
                 ).ToListAsync();
                 if (collections == null || collections.Count == 0)

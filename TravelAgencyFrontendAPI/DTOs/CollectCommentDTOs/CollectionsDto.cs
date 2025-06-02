@@ -19,6 +19,9 @@ namespace TravelAgencyFrontendAPI.DTOs.CollectCommentDTOs
         //客製化行程為Null
         //聖凱新增
         public string? CoverPath { get; set; }
+        public int? ProjectId { get; set; }  
+        public int? DetailId { get; set; }
+        public int? GroupId { get; set; }
     }
 
     public class addCollectionDto : CollectionsBaseDto
