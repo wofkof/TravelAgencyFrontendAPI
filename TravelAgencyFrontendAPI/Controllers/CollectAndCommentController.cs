@@ -40,8 +40,9 @@ namespace TravelAgencyFrontendAPI.Controllers
                             _context.CustomTravels.Where(ct => ct.CustomTravelId == c.TravelId).Select(ct => ct.Note).FirstOrDefault() :
                             _context.OfficialTravels.Where(ot => ot.OfficialTravelId == c.TravelId).Select(ot => ot.Title).FirstOrDefault(),
                     Description = c.TravelType == CollectType.Custom ?
-                             "" :_context.OfficialTravels.Where(ot => ot.OfficialTravelId == c.TravelId).Select(ot => ot.Description).FirstOrDefault()
-
+                             "" :_context.OfficialTravels.Where(ot => ot.OfficialTravelId == c.TravelId).Select(ot => ot.Description).FirstOrDefault(),
+                    CoverPath = c.TravelType == CollectType.Custom ?
+                             "" :_context.OfficialTravels.Where(ot => ot.OfficialTravelId == c.TravelId).Select(ot => ot.CoverPath).FirstOrDefault()
                 }
                 ).ToListAsync();
                 if (collections == null || collections.Count == 0)
