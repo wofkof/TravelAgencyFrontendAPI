@@ -60,6 +60,7 @@ namespace TravelAgency.Shared.Models
         public ICollection<MemberFavoriteTraveler> MemberFavoriteTravelers { get; set; } = new List<MemberFavoriteTraveler>();
         public ICollection<ChatRoom> ChatRooms { get; set; } = new List<ChatRoom>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public ICollection<Collect> Collects { get; set; }
 
     }
 }

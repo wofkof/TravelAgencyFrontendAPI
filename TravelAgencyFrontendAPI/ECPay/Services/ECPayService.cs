@@ -863,8 +863,6 @@ namespace TravelAgencyFrontendAPI.ECPay.Services
         }
 
 
-
-
         /// <summary>
         /// 計算 CheckMacValue (綠界金流驗證碼 - SHA256)
         /// </summary>
