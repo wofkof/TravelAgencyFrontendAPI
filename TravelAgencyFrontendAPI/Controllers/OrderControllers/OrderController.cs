@@ -1003,7 +1003,7 @@ namespace TravelAgencyFrontendAPI.Controllers
                             var groupTravel = await _context.GroupTravels
                                 .Include(gt => gt.OfficialTravelDetail).ThenInclude(otd => otd.OfficialTravel)
                                 .AsNoTracking()
-                                .FirstOrDefaultAsync(gt => gt.GroupTravelId == cartItemDto.ProductId && gt.GroupStatus == "開團");
+                                .FirstOrDefaultAsync(gt => gt.GroupTravelId == cartItemDto.ProductId && gt.GroupStatus == "可報名");
 
                             if (groupTravel == null || groupTravel.OfficialTravelDetail?.OfficialTravel == null || groupTravel.OfficialTravelDetail.State != DetailState.Locked)
                             { return BadRequest($"團體行程 (ID: GT{cartItemDto.ProductId}) 資訊不完整或未鎖定價格。"); }
