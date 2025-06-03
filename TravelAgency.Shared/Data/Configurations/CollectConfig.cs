@@ -25,7 +25,7 @@ namespace TravelAgency.Shared.Data.Configurations
                   .HasDefaultValueSql("GETDATE()");
 
             entity.HasOne(e => e.Member)
-                  .WithMany()
+                  .WithMany(m => m.Collects)
                   .HasForeignKey(e => e.MemberId);
 
             entity.HasIndex(e => new { e.MemberId, e.TravelType, e.TravelId })
