@@ -266,28 +266,43 @@ namespace TravelAgencyFrontendAPI.Controllers.MemberControllers
                     dto.Email,
                     "嶼你同行｜歡迎註冊會員-驗證碼通知",
                     $@"
-                <div style='font-family:Arial,sans-serif; font-size:16px; color:#333; line-height:1.8'>
-                  <div style='text-align:center; margin-bottom:20px'>
-                    <img src='https://i.ibb.co/bgLz9Hk3/logo.png' alt='嶼你同行 LOGO' width='180' />
-                  </div>
+                <div style=""font-family:Arial,sans-serif; font-size:16px; color:#333; line-height:1.8; text-align:center"">
 
-                  <p>親愛的旅客您好，</p>
-                  <p>感謝您註冊 <strong>嶼你同行</strong>，以下是您的 Email 驗證碼：</p>
+                      <!-- LOGO 區塊 -->
+                      <div style=""margin-bottom:20px"">
+                        <img src=""https://res.cloudinary.com/dfkhvrmhi/image/upload/v1748875395/%E4%B8%BBlogo%E4%BF%A1%E4%BB%B6%E7%94%A8_pptoiv.png"" alt=""嶼你同行 LOGO"" width=""180"" />
+                      </div>
 
-                  <div style='text-align:center; margin:20px 0'>
-                    <span style='font-size:28px; font-weight:bold; color:#1d4ed8'>{code}</span>
-                  </div>
+                      <!-- 歡迎語 -->
+                      <p>親愛的旅客您好，</p>
+                      <p>感謝您註冊 <strong>嶼你同行</strong>，以下是您的 Email 驗證碼：</p>
 
-                  <p>請於 <strong>10 分鐘</strong> 內完成註冊流程。</p>
+                      <!-- 驗證碼區塊（加入漸層與陰影） -->
+                      <div style=""
+                        margin: 20px auto;
+                        padding: 20px 30px;
+                        background: linear-gradient(135deg, #e0f2ff, #f0f9ff);
+                        border-radius: 10px;
+                        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+                        display: inline-block;
+                        border: 1px solid #dbeafe;
+                      "">
+                     <span style='font-size:28px; font-weight:bold; color:#1d4ed8'>{code}</span>
+                      </div>
 
-                  <hr style='margin:30px 0; border:none; border-top:1px solid #ddd' />
+                      <!-- 提示語 -->
+                      <p>請於 <strong>10 分鐘</strong> 內完成註冊流程。</p>
 
-                 <p style='font-size:14px; color:#888'>
-                  若您並未申請註冊，請忽略此信件。<br>
-                  此為系統自動發送的通知信件，請勿直接回覆。
-                </p>
-                  <p>嶼你同行 客服中心 敬上</p>
-                </div>
+                    </div>
+
+                    <!-- 分隔線 -->
+                    <hr style=""margin:30px 0; border:none; border-top:1px solid #ddd"" />
+
+                    <!-- 底部備註 -->
+                    <div style=""font-family:Arial,sans-serif; font-size:14px; color:#888"">
+                      <p>若您並未申請註冊，請忽略此信件。<br>此為系統自動發送的通知信件，請勿直接回覆。</p>
+                      <p style=""color:#333"">嶼你同行 客服中心 敬上</p>
+                    </div>
                 "
                 );
 

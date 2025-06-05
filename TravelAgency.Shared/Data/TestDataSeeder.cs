@@ -1070,7 +1070,8 @@ namespace TravelAgency.Shared.Data
         {
             if (!_context.Regions.Any())
             {
-                _context.Regions.AddRange(
+               _context.Regions.AddRange(
+
                 // 日本
                 new Region { Country = "日本", Name = "北海道" },
                 new Region { Country = "日本", Name = "東北" },
