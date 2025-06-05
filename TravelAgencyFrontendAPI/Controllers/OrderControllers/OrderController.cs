@@ -149,7 +149,7 @@ namespace TravelAgencyFrontendAPI.Controllers
                 else if (itemCategory == ProductCategory.CustomTravel)
                 {
                     var customTravel = await _context.CustomTravels
-                                             .FirstOrDefaultAsync(ct => ct.CustomTravelId == cartItemDto.ProductId && ct.Status == CustomTravelStatus.Pending); // 假設是 Pending 狀態
+                                             .FirstOrDefaultAsync(ct => ct.CustomTravelId == cartItemDto.ProductId && ct.Status == CustomTravelStatus.Approved); // 假設是 Pending 狀態
                     if (customTravel == null)
                     {
                         return BadRequest($"客製化行程產品 (ID: CT{cartItemDto.ProductId}) 無效或未發佈。");
@@ -1027,7 +1027,7 @@ namespace TravelAgencyFrontendAPI.Controllers
                         }
                         else if (itemCategory == ProductCategory.CustomTravel)
                         {
-                            var customTravel = await _context.CustomTravels.FirstOrDefaultAsync(ct => ct.CustomTravelId == cartItemDto.ProductId && ct.Status == CustomTravelStatus.Pending);
+                            var customTravel = await _context.CustomTravels.FirstOrDefaultAsync(ct => ct.CustomTravelId == cartItemDto.ProductId && ct.Status == CustomTravelStatus.Approved);
                             if (customTravel == null) { return BadRequest($"客製化行程產品 (ID: CT{cartItemDto.ProductId}) 無效。"); }
                             unitPrice = customTravel.TotalAmount;
                             productName = customTravel.Note ?? $"客製化行程 {customTravel.CustomTravelId}";
